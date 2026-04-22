@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오운완 대시보드 💪</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:#0f1117; --surface:#181c27; --surface2:#1f2435; --border:#272d40;
+  --accent:#4ade80; --amber:#fbbf24; --red:#f87171; --blue:#60a5fa;
+  --purple:#a78bfa; --text:#e2e8f0; --muted:#5a6480;
+  --gold:#fbbf24; --silver:#94a3b8; --bronze:#cd7c45;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* HEADER */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
+.logo{font-size:17px;font-weight:800;letter-spacing:-0.3px;}
+.logo em{color:var(--accent);font-style:normal;}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.badge{font-size:12px;color:var(--muted);background:var(--surface2);padding:3px 10px;border-radius:20px;border:1px solid var(--border);}
+.year-progress-wrap{display:flex;align-items:center;gap:8px;}
+.year-prog-bar{width:100px;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.year-prog-fill{height:100%;border-radius:3px;background:var(--accent);}
+.year-pct{font-size:12px;font-family:'DM Mono',monospace;color:var(--accent);font-weight:500;}
+.btn-refresh{background:var(--accent);color:#0f1117;border:none;padding:5px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:opacity .15s;}
+.btn-refresh:hover{opacity:.8;}
+.btn-refresh:disabled{opacity:.5;cursor:not-allowed;}
+
+/* LAYOUT */
+.container{max-width:1440px;margin:0 auto;padding:20px 20px 60px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+@media(max-width:900px){.g2{grid-template-columns:1fr;}}
+.mb14{margin-bottom:14px;}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.card-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+.card-title .dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:middle;}
+
+/* STAT CARDS */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;}
+@media(max-width:800px){.stat-row{grid-template-columns:repeat(2,1fr);}}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);}
+.stat-card.c-amber::after{background:var(--amber);}
+.stat-card.c-blue::after{background:var(--blue);}
+.stat-card.c-purple::after{background:var(--purple);}
+.s-label{font-size:11px;color:var(--muted);letter-spacing:.7px;text-transform:uppercase;margin-bottom:6px;}
+.s-val{font-size:28px;font-weight:800;font-family:'DM Mono',monospace;line-height:1;}
+.s-sub{font-size:11px;color:var(--muted);margin-top:5px;display:flex;align-items:center;gap:5px;}
+.yoy-up{color:var(--accent);font-size:11px;font-weight:700;}
+.yoy-dn{color:var(--red);font-size:11px;font-weight:700;}
+.yoy-eq{color:var(--muted);font-size:11px;}
+
+/* DROPDOWN */
+.dropdown-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.dropdown-label{font-size:13px;color:var(--muted);white-space:nowrap;}
+#monthSelect{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:7px 14px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR',sans-serif;outline:none;transition:border-color .15s;min-width:130px;}
+#monthSelect:focus{border-color:var(--accent);}
+#monthSelect option{background:var(--surface2);}
+
+/* CHARTS */
+.chart-box{position:relative;}
+.h200{height:200px;} .h240{height:240px;} .h280{height:280px;} .h320{height:320px;}
+
+/* MEMBER TABLE */
+.mt{width:100%;border-collapse:collapse;}
+.mt th{font-size:11px;color:var(--muted);text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);font-weight:500;}
+.mt td{padding:8px 8px;font-size:13px;border-bottom:1px solid var(--border);}
+.mt tr:last-child td{border-bottom:none;}
+.mt tbody tr:hover td{background:var(--surface2);}
+.rank{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:700;font-family:'DM Mono',monospace;}
+.r1{background:#fbbf2418;color:var(--gold);border:1px solid #fbbf2440;}
+.r2{background:#94a3b818;color:var(--silver);border:1px solid #94a3b840;}
+.r3{background:#cd7c4518;color:var(--bronze);border:1px solid #cd7c4540;}
+.rn{background:var(--surface2);color:var(--muted);border:1px solid var(--border);font-size:9px;}
+.pbar-row{display:flex;align-items:center;gap:6px;}
+.pbar{flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+.pfill{height:100%;border-radius:2px;background:var(--accent);}
+.pfill.mid{background:var(--amber);}
+.pfill.low{background:var(--red);}
+.pct{font-size:11px;font-family:'DM Mono',monospace;font-weight:500;min-width:34px;text-align:right;}
+
+/* SPORT RANK */
+.sport-section{display:flex;flex-direction:column;gap:7px;}
+.sr-item{display:flex;align-items:center;gap:8px;font-size:12px;}
+.sr-rank{font-size:10px;color:var(--muted);min-width:14px;font-family:'DM Mono',monospace;}
+.sr-name{width:52px;color:var(--text);text-align:right;white-space:nowrap;overflow:hidden;}
+.sr-bar{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.sr-fill{height:100%;border-radius:3px;}
+.sr-right{display:flex;align-items:center;gap:6px;min-width:90px;justify-content:flex-end;}
+.sr-cnt{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);}
+.master-badge{font-size:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:1px 7px;color:var(--amber);white-space:nowrap;}
+
+/* LOG */
+.log-list{max-height:300px;overflow-y:auto;}
+.log-list::-webkit-scrollbar{width:3px;}
+.log-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.log-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.log-item:last-child{border-bottom:none;}
+.log-date{color:var(--muted);font-size:11px;font-family:'DM Mono',monospace;min-width:42px;}
+.log-name{font-weight:700;color:var(--accent);min-width:30px;}
+.log-sport{color:var(--text);font-size:11px;}
+
+/* HEATMAP */
+.hm-cell{width:13px;height:13px;border-radius:2px;background:var(--surface2);border:1px solid var(--border);cursor:default;transition:transform .1s;display:inline-block;}
+.hm-cell:hover{transform:scale(1.5);z-index:10;position:relative;}
+.hm-cell.lv1{background:#14532d;border-color:#166534;}
+.hm-cell.lv2{background:#16a34a;border-color:#15803d;}
+.hm-cell.lv3{background:#4ade80;border-color:#22c55e;}
+.hm-legend{display:flex;align-items:center;gap:5px;margin-top:8px;font-size:10px;color:var(--muted);}
+
+/* CUMUL HEATMAP */
+.cumul-hm{display:flex;flex-direction:column;gap:3px;}
+.cumul-hm-row{display:flex;align-items:center;gap:3px;}
+.cumul-hm-label{font-size:10px;color:var(--muted);min-width:50px;font-family:'DM Mono',monospace;}
+
+/* MEMBER SCROLL */
+.member-scroll{max-height:140px;overflow-y:auto;}
+.member-scroll::-webkit-scrollbar{width:3px;}
+.member-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* TICKER */
+.ticker-wrap {
+  flex: 1;
+  overflow: hidden;
+  margin: 0 20px;
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+.ticker-track {
+  display: flex;
+  gap: 0;
+  white-space: nowrap;
+  animation: ticker-scroll 40s linear infinite;
+}
+.ticker-track:hover { animation-play-state: paused; }
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 20px;
+  font-size: 12px;
+  color: var(--muted);
+  border-right: 1px solid var(--border);
+}
+.ticker-item .t-date { color: var(--muted); font-family: 'DM Mono', monospace; font-size: 11px; }
+.ticker-item .t-name { color: var(--accent); font-weight: 700; }
+.ticker-item .t-sport { color: var(--text); }
+.loading{text-align:center;padding:80px 20px;color:var(--muted);}
+.spin{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading h3{font-size:15px;color:var(--text);}
+.err{text-align:center;padding:60px 20px;}
+.err-icon{font-size:38px;margin-bottom:10px;}
+.err h3{font-size:15px;margin-bottom:8px;}
+.err p{font-size:13px;color:var(--muted);line-height:1.7;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">오운완 <em>💪</em></div>
+  <!-- 티커 -->
+  <div class="ticker-wrap">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+  <div class="header-right">
+    <span class="badge" id="todayBadge">—</span>
+    <div class="year-progress-wrap">
+      <div class="year-prog-bar"><div class="year-prog-fill" id="yearProgFill"></div></div>
+      <span class="year-pct" id="yearPct">—</span>
+    </div>
+    <button class="btn-refresh" id="refreshBtn" onclick="init()">🔄 새로고침</button>
+  </div>
+</header>
+
+<div class="container">
+  <div id="app"><div class="loading"><div class="spin"></div><h3>데이터 불러오는 중...</h3></div></div>
+</div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbzhCy5M8_IpwhJO2EUzrc74FEewXiSgyewm7B0IegufBODEvOWzalijZSvT75dZ-QSh/exec?Q=dashboard';
+// 데이터라벨 플러그인 전역 등록
+Chart.register(ChartDataLabels);
+const MEMBERS = ['상','성경','보현','성우','상필','주현','정현','범진','재현','윤선','아현','윤경'];
+const MEM_COLORS = MEMBERS.map((_,i)=>`hsl(${i*30},60%,58%)`);
+const SPORT_COLORS = ['#4ade80','#34d399','#2dd4bf','#60a5fa','#a78bfa','#f472b6','#fbbf24','#fb923c','#f87171','#94a3b8'];
+
+let S = { raw:[], monthly:{}, stats:{target:{},remain:{},rate:{},cumul:{}}, selMonth:null };
+let CHARTS = {};
+
+// ── 헤더 날짜 & 연간 진행률
+const NOW = new Date();
+const nowYM = `${NOW.getFullYear()}-${String(NOW.getMonth()+1).padStart(2,'0')}`;
+const TODAY = `${NOW.getFullYear()}-${String(NOW.getMonth()+1).padStart(2,'0')}-${String(NOW.getDate()).padStart(2,'0')}`;
+const startOfYear = new Date(NOW.getFullYear(), 0, 1);
+const yearPct = ((NOW - startOfYear) / (365.25*24*3600*1000) * 100).toFixed(1);
+document.getElementById('todayBadge').textContent =
+  `${NOW.getFullYear()}년 ${NOW.getMonth()+1}월 ${NOW.getDate()}일`;
+document.getElementById('yearProgFill').style.width = yearPct + '%';
+document.getElementById('yearPct').textContent = `연간 ${yearPct}% 경과`;
+
+// ── INIT
+async function init() {
+  document.getElementById('refreshBtn').disabled = true;
+  document.getElementById('app').innerHTML =
+    `<div class="loading"><div class="spin"></div><h3>데이터 불러오는 중...</h3></div>`;
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    parse(await res.json());
+    render();
+  } catch(e) {
+    document.getElementById('app').innerHTML =
+      `<div class="err"><div class="err-icon">⚠️</div><h3>데이터를 불러오지 못했습니다</h3><p>${e.message}</p></div>`;
+  } finally {
+    document.getElementById('refreshBtn').disabled = false;
+  }
+}
+
+// ── PARSE
+function parse(rows) {
+  S.raw=[]; S.monthly={};
+  S.stats={target:{},remain:{},rate:{},cumul:{}};
+  const dateRe=/^\d{4}-\d{2}-\d{2}/;
+
+  // ISO 날짜 → KST 날짜 문자열 변환 (T15:00:00.000Z = KST 자정 = 올바른 날짜)
+  function toKSTDate(raw) {
+    const s = String(raw||'');
+    if (!dateRe.test(s)) return null;
+    if (s.includes('T')) {
+      // ISO 형식: UTC+9 적용
+      const d = new Date(s);
+      const kst = new Date(d.getTime() + 9*60*60*1000);
+      return kst.toISOString().slice(0,10);
+    }
+    return s.slice(0,10);
+  }
+
+  // 요약 통계 행 파싱 (날짜가 아닌 텍스트 키 행들)
+  for (const r of rows) {
+    const key = String(r[0]||'').trim();
+    if(key==='목표 일수') MEMBERS.forEach((n,j)=>S.stats.target[n]=+r[j+1]||0);
+    if(key==='남은 횟수') MEMBERS.forEach((n,j)=>S.stats.remain[n]=+r[j+1]||0);
+    if(key==='달성률')    MEMBERS.forEach((n,j)=>S.stats.rate[n]=+r[j+1]||0);
+    if(key==='누적')      MEMBERS.forEach((n,j)=>S.stats.cumul[n]=+r[j+1]||0);
+  }
+
+  // 날짜별 운동 기록 파싱
+  for (const r of rows) {
+    const date = toKSTDate(r[0]);
+    if (!date) continue;
+
+    // 오늘 이후 날짜는 스킵 (미래 빈 행 제외)
+    if (date > TODAY) continue;
+
+    // 운동 기록이 하나도 없는 행은 스킵 (모든 멤버 컬럼이 비어있는 경우)
+    // 단, 컬럼 r[1]~r[12]를 체크
+    const hasAnyData = MEMBERS.some((_,j) => {
+      const cell = String(r[j+1]||'').trim();
+      // 숫자만 있는 셀(달성률 행 오파싱 방지), 빈 셀 제외
+      return cell && isNaN(Number(cell));
+    });
+    if (!hasAnyData) continue;
+
+    const month = date.slice(0,7);
+    if (!S.monthly[month]) S.monthly[month]={};
+    const entry = {date, data:{}};
+
+    for(let j=0; j<MEMBERS.length; j++){
+      const cell = String(r[j+1]||'').trim();
+      // 숫자값(달성률 등) 제외
+      if(cell && isNaN(Number(cell))){
+        entry.data[MEMBERS[j]] = cell.split(/[\/,·、]+/).map(s=>s.trim()).filter(Boolean);
+        S.monthly[month][MEMBERS[j]] = (S.monthly[month][MEMBERS[j]]||0)+1;
+      }
+    }
+
+    if(Object.keys(entry.data).length > 0) S.raw.push(entry);
+  }
+
+  // 선택 월 초기화 (현재월 또는 가장 최근 데이터 월)
+  const months = Object.keys(S.monthly).sort();
+  const currentYM = nowYM;
+  if (S.monthly[currentYM]) {
+    S.selMonth = currentYM;
+  } else if (!S.selMonth || !months.includes(S.selMonth)) {
+    S.selMonth = months[months.length-1];
+  }
+}
+
+// ── RENDER
+function render() {
+  const allMonths = Object.keys(S.monthly).sort().filter(mo=>mo<=nowYM);
+  const dropMonths = allMonths.filter(mo=>mo>='2023-12').reverse();
+  const m = S.selMonth;
+
+  destroyAll();
+
+  document.getElementById('app').innerHTML = `
+
+    <!-- ① 고정: 누적 막대(좌) + 누적 운동 일수(우) -->
+    <div class="g2 mb14">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><span class="dot" style="background:var(--amber)"></span>월별 인원별 운동 일수 <small style="color:var(--muted);font-weight:400;font-size:10px;margin-left:4px">2025-01~ · 고정</small></div>
+        </div>
+        <div class="chart-box h320"><canvas id="stackedChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--purple)"></span>누적 운동 일수 <small style="color:var(--muted);font-size:10px" id="cumulTitle"></small></div></div>
+        <div class="chart-box h320"><canvas id="cumulBarChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ② 드롭다운 -->
+    <div class="dropdown-row">
+      <label class="dropdown-label">📅 월 선택</label>
+      <select id="monthSelect" onchange="selMonth(this.value)">
+        ${dropMonths.map(mo=>`<option value="${mo}"${mo===m?' selected':''}>${mo}</option>`).join('')}
+      </select>
+    </div>
+
+    <!-- ③ 요약 카드 -->
+    <div class="stat-row" id="statRow"></div>
+
+    <!-- ④ 이번달 운동 일수 / 멤버별 달성률 -->
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--blue)"></span>이번달 운동 일수 <small style="color:var(--muted);font-size:10px">${m}</small></div></div>
+        <div class="chart-box h280"><canvas id="monthlyBarChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>멤버별 달성률 <small style="color:var(--muted);font-size:10px">${m}</small></div></div>
+        <div id="memberTbl"></div>
+      </div>
+    </div>
+
+    <!-- ⑤ 이달 종목 순위+장인 / 누적 종목 순위+장인 -->
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--amber)"></span>이달 운동 종목 순위 + 장인 <small style="color:var(--muted);font-size:10px">${m}</small></div></div>
+        <div id="sportMonthly"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--gold)"></span>누적 운동 종목 순위 + 장인</div></div>
+        <div id="sportCumul"></div>
+      </div>
+    </div>
+
+    <!-- ⑥ 히트맵 -->
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>출석 히트맵</div></div>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+          <div style="flex:0 0 auto">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600">월간 <small>${m}</small></div>
+            <div id="heatmonth"></div>
+          </div>
+          <div style="flex:1 1 auto;min-width:200px">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600">연간 <span id="annualHeatTitle"></span></div>
+            <div id="heatannual" style="overflow-x:auto"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--blue)"></span>인원별 히트맵 <small style="color:var(--muted);font-size:10px">멤버 × 전체 기간</small></div></div>
+        <div id="heatcumul"></div>
+      </div>
+    </div>
+  `;
+
+  buildStacked(allMonths);
+  buildCumulBar(m);
+  buildStats(m);
+  buildMonthlyBar(m);
+  buildMemberTable(m);
+  buildSportRank(m);
+  buildSportCumul();
+  buildHeatMonth(m);
+  buildHeatAnnual(m);
+  buildHeatCumul();
+  buildTicker();
+}
+
+function selMonth(m) { S.selMonth=m; render(); }
+function destroyAll() { Object.values(CHARTS).forEach(c=>c.destroy()); CHARTS={}; }
+
+// ── ① 누적 스택 바
+function buildStacked(months) {
+  const tgt = months.filter(mo=>mo>='2025-01');
+  CHARTS.stacked = new Chart(document.getElementById('stackedChart'),{
+    type:'bar',
+    data:{
+      labels:tgt.map(mo=>mo.slice(2)),
+      datasets:MEMBERS.map((n,i)=>({
+        label:n, data:tgt.map(mo=>S.monthly[mo]?.[n]||0),
+        backgroundColor:MEM_COLORS[i], borderWidth:0,
+      }))
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      layout:{padding:{top:22}},
+      plugins:{
+        legend:{labels:{color:'#94a3b8',font:{size:11},boxWidth:11,padding:8}},
+        tooltip:{callbacks:{footer:items=>`합계: ${items.reduce((s,i)=>s+i.raw,0)}일`}},
+        datalabels:{
+          display: ctx => ctx.datasetIndex === MEMBERS.length-1,
+          anchor:'end', align:'end', color:'#e2e8f0', font:{size:10,weight:'700'},
+          formatter:(v,ctx)=>{
+            const mo=tgt[ctx.dataIndex];
+            const total=MEMBERS.reduce((s,n)=>s+(S.monthly[mo]?.[n]||0),0);
+            return total>0?total:'';
+          }
+        }
+      },
+      scales:{
+        x:{stacked:true,ticks:{color:'#94a3b8',font:{size:11}},grid:{display:false}},
+        y:{stacked:true,ticks:{color:'#5a6480',font:{size:11}},grid:{color:'#1f2435'},beginAtZero:true}
+      }
+    }
+  });
+}
+
+// ── ③ 요약 카드 (전년 동월 대비)
+function buildStats(m) {
+  const md = S.monthly[m]||{};
+  const total = Object.values(md).reduce((s,v)=>s+v,0);
+  const active = Object.keys(md).filter(n=>md[n]>0).length;
+
+  // 전년 동월
+  const prevYM = `${parseInt(m.slice(0,4))-1}-${m.slice(5,7)}`;
+  const prevMd = S.monthly[prevYM]||{};
+  const prevTotal = Object.values(prevMd).reduce((s,v)=>s+v,0);
+  const prevActive = Object.keys(prevMd).filter(n=>prevMd[n]>0).length;
+
+  function yoyHtml(cur, prev) {
+    if (!prev) return `<span class="yoy-eq">전년 데이터 없음</span>`;
+    const diff = cur - prev;
+    const pct = ((diff/prev)*100).toFixed(1);
+    if (diff > 0) return `<span class="yoy-up">▲ ${pct}% vs ${prevYM}</span>`;
+    if (diff < 0) return `<span class="yoy-dn">▼ ${Math.abs(pct)}% vs ${prevYM}</span>`;
+    return `<span class="yoy-eq">± 0% vs ${prevYM}</span>`;
+  }
+
+  const avg = MEMBERS.map(n=>S.stats.rate[n]||0).reduce((s,v)=>s+v,0)/MEMBERS.length;
+  const best = Object.entries(md).sort((a,b)=>b[1]-a[1])[0];
+
+  document.getElementById('statRow').innerHTML = `
+    <div class="stat-card">
+      <div class="s-label">이달 총 운동</div>
+      <div class="s-val" style="color:var(--accent)">${total}</div>
+      <div class="s-sub">${yoyHtml(total,prevTotal)}</div>
+    </div>
+    <div class="stat-card c-amber">
+      <div class="s-label">활동 멤버</div>
+      <div class="s-val" style="color:var(--amber)">${active}</div>
+      <div class="s-sub">${yoyHtml(active,prevActive)}</div>
+    </div>
+    <div class="stat-card c-blue">
+      <div class="s-label">평균 달성률</div>
+      <div class="s-val" style="color:var(--blue)">${(avg*100).toFixed(1)}%</div>
+      <div class="s-sub">연간 목표 대비</div>
+    </div>
+    <div class="stat-card c-purple">
+      <div class="s-label">이달의 MVP 🏆</div>
+      <div class="s-val" style="color:var(--gold);font-size:20px">${best?best[0]:'—'}</div>
+      <div class="s-sub">${best?best[1]+'일 운동':''}</div>
+    </div>`;
+}
+
+// ── ④-1 이번달 운동 일수 바
+function buildMonthlyBar(m) {
+  const md = S.monthly[m]||{};
+  const sorted = MEMBERS.map((n,i)=>({name:n, count:md[n]||0, color:MEM_COLORS[i]}))
+    .sort((a,b)=>b.count-a.count);
+  CHARTS.monthlyBar = new Chart(document.getElementById('monthlyBarChart'),{
+    type:'bar',
+    data:{
+      labels:sorted.map(s=>s.name),
+      datasets:[{data:sorted.map(s=>s.count),backgroundColor:sorted.map(s=>s.color),borderRadius:5,borderWidth:0}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      layout:{padding:{top:20}},
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.raw}일`}},
+        datalabels:{
+          anchor:'end',align:'end',color:'#94a3b8',font:{size:11,weight:'600'},
+          formatter:v=>v>0?v:''
+        }
+      },
+      scales:{
+        x:{ticks:{color:'#94a3b8',font:{size:12,weight:'600'}},grid:{display:false}},
+        y:{ticks:{color:'#5a6480',font:{size:10}},grid:{color:'#1f2435'},beginAtZero:true}
+      }
+    }
+  });
+}
+
+// ── ④-2 누적 운동 일수 - 선택 연도의 월별 누적 스택 + 달성률 라인
+function buildCumulBar(m) {
+  const year = m.slice(0,4);
+  document.getElementById('cumulTitle').textContent = `${year}년 누적`;
+
+  const isCurrentYear = year === String(NOW.getFullYear());
+  const maxMo = isCurrentYear ? parseInt(nowYM.slice(5,7)) : 12;
+  const yearMonths = [];
+  for(let mo=1; mo<=maxMo; mo++) {
+    const ym = `${year}-${String(mo).padStart(2,'0')}`;
+    if(S.monthly[ym]) yearMonths.push(ym);
+  }
+  if(!yearMonths.length) return;
+
+  const labels = MEMBERS;
+  const datasets = yearMonths.map((ym, mi) => {
+    const alpha = 0.30 + (mi / Math.max(yearMonths.length - 1, 1)) * 0.70; // 0.30~1.0
+    return {
+      label: ym.slice(2),
+      data: MEMBERS.map(n => S.monthly[ym]?.[n] || 0),
+      // 멤버 고유색(MEM_COLORS) 기반으로 월별 투명도만 다르게
+      backgroundColor: MEMBERS.map((_,ni) => {
+        const base = MEM_COLORS[ni]; // e.g. "hsl(0,60%,58%)"
+        // hsl → hsla 변환
+        return base.replace('hsl(', 'hsla(').replace(')', `,${alpha.toFixed(2)})`);
+      }),
+      borderWidth: 0,
+      yAxisID: 'y',
+    };
+  });
+
+  // 달성률: 해당 연도 실제 집계 기반
+  const cumulCounts = MEMBERS.map(n =>
+    yearMonths.reduce((s,ym) => s+(S.monthly[ym]?.[n]||0), 0)
+  );
+  const rateData = MEMBERS.map((n,i) => {
+    const target = S.stats.target[n] || 1;
+    return Math.round(cumulCounts[i] / target * 100);
+  });
+
+  datasets.push({
+    label: '달성률(%)', type:'line',
+    data: rateData,
+    borderColor:'#fbbf24', backgroundColor:'transparent',
+    borderWidth:2, pointRadius:4, pointBackgroundColor:'#fbbf24',
+    tension:0.3, yAxisID:'y2', order:0,
+  });
+
+  if(isCurrentYear) {
+    datasets.push({
+      label:`기준선 ${yearPct}%`, type:'line',
+      data: MEMBERS.map(()=>parseFloat(yearPct)),
+      borderColor:'#f87171', backgroundColor:'transparent',
+      borderWidth:1.5, borderDash:[5,4], pointRadius:0,
+      tension:0, yAxisID:'y2', order:0,
+    });
+  }
+
+  CHARTS.cumulBar = new Chart(document.getElementById('cumulBarChart'), {
+    type:'bar', data:{labels, datasets},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      layout:{padding:{top:24}},
+      plugins:{
+        legend:{labels:{color:'#5a6480',font:{size:9},boxWidth:8,padding:5,
+          filter: item => {
+            if(item.text==='달성률(%)') return true;
+            if(isCurrentYear && item.text===`기준선 ${yearPct}%`) return true;
+            return item.datasetIndex < yearMonths.length;
+          }
+        }},
+        tooltip:{callbacks:{footer:items=>{
+          const barItems=items.filter(i=>i.dataset.yAxisID==='y');
+          if(barItems.length) return `누적 합계: ${barItems.reduce((s,i)=>s+i.raw,0)}일`;
+        }}},
+        datalabels:{
+          display: ctx => ctx.dataset.yAxisID==='y' && ctx.datasetIndex===yearMonths.length-1,
+          anchor:'end', align:'end', color:'#94a3b8', font:{size:10,weight:'600'},
+          formatter:(v,ctx)=>{
+            const total=yearMonths.reduce((s,ym)=>s+(S.monthly[ym]?.[MEMBERS[ctx.dataIndex]]||0),0);
+            return total>0?total:'';
+          }
+        }
+      },
+      scales:{
+        x:{stacked:true,ticks:{color:'#94a3b8',font:{size:12,weight:'600'}},grid:{display:false}},
+        y:{stacked:true,ticks:{color:'#5a6480',font:{size:10}},grid:{color:'#1f2435'},beginAtZero:true,
+           title:{display:true,text:'운동 일수',color:'#5a6480',font:{size:10}}},
+        y2:{position:'right',min:0,max:120,
+            ticks:{color:'#fbbf24',font:{size:10},callback:v=>`${v}%`},
+            grid:{display:false},
+            title:{display:true,text:'달성률',color:'#fbbf24',font:{size:10}}}
+      }
+    }
+  });
+}
+
+// ── ⑤-1 멤버별 달성률 (1-3위 고정 헤더, 4위부터 스크롤)
+function buildMemberTable(m) {
+  const md = S.monthly[m]||{};
+  // 달성률: 실제 전체 집계 / 목표 일수
+  const allCumul = {};
+  MEMBERS.forEach(n => {
+    allCumul[n] = Object.values(S.monthly).reduce((s,mo)=>s+(mo[n]||0),0);
+  });
+  const sorted = MEMBERS.map(n=>({
+    name:n,
+    count:md[n]||0,
+    rate: S.stats.target[n] ? allCumul[n]/S.stats.target[n] : 0,
+  })).sort((a,b)=>b.count-a.count);
+
+  function rowHtml(p, i) {
+    const pct=Math.round(p.rate*100);
+    const cls=pct>=50?'':pct>=30?'mid':'low';
+    const rc=i===0?'r1':i===1?'r2':i===2?'r3':'rn';
+    const col=pct>=50?'var(--accent)':pct>=30?'var(--amber)':'var(--red)';
+    return `<tr>
+      <td><span class="rank ${rc}">${i+1}</span></td>
+      <td style="font-weight:700">${p.name}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:700">${p.count}<span style="color:var(--muted);font-size:10px">일</span></td>
+      <td><div class="pbar-row">
+        <div class="pbar"><div class="pfill ${cls}" style="width:${Math.min(100,pct)}%"></div></div>
+        <span class="pct" style="color:${col}">${pct}%</span>
+      </div></td></tr>`;
+  }
+
+  const thead = `<thead><tr><th>#</th><th>이름</th><th>이달</th><th>달성률(연간)</th></tr></thead>`;
+  const top3 = sorted.slice(0,3).map((p,i)=>rowHtml(p,i)).join('');
+  const rest = sorted.slice(3).map((p,i)=>rowHtml(p,i+3)).join('');
+
+  document.getElementById('memberTbl').innerHTML = `
+    <table class="mt" style="table-layout:fixed;width:100%">
+      <colgroup><col style="width:32px"><col style="width:44px"><col style="width:44px"><col></colgroup>
+      ${thead}
+      <tbody>${top3}</tbody>
+    </table>
+    ${rest ? `<div class="member-scroll"><table class="mt" style="table-layout:fixed;width:100%"><colgroup><col style="width:32px"><col style="width:44px"><col style="width:44px"><col></colgroup><tbody>${rest}</tbody></table></div>` : ''}`;
+}
+
+// ── 티커: 최근 10개 운동 기록 헤더에 흘러가기
+function buildTicker() {
+  const items = [];
+  for(const e of [...S.raw].sort((a,b)=>b.date.localeCompare(a.date))) {
+    for(const [name, sports] of Object.entries(e.data)) {
+      items.push({ date: e.date.slice(5), name, sport: sports.join('·') });
+      if(items.length >= 10) break;
+    }
+    if(items.length >= 10) break;
+  }
+  if(!items.length) return;
+
+  // 무한 루프를 위해 2배 복제
+  const html = [...items, ...items].map(it =>
+    `<span class="ticker-item">
+      <span class="t-date">${it.date}</span>
+      <span class="t-name">${it.name}</span>
+      <span class="t-sport">${it.sport}</span>
+    </span>`
+  ).join('');
+
+  const track = document.getElementById('tickerTrack');
+  if(track) {
+    track.innerHTML = html;
+    // 아이템 수에 따라 속도 조정 (많을수록 빠르게)
+    const totalWidth = track.scrollWidth / 2;
+    const speed = Math.max(20, Math.min(60, totalWidth / 10));
+    track.style.animationDuration = `${speed}s`;
+  }
+}
+
+// ── ⑥-1 이달 종목 순위 + 장인
+function buildSportRank(m) {
+  const entries = S.raw.filter(r=>r.date.startsWith(m));
+  // {sport: {total, perMember:{name:count}}}
+  const sportMap = {};
+  for(const e of entries){
+    for(const [name,sports] of Object.entries(e.data)){
+      for(const s of sports){
+        const k=normSport(s);
+        if(!sportMap[k]) sportMap[k]={total:0,per:{}};
+        sportMap[k].total++;
+        sportMap[k].per[name]=(sportMap[k].per[name]||0)+1;
+      }
+    }
+  }
+  renderSportSection('sportMonthly', sportMap);
+}
+
+// ── ⑥-2 누적 종목 순위 + 장인
+function buildSportCumul() {
+  const sportMap = {};
+  for(const e of S.raw){
+    for(const [name,sports] of Object.entries(e.data)){
+      for(const s of sports){
+        const k=normSport(s);
+        if(!sportMap[k]) sportMap[k]={total:0,per:{}};
+        sportMap[k].total++;
+        sportMap[k].per[name]=(sportMap[k].per[name]||0)+1;
+      }
+    }
+  }
+  renderSportSection('sportCumul', sportMap);
+}
+
+function renderSportSection(elId, sportMap) {
+  const sorted = Object.entries(sportMap).sort((a,b)=>b[1].total-a[1].total).slice(0,10);
+  const max = sorted[0]?.[1].total||1;
+  const html = sorted.map(([name,{total,per}],i)=>{
+    const master = Object.entries(per).sort((a,b)=>b[1]-a[1])[0];
+    return `<div class="sr-item">
+      <span class="sr-rank">${i+1}</span>
+      <span class="sr-name">${name}</span>
+      <div class="sr-bar"><div class="sr-fill" style="width:${total/max*100}%;background:${SPORT_COLORS[i%10]}"></div></div>
+      <div class="sr-right">
+        <span class="sr-cnt">${total}회</span>
+        ${master?`<span class="master-badge">🏅${master[0]} ${master[1]}회</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById(elId).innerHTML = `<div class="sport-section">${html}</div>`;
+}
+
+// ── ⑦-1 월간 히트맵
+function buildHeatMonth(m) {
+  const dayMap={};
+  for(const e of S.raw.filter(r=>r.date.startsWith(m)))
+    dayMap[e.date]=Object.keys(e.data).length;
+  const [y,mo]=m.split('-').map(Number);
+  const days=new Date(y,mo,0).getDate();
+  const first=new Date(y,mo-1,1).getDay();
+  const max=Math.max(...Object.values(dayMap),1);
+  const cells=Array(first).fill(`<div class="hm-cell" style="opacity:0"></div>`);
+  for(let d=1;d<=days;d++){
+    const key=`${m}-${String(d).padStart(2,'0')}`;
+    const cnt=dayMap[key]||0;
+    const lv=cnt===0?'':cnt<=max*.33?'lv1':cnt<=max*.66?'lv2':'lv3';
+    cells.push(`<div class="hm-cell ${lv}" title="${key}: ${cnt}명"></div>`);
+  }
+  const weeks=[];
+  for(let i=0;i<cells.length;i+=7) weeks.push(cells.slice(i,i+7));
+  document.getElementById('heatmonth').innerHTML=`
+    <div style="display:flex;gap:3px;margin-bottom:5px">
+      ${['일','월','화','수','목','금','토'].map(d=>`<div style="width:13px;font-size:9px;color:var(--muted);text-align:center">${d}</div>`).join('')}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:3px">
+      ${weeks.map(w=>`<div style="display:flex;gap:3px">${w.join('')}</div>`).join('')}
+    </div>
+    <div class="hm-legend">없음
+      <div class="hm-cell"></div><div class="hm-cell lv1"></div>
+      <div class="hm-cell lv2"></div><div class="hm-cell lv3"></div>많음
+    </div>`;
+}
+
+// ── ⑦-2 연간 히트맵 (선택 연도, GitHub 잔디 스타일 - 날짜별 × 멤버 수)
+function buildHeatAnnual(m) {
+  const year = m.slice(0,4);
+  document.getElementById('annualHeatTitle').textContent = `${year}년`;
+
+  const isCurrentYear = year === String(NOW.getFullYear());
+  const endDate = isCurrentYear ? TODAY : `${year}-12-31`;
+  const startDate = `${year}-01-01`;
+
+  // 날짜 → 운동한 멤버 수
+  const dayMap = {};
+  for(const e of S.raw) {
+    if(e.date < startDate || e.date > endDate) continue;
+    dayMap[e.date] = Object.keys(e.data).length;
+  }
+
+  // 1월 1일 요일 기준으로 그리드 생성
+  const start = new Date(year, 0, 1);
+  const startDow = start.getDay(); // 0=일
+  const totalDays = isCurrentYear
+    ? Math.floor((NOW - start) / 86400000) + 1
+    : (new Date(year,11,31) - start) / 86400000 + 1;
+
+  const max = Math.max(...Object.values(dayMap), 1);
+
+  // 주(column) × 요일(row) 구조
+  const cellSize = 14, gap = 3;
+  const totalCells = startDow + Math.ceil(totalDays);
+  const weeks = Math.ceil(totalCells / 7);
+
+  let cols = []; // cols[week][day]
+  for(let w=0; w<weeks; w++) cols.push([]);
+
+  let dayIdx = 0;
+  for(let cell=0; cell < weeks*7; cell++) {
+    const w = Math.floor(cell/7), d = cell%7;
+    if(cell < startDow || dayIdx >= totalDays) {
+      cols[w].push(null); continue;
+    }
+    const date = new Date(start.getTime() + dayIdx*86400000);
+    const dateStr = `${year}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+    const cnt = dayMap[dateStr]||0;
+    const lv = cnt===0?0:cnt<=max*.33?1:cnt<=max*.66?2:3;
+    cols[w].push({dateStr, cnt, lv});
+    dayIdx++;
+  }
+
+  // 월 레이블 (각 주 중 해당 월 시작 주에 표시)
+  const monthLabels = Array(weeks).fill('');
+  let lastMonth = -1;
+  for(let w=0; w<weeks; w++) {
+    const firstCell = cols[w].find(c=>c!==null);
+    if(firstCell) {
+      const mo = parseInt(firstCell.dateStr.slice(5,7));
+      if(mo !== lastMonth) { monthLabels[w] = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'][mo-1]; lastMonth=mo; }
+    }
+  }
+
+  const DOW = ['일','월','화','수','목','금','토'];
+
+  let html = `<div style="display:flex;gap:0">`;
+  // 요일 레이블 (왼쪽)
+  html += `<div style="display:flex;flex-direction:column;gap:${gap}px;margin-right:4px;margin-top:18px">`;
+  DOW.forEach(d => { html += `<div style="height:${cellSize}px;line-height:${cellSize}px;font-size:9px;color:var(--muted);text-align:right">${d}</div>`; });
+  html += `</div>`;
+
+  // 주별 컬럼
+  html += `<div style="display:flex;flex-direction:column">`;
+  // 월 레이블 행
+  html += `<div style="display:flex;gap:${gap}px;margin-bottom:3px">`;
+  for(let w=0;w<weeks;w++) {
+    html += `<div style="width:${cellSize}px;font-size:9px;color:var(--muted);white-space:nowrap;overflow:visible">${monthLabels[w]}</div>`;
+  }
+  html += `</div>`;
+  // 셀 그리드 (요일행 × 주열)
+  for(let d=0;d<7;d++) {
+    html += `<div style="display:flex;gap:${gap}px;margin-bottom:${gap}px">`;
+    for(let w=0;w<weeks;w++) {
+      const cell = cols[w][d];
+      if(!cell) { html += `<div style="width:${cellSize}px;height:${cellSize}px;opacity:0"></div>`; continue; }
+      const lvClass = `lv${cell.lv}`;
+      html += `<div class="hm-cell ${cell.lv>0?lvClass:''}" style="width:${cellSize}px;height:${cellSize}px" title="${cell.dateStr}: ${cell.cnt}명 운동"></div>`;
+    }
+    html += `</div>`;
+  }
+  html += `</div></div>`;
+
+  html += `<div class="hm-legend" style="margin-top:8px">없음
+    <div class="hm-cell" style="width:${cellSize}px;height:${cellSize}px"></div>
+    <div class="hm-cell lv1" style="width:${cellSize}px;height:${cellSize}px"></div>
+    <div class="hm-cell lv2" style="width:${cellSize}px;height:${cellSize}px"></div>
+    <div class="hm-cell lv3" style="width:${cellSize}px;height:${cellSize}px"></div>많음
+    <span style="margin-left:8px;color:var(--muted)">숫자 = 운동한 멤버 수</span>
+  </div>`;
+
+  document.getElementById('heatannual').innerHTML = html;
+}
+
+// ── 인원별 히트맵 (멤버 × 전체 월)
+function buildHeatCumul() {
+  const allMonths = Object.keys(S.monthly).sort().filter(mo=>mo<=nowYM);
+  const maxVal = Math.max(...MEMBERS.map(n=>Math.max(...allMonths.map(mo=>S.monthly[mo]?.[n]||0))),1);
+  const rows = MEMBERS.map(name=>{
+    const cells = allMonths.map(mo=>{
+      const cnt=S.monthly[mo]?.[name]||0;
+      const lv=cnt===0?'':cnt<=maxVal*.33?'lv1':cnt<=maxVal*.66?'lv2':'lv3';
+      return `<div class="hm-cell ${lv}" style="width:13px;height:13px" title="${name} ${mo}: ${cnt}일"></div>`;
+    }).join('');
+    return `<div style="display:flex;align-items:center;gap:3px;margin-bottom:3px">
+      <span style="font-size:10px;color:var(--muted);min-width:32px;font-family:'DM Mono',monospace;text-align:right">${name}</span>
+      <div style="display:flex;gap:2px;flex-wrap:nowrap">${cells}</div>
+    </div>`;
+  }).join('');
+  const labels = allMonths.map((mo,i)=>{
+    const prev=allMonths[i-1];
+    if(!prev||prev.slice(0,4)!==mo.slice(0,4))
+      return `<span style="font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;display:inline-block;min-width:15px">${mo.slice(2,4)}년</span>`;
+    return `<span style="display:inline-block;min-width:15px"></span>`;
+  }).join('');
+  document.getElementById('heatcumul').innerHTML=`
+    <div style="margin-left:38px;display:flex;gap:2px;margin-bottom:4px;flex-wrap:nowrap">${labels}</div>
+    <div>${rows}</div>
+    <div class="hm-legend" style="margin-top:8px">없음
+      <div class="hm-cell" style="width:13px;height:13px"></div>
+      <div class="hm-cell lv1" style="width:13px;height:13px"></div>
+      <div class="hm-cell lv2" style="width:13px;height:13px"></div>
+      <div class="hm-cell lv3" style="width:13px;height:13px"></div>많음
+    </div>`;
+}
+
+// ── 종목 정규화
+function normSport(s){
+  s=s.trim();
+  if(/헬스.*(가슴|chest)/i.test(s)) return '헬스/가슴';
+  if(/헬스.*(하체|leg)/i.test(s))   return '헬스/하체';
+  if(/헬스.*(등|back)/i.test(s))    return '헬스/등';
+  if(/헬스.*(어깨)/i.test(s))       return '헬스/어깨';
+  if(/헬스.*(팔|arm)/i.test(s))     return '헬스/팔';
+  if(/헬스/.test(s))                return '헬스';
+  if(/클핏|클라이밍|클릿/.test(s))  return '클라이밍';
+  if(/수영/.test(s))                return '수영';
+  if(/러닝|달리기|런/.test(s))      return '러닝';
+  if(/등산/.test(s))                return '등산';
+  if(/필라테스/.test(s))            return '필라테스';
+  if(/요가/.test(s))                return '요가';
+  if(/발레/.test(s))                return '발레';
+  if(/자전거/.test(s))              return '자전거';
+  if(/골프/.test(s))                return '골프';
+  if(/홈/.test(s))                  return '홈트';
+  if(/줌바|좀바|zumba/i.test(s))    return '줌바';
+  if(/로잉|로윙/.test(s))           return '로잉';
+  if(/수중/.test(s))                return '수중하키';
+  if(/F45/i.test(s))               return 'F45';
+  if(/풋살/.test(s))                return '풋살';
+  if(/배드민턴/.test(s))            return '배드민턴';
+  if(/테니스/.test(s))              return '테니스';
+  return s||'기타';
+}
+
+init();
+</script>
+</body>
+</html>
