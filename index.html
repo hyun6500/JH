@@ -953,13 +953,9 @@ function buildHeatCumul() {
 // ── 종목 정규화
 function normSport(s){
   s=s.trim();
-  if(/헬스.*(가슴|chest)/i.test(s)) return '헬스/가슴';
-  if(/헬스.*(하체|leg)/i.test(s))   return '헬스/하체';
-  if(/헬스.*(등|back)/i.test(s))    return '헬스/등';
-  if(/헬스.*(어깨)/i.test(s))       return '헬스/어깨';
-  if(/헬스.*(팔|arm)/i.test(s))     return '헬스/팔';
   if(/헬스/.test(s))                return '헬스';
-  if(/클핏|클라이밍|클릿/.test(s))  return '클라이밍';
+  if(/클핏|크로스핏/.test(s))        return '크로스핏';
+  if(/클라이밍|클릿/.test(s))        return '클라이밍';
   if(/수영/.test(s))                return '수영';
   if(/러닝|달리기|런/.test(s))      return '러닝';
   if(/등산/.test(s))                return '등산';
