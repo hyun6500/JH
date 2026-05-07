@@ -459,8 +459,10 @@ function buildStats(m) {
   const md = S.monthly[m]||{};
   const total = Object.values(md).reduce((s,v)=>s+v,0);
   const active = Object.keys(md).filter(n=>md[n]>0).length;
+  const year   = m.slice(0,4);
+  const selMo  = parseInt(m.slice(5,7));
 
-  const prevYM = `${parseInt(m.slice(0,4))-1}-${m.slice(5,7)}`;
+  const prevYM = `${parseInt(year)-1}-${m.slice(5,7)}`;
   const prevMd = S.monthly[prevYM]||{};
   const prevTotal = Object.values(prevMd).reduce((s,v)=>s+v,0);
   const prevActive = Object.keys(prevMd).filter(n=>prevMd[n]>0).length;
@@ -474,7 +476,38 @@ function buildStats(m) {
     return `<span class="yoy-eq">± 0% vs ${prevYM}</span>`;
   }
 
-  const avg = MEMBERS.map(n=>S.stats.rate[n]||0).reduce((s,v)=>s+v,0)/MEMBERS.length;
+  // 선택 월 기준 경과율 (현재 월 = 오늘, 과거 월 = 말일)
+  const isCurrentMonth = m === nowYM;
+  let expectedRate;
+  if (isCurrentMonth) {
+    expectedRate = parseFloat(yearPct) / 100;
+  } else {
+    const yStart   = new Date(parseInt(year), 0, 1).getTime();
+    const monthEnd = new Date(parseInt(year), selMo, 0).getTime();
+    const yDays    = new Date(parseInt(year) + 1, 0, 1).getTime() - yStart;
+    expectedRate   = (monthEnd - yStart + 86400000) / yDays;
+  }
+  const expectedPctStr = (expectedRate * 100).toFixed(1);
+
+  // 선택 월까지의 평균 달성률 (멤버별 누적 / 목표)
+  const avg = MEMBERS.reduce((s, n) => {
+    const cumul = Object.keys(S.monthly)
+      .filter(ym => ym.startsWith(year) && ym <= m)
+      .reduce((a, ym) => a + (S.monthly[ym]?.[n] || 0), 0);
+    const target = S.stats.target[n] || 1;
+    return s + cumul / target;
+  }, 0) / MEMBERS.length;
+
+  // 페이스 대비 색상 (멤버 테이블과 동일 기준)
+  let avgColor, avgLabel;
+  if (avg >= expectedRate) {
+    avgColor = 'var(--accent)'; avgLabel = '▲ 페이스 초과';
+  } else if (avg >= expectedRate * 0.85) {
+    avgColor = 'var(--amber)';  avgLabel = '≈ 페이스 유사';
+  } else {
+    avgColor = 'var(--red)';    avgLabel = '▼ 페이스 부족';
+  }
+
   const best = Object.entries(md).sort((a,b)=>b[1]-a[1])[0];
 
   document.getElementById('statRow').innerHTML = `
@@ -490,8 +523,11 @@ function buildStats(m) {
     </div>
     <div class="stat-card c-blue">
       <div class="s-label">평균 달성률</div>
-      <div class="s-val" style="color:var(--blue)">${(avg*100).toFixed(1)}%</div>
-      <div class="s-sub">연간 목표 대비</div>
+      <div class="s-val" style="color:${avgColor}">${(avg*100).toFixed(1)}%</div>
+      <div class="s-sub" style="flex-direction:column;align-items:flex-start;gap:2px">
+        <span style="color:${avgColor};font-weight:700">${avgLabel}</span>
+        <span style="color:var(--muted);font-size:10px">기준 ${expectedPctStr}% 경과${isCurrentMonth?' (오늘)':` (${m.slice(5,7)}월 말)`}</span>
+      </div>
     </div>
     <div class="stat-card c-purple">
       <div class="s-label">이달의 MVP 🏆</div>
@@ -530,7 +566,7 @@ function buildMonthlyBar(m) {
   });
 }
 
-// ── ④-2 누적 운동 일수 ★변경: 목표 표시 + 소수점 달성률
+// ── ④-2 누적 운동 일수: 목표까지 속 빈 막대 + 소수점 달성률
 function buildCumulBar(m) {
   const year = m.slice(0,4);
   document.getElementById('cumulTitle').textContent = `${year}년 누적`;
@@ -545,6 +581,8 @@ function buildCumulBar(m) {
   if(!yearMonths.length) return;
 
   const labels = MEMBERS;
+
+  // 월별 채워진 바 datasets (datalabels 개별 비활성화)
   const datasets = yearMonths.map((ym, mi) => {
     const alpha = 0.30 + (mi / Math.max(yearMonths.length - 1, 1)) * 0.70;
     return {
@@ -556,6 +594,7 @@ function buildCumulBar(m) {
       }),
       borderWidth: 0,
       yAxisID: 'y',
+      datalabels: { display: false },
     };
   });
 
@@ -564,7 +603,57 @@ function buildCumulBar(m) {
     yearMonths.reduce((s,ym) => s+(S.monthly[ym]?.[n]||0), 0)
   );
 
-  // ★ 소수 첫째 자리 달성률
+  // ★ 목표까지 잔여분: 속 빈 테두리 바
+  // 누적이 목표 초과일 때는 0 (오버 달성자는 막대 위에 텍스트만)
+  const remainData = MEMBERS.map((n, i) =>
+    Math.max(0, (S.stats.target[n] || 0) - cumulCounts[i])
+  );
+
+  datasets.push({
+    label: '잔여 (목표까지)',
+    type: 'bar',
+    data: remainData,
+    // 거의 투명한 배경 + 멤버 고유색 테두리
+    backgroundColor: MEMBERS.map((_,i) => {
+      const base = MEM_COLORS[i];
+      return base.replace('hsl(', 'hsla(').replace(')', ',0.06)');
+    }),
+    borderColor: MEMBERS.map((_,i) => {
+      const base = MEM_COLORS[i];
+      return base.replace('hsl(', 'hsla(').replace(')', ',0.55)');
+    }),
+    borderWidth: 1.5,
+    borderSkipped: false,   // 4면 모두 테두리
+    yAxisID: 'y',
+    // ★ 잔여 바 꼭대기에 "누적/목표" 레이블
+    datalabels: {
+      display: ctx => {
+        const i = ctx.dataIndex;
+        const total = cumulCounts[i];
+        return total > 0;
+      },
+      anchor: 'end',
+      align: 'end',
+      color: '#94a3b8',
+      font: { size: 10, weight: '600', family: "'DM Mono', monospace" },
+      formatter: (v, ctx) => {
+        const n = MEMBERS[ctx.dataIndex];
+        const total = cumulCounts[ctx.dataIndex];
+        const target = S.stats.target[n] || 0;
+        // 목표 초과 시: 초록으로 표시는 color 콜백으로 처리
+        return [`${total}일`, `/${target}`];
+      },
+      color: (ctx) => {
+        const n = MEMBERS[ctx.dataIndex];
+        const total = cumulCounts[ctx.dataIndex];
+        const target = S.stats.target[n] || 0;
+        return total >= target ? '#4ade80' : '#94a3b8';
+      },
+      offset: 3,
+    },
+  });
+
+  // 달성률 라인 (소수 첫째 자리)
   const rateData = MEMBERS.map((n,i) => {
     const target = S.stats.target[n] || 1;
     return parseFloat((cumulCounts[i] / target * 100).toFixed(1));
@@ -576,15 +665,7 @@ function buildCumulBar(m) {
     borderColor:'#fbbf24', backgroundColor:'transparent',
     borderWidth:2, pointRadius:4, pointBackgroundColor:'#fbbf24',
     tension:0.3, yAxisID:'y2', order:0,
-    datalabels: {
-      display: true,
-      anchor: 'top',
-      align: 'top',
-      color: '#fbbf24',
-      font: { size: 9, weight: '600', family: "'DM Mono', monospace" },
-      formatter: v => `${v.toFixed(1)}%`,
-      offset: 2,
-    }
+    datalabels: { display: false },
   });
 
   if(isCurrentYear) {
@@ -598,79 +679,54 @@ function buildCumulBar(m) {
     });
   }
 
-  // ★ 목표 일수 scatter (붉은 다이아몬드 마커)
-  datasets.push({
-    label: '목표 일수',
-    type: 'scatter',
-    data: MEMBERS.map((n, i) => ({ x: labels[i], y: S.stats.target[n] || 0 })),
-    backgroundColor: '#f8717188',
-    borderColor: '#f87171',
-    borderWidth: 2,
-    pointStyle: 'rectRot',    // 다이아몬드 모양
-    pointRadius: 7,
-    pointHoverRadius: 9,
-    yAxisID: 'y',
-    order: -1,
-    datalabels: {
-      display: true,
-      anchor: 'end',
-      align: 'end',
-      color: '#f87171',
-      font: { size: 9, weight: '600', family: "'DM Mono', monospace" },
-      formatter: (v, ctx) => {
-        const n = MEMBERS[ctx.dataIndex];
-        return `목표 ${S.stats.target[n] || 0}`;
-      },
-      offset: 2,
-    }
-  });
+  // y 축 최대값: 목표 중 최대 * 1.18 (레이블 공간 확보)
+  const maxTarget = Math.max(...MEMBERS.map(n => S.stats.target[n] || 0));
+  const maxCumul  = Math.max(...cumulCounts);
+  const yMax = Math.ceil(Math.max(maxTarget, maxCumul) * 1.18 / 5) * 5;
 
   CHARTS.cumulBar = new Chart(document.getElementById('cumulBarChart'), {
     type:'bar', data:{labels, datasets},
     options:{
       responsive:true, maintainAspectRatio:false,
-      layout:{padding:{top:32, right:8}},
+      layout:{padding:{top:36, right:8}},
       plugins:{
         legend:{labels:{color:'#5a6480',font:{size:9},boxWidth:8,padding:5,
           filter: item => {
             if(item.text==='달성률(%)') return true;
-            if(item.text==='목표 일수') return true;
+            if(item.text==='잔여 (목표까지)') return true;
             if(isCurrentYear && item.text===`기준선 ${yearPct}%`) return true;
             return item.datasetIndex < yearMonths.length;
           }
         }},
         tooltip:{callbacks:{
-          footer:items=>{
-            const barItems=items.filter(i=>i.dataset.yAxisID==='y' && i.dataset.type!=='scatter');
+          label: ctx => {
+            if(ctx.dataset.label === '잔여 (목표까지)') {
+              const n = MEMBERS[ctx.dataIndex];
+              return ` 잔여 ${ctx.raw}일 (목표: ${S.stats.target[n]}일)`;
+            }
+            if(ctx.dataset.yAxisID === 'y2') return ` 달성률 ${Number(ctx.raw).toFixed(1)}%`;
+            return ` ${ctx.dataset.label}: ${ctx.raw}일`;
+          },
+          footer: items => {
+            const barItems = items.filter(i => i.dataset.yAxisID==='y');
             if(barItems.length) {
               const n = MEMBERS[items[0].dataIndex];
-              const total = yearMonths.reduce((s,ym)=>s+(S.monthly[ym]?.[n]||0),0);
+              const i = items[0].dataIndex;
+              const total = cumulCounts[i];
               const target = S.stats.target[n] || 0;
               return `누적: ${total}일 / 목표: ${target}일`;
             }
           }
         }},
-        // ★ 기본 datalabels: 바 총합 표시 (목표 일수 datalabels는 dataset 레벨에서 정의)
-        datalabels:{
-          display: ctx => {
-            if(ctx.dataset.yAxisID==='y2') return false;   // 라인은 dataset 레벨에서 처리
-            if(ctx.dataset.type==='scatter') return false; // scatter도 dataset 레벨
-            return ctx.datasetIndex === yearMonths.length - 1; // 마지막 월 바 위에만
-          },
-          anchor:'end', align:'end', color:'#94a3b8', font:{size:10,weight:'600'},
-          formatter:(v,ctx)=>{
-            const n = MEMBERS[ctx.dataIndex];
-            const total=yearMonths.reduce((s,ym)=>s+(S.monthly[ym]?.[n]||0),0);
-            return total>0 ? String(total) : '';
-          }
-        }
+        // 전역 기본값: off (각 dataset에서 개별 지정)
+        datalabels:{ display: false }
       },
       scales:{
         x:{stacked:true,ticks:{color:'#94a3b8',font:{size:12,weight:'600'}},grid:{display:false}},
-        y:{stacked:true,ticks:{color:'#5a6480',font:{size:10}},grid:{color:'#1f2435'},beginAtZero:true,
+        y:{stacked:true, max: yMax,
+           ticks:{color:'#5a6480',font:{size:10}},grid:{color:'#1f2435'},beginAtZero:true,
            title:{display:true,text:'운동 일수',color:'#5a6480',font:{size:10}}},
         y2:{position:'right',min:0,max:120,
-            // ★ 소수 첫째 자리
             ticks:{color:'#fbbf24',font:{size:10},callback:v=>`${Number(v).toFixed(1)}%`},
             grid:{display:false},
             title:{display:true,text:'달성률',color:'#fbbf24',font:{size:10}}}
@@ -683,12 +739,13 @@ function buildCumulBar(m) {
 function buildMemberTable(m) {
   const md = S.monthly[m]||{};
   const year = m.slice(0,4);
+  const selMo = parseInt(m.slice(5,7));
 
-  // ★ 선택 연도 기준 누적 (전체 기간 아님)
+  // 선택 월 말일까지의 연도 내 누적 (이후 월 제외)
   const yearCumul = {};
   MEMBERS.forEach(n => {
     yearCumul[n] = Object.keys(S.monthly)
-      .filter(ym => ym.startsWith(year))
+      .filter(ym => ym.startsWith(year) && ym <= m)
       .reduce((s, ym) => s + (S.monthly[ym]?.[n] || 0), 0);
   });
 
@@ -700,17 +757,37 @@ function buildMemberTable(m) {
     rate: S.stats.target[n] ? yearCumul[n]/S.stats.target[n] : 0,
   })).sort((a,b)=>b.count-a.count);
 
-  // 헤더에 연도 표시
+  // 선택 월 말일 기준 연간 경과율
+  // 현재 월이면 오늘 날짜 기준, 과거 월이면 그 달 말일 기준
+  const isCurrentMonth = m === nowYM;
+  let expectedRate;
+  if (isCurrentMonth) {
+    expectedRate = parseFloat(yearPct) / 100;
+  } else {
+    const yStart   = new Date(parseInt(year), 0, 1).getTime();
+    const monthEnd = new Date(parseInt(year), selMo, 0).getTime(); // 말일 자정
+    const yDays    = new Date(parseInt(year) + 1, 0, 1).getTime() - yStart;
+    expectedRate   = (monthEnd - yStart + 86400000) / yDays;      // 말일 포함
+  }
+  const expectedPct = (expectedRate * 100).toFixed(1);
+
+  // 페이스 대비 색상 판정
+  // 초록: 기준 이상(초과 달성) / 노랑: 기준의 85% 이상(유사) / 빨강: 그 미만(부족)
+  function paceStyle(rate) {
+    if (rate >= expectedRate)        return { cls: '',    col: 'var(--accent)' };
+    if (rate >= expectedRate * 0.85) return { cls: 'mid', col: 'var(--amber)'  };
+    return                                  { cls: 'low', col: 'var(--red)'    };
+  }
+
+  // 헤더 레이블: 기준 경과율 함께 표시
   const titleEl = document.getElementById('memberTblTitle');
-  if(titleEl) titleEl.textContent = `${m} · 달성률 기준: ${year}년`;
+  if(titleEl) titleEl.textContent = `${m} · ${year}년 누적 / 기준 ${expectedPct}% 경과`;
 
   function rowHtml(p, i) {
-    // ★ 소수 첫째 자리
-    const pct = (p.rate * 100).toFixed(1);
+    const pct    = (p.rate * 100).toFixed(1);
     const pctNum = parseFloat(pct);
-    const cls = pctNum>=50?'':pctNum>=30?'mid':'low';
+    const { cls, col } = paceStyle(p.rate);
     const rc = i===0?'r1':i===1?'r2':i===2?'r3':'rn';
-    const col = pctNum>=50?'var(--accent)':pctNum>=30?'var(--amber)':'var(--red)';
     return `<tr>
       <td><span class="rank ${rc}">${i+1}</span></td>
       <td style="font-weight:700">${p.name}</td>
@@ -726,7 +803,7 @@ function buildMemberTable(m) {
 
   const thead = `<thead><tr>
     <th>#</th><th>이름</th><th>이달</th>
-    <th title="${year}년 1월~현재 누적 / 연간 목표">달성률 (${year}년 누적/목표)</th>
+    <th title="${year}년 1월~${m} 누적 / 연간 목표 · 기준 ${expectedPct}% 경과 대비">달성률 (누적/목표)</th>
   </tr></thead>`;
   const top3 = sorted.slice(0,3).map((p,i)=>rowHtml(p,i)).join('');
   const rest = sorted.slice(3).map((p,i)=>rowHtml(p,i+3)).join('');
