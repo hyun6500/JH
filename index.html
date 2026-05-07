@@ -86,7 +86,9 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .pfill{height:100%;border-radius:2px;background:var(--accent);}
 .pfill.mid{background:var(--amber);}
 .pfill.low{background:var(--red);}
-.pct{font-size:11px;font-family:'DM Mono',monospace;font-weight:500;min-width:34px;text-align:right;}
+.pct{font-size:11px;font-family:'DM Mono',monospace;font-weight:500;min-width:40px;text-align:right;}
+/* 달성률 툴팁용 */
+.rate-detail{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
 
 /* SPORT RANK */
 .sport-section{display:flex;flex-direction:column;gap:7px;}
@@ -192,7 +194,6 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbzhCy5M8_IpwhJO2EUzrc74FEewXiSgyewm7B0IegufBODEvOWzalijZSvT75dZ-QSh/exec?Q=dashboard';
-// 데이터라벨 플러그인 전역 등록
 Chart.register(ChartDataLabels);
 const MEMBERS = ['상','성경','보현','성우','상필','주현','정현','범진','재현','윤선','아현','윤경'];
 const MEM_COLORS = MEMBERS.map((_,i)=>`hsl(${i*30},60%,58%)`);
@@ -200,9 +201,8 @@ const SPORT_COLORS = ['#4ade80','#34d399','#2dd4bf','#60a5fa','#a78bfa','#f472b6
 
 let S = { raw:[], monthly:{}, stats:{target:{},remain:{},rate:{},cumul:{}}, selMonth:null };
 let CHARTS = {};
-let STACKED_FILTER = new Set(); // 선택된 멤버 집합 (비어있으면 전체)
+let STACKED_FILTER = new Set();
 
-// ── 헤더 날짜 & 연간 진행률
 const NOW = new Date();
 const nowYM = `${NOW.getFullYear()}-${String(NOW.getMonth()+1).padStart(2,'0')}`;
 const TODAY = `${NOW.getFullYear()}-${String(NOW.getMonth()+1).padStart(2,'0')}-${String(NOW.getDate()).padStart(2,'0')}`;
@@ -213,7 +213,6 @@ document.getElementById('todayBadge').textContent =
 document.getElementById('yearProgFill').style.width = yearPct + '%';
 document.getElementById('yearPct').textContent = `연간 ${yearPct}% 경과`;
 
-// ── INIT
 async function init() {
   document.getElementById('refreshBtn').disabled = true;
   document.getElementById('app').innerHTML =
@@ -231,18 +230,15 @@ async function init() {
   }
 }
 
-// ── PARSE
 function parse(rows) {
   S.raw=[]; S.monthly={};
   S.stats={target:{},remain:{},rate:{},cumul:{}};
   const dateRe=/^\d{4}-\d{2}-\d{2}/;
 
-  // ISO 날짜 → KST 날짜 문자열 변환 (T15:00:00.000Z = KST 자정 = 올바른 날짜)
   function toKSTDate(raw) {
     const s = String(raw||'');
     if (!dateRe.test(s)) return null;
     if (s.includes('T')) {
-      // ISO 형식: UTC+9 적용
       const d = new Date(s);
       const kst = new Date(d.getTime() + 9*60*60*1000);
       return kst.toISOString().slice(0,10);
@@ -250,7 +246,6 @@ function parse(rows) {
     return s.slice(0,10);
   }
 
-  // 요약 통계 행 파싱 (날짜가 아닌 텍스트 키 행들)
   for (const r of rows) {
     const key = String(r[0]||'').trim();
     if(key==='목표 일수') MEMBERS.forEach((n,j)=>S.stats.target[n]=+r[j+1]||0);
@@ -259,19 +254,12 @@ function parse(rows) {
     if(key==='누적')      MEMBERS.forEach((n,j)=>S.stats.cumul[n]=+r[j+1]||0);
   }
 
-  // 날짜별 운동 기록 파싱
   for (const r of rows) {
     const date = toKSTDate(r[0]);
     if (!date) continue;
-
-    // 오늘 이후 날짜는 스킵 (미래 빈 행 제외)
     if (date > TODAY) continue;
-
-    // 운동 기록이 하나도 없는 행은 스킵 (모든 멤버 컬럼이 비어있는 경우)
-    // 단, 컬럼 r[1]~r[12]를 체크
     const hasAnyData = MEMBERS.some((_,j) => {
       const cell = String(r[j+1]||'').trim();
-      // 숫자만 있는 셀(달성률 행 오파싱 방지), 빈 셀 제외
       return cell && isNaN(Number(cell));
     });
     if (!hasAnyData) continue;
@@ -282,9 +270,7 @@ function parse(rows) {
 
     for(let j=0; j<MEMBERS.length; j++){
       const cell = String(r[j+1]||'').trim();
-      // 숫자값(달성률 등) 제외
       if(cell && isNaN(Number(cell))){
-        // 콤마로 여러 종목 구분, 각 종목에서 '/' 앞부분만 사용 (헬스/하체 → 헬스)
         const sports = cell.split(/[,·、]+/)
           .map(s => s.split('/')[0].trim())
           .filter(Boolean);
@@ -292,11 +278,9 @@ function parse(rows) {
         S.monthly[month][MEMBERS[j]] = (S.monthly[month][MEMBERS[j]]||0)+1;
       }
     }
-
     if(Object.keys(entry.data).length > 0) S.raw.push(entry);
   }
 
-  // 선택 월 초기화 (현재월 또는 가장 최근 데이터 월)
   const months = Object.keys(S.monthly).sort();
   const currentYM = nowYM;
   if (S.monthly[currentYM]) {
@@ -306,7 +290,6 @@ function parse(rows) {
   }
 }
 
-// ── RENDER
 function render() {
   const allMonths = Object.keys(S.monthly).sort().filter(mo=>mo<=nowYM);
   const dropMonths = allMonths.filter(mo=>mo>='2023-12').reverse();
@@ -349,7 +332,7 @@ function render() {
         <div class="chart-box h280"><canvas id="monthlyBarChart"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>멤버별 달성률 <small style="color:var(--muted);font-size:10px">${m}</small></div></div>
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>멤버별 달성률 <small style="color:var(--muted);font-size:10px" id="memberTblTitle"></small></div></div>
         <div id="memberTbl"></div>
       </div>
     </div>
@@ -404,13 +387,9 @@ function render() {
 function selMonth(m) { S.selMonth=m; render(); }
 function destroyAll() { Object.values(CHARTS).forEach(c=>c.destroy()); CHARTS={}; }
 
-// 스택 차트 멤버 필터
 function toggleStackMember(name) {
-  if(STACKED_FILTER.has(name)) {
-    STACKED_FILTER.delete(name);
-  } else {
-    STACKED_FILTER.add(name);
-  }
+  if(STACKED_FILTER.has(name)) STACKED_FILTER.delete(name);
+  else STACKED_FILTER.add(name);
   applyStackFilter();
 }
 
@@ -422,26 +401,13 @@ function clearStackFilter() {
 function applyStackFilter() {
   const btn = document.getElementById('clearFilterBtn');
   if(!btn || !CHARTS.stacked) return;
-
-  // 선택 해제 버튼 표시 여부
   btn.style.display = STACKED_FILTER.size > 0 ? 'block' : 'none';
-
-  // 필터에 따라 데이터셋 visibility 조정
   CHARTS.stacked.data.datasets.forEach((ds, i) => {
     const name = MEMBERS[i];
-    if(STACKED_FILTER.size === 0) {
-      // 전체 표시
-      CHARTS.stacked.show(i);
-    } else {
-      if(STACKED_FILTER.has(name)) {
-        CHARTS.stacked.show(i);
-      } else {
-        CHARTS.stacked.hide(i);
-      }
-    }
+    if(STACKED_FILTER.size === 0) CHARTS.stacked.show(i);
+    else if(STACKED_FILTER.has(name)) CHARTS.stacked.show(i);
+    else CHARTS.stacked.hide(i);
   });
-
-  // 데이터라벨 총합 갱신
   CHARTS.stacked.update();
 }
 
@@ -473,7 +439,6 @@ function buildStacked(months) {
           anchor:'end', align:'end', color:'#e2e8f0', font:{size:10,weight:'700'},
           formatter:(v,ctx)=>{
             const mo=tgt[ctx.dataIndex];
-            // 필터 적용된 멤버만 합산
             const activeMems = STACKED_FILTER.size>0 ? [...STACKED_FILTER] : MEMBERS;
             const total=activeMems.reduce((s,n)=>s+(S.monthly[mo]?.[n]||0),0);
             return total>0?total:'';
@@ -486,7 +451,6 @@ function buildStacked(months) {
       }
     }
   });
-  // render 후 기존 필터 상태 복원
   if(STACKED_FILTER.size > 0) applyStackFilter();
 }
 
@@ -496,7 +460,6 @@ function buildStats(m) {
   const total = Object.values(md).reduce((s,v)=>s+v,0);
   const active = Object.keys(md).filter(n=>md[n]>0).length;
 
-  // 전년 동월
   const prevYM = `${parseInt(m.slice(0,4))-1}-${m.slice(5,7)}`;
   const prevMd = S.monthly[prevYM]||{};
   const prevTotal = Object.values(prevMd).reduce((s,v)=>s+v,0);
@@ -567,7 +530,7 @@ function buildMonthlyBar(m) {
   });
 }
 
-// ── ④-2 누적 운동 일수 - 선택 연도의 월별 누적 스택 + 달성률 라인
+// ── ④-2 누적 운동 일수 ★변경: 목표 표시 + 소수점 달성률
 function buildCumulBar(m) {
   const year = m.slice(0,4);
   document.getElementById('cumulTitle').textContent = `${year}년 누적`;
@@ -583,14 +546,12 @@ function buildCumulBar(m) {
 
   const labels = MEMBERS;
   const datasets = yearMonths.map((ym, mi) => {
-    const alpha = 0.30 + (mi / Math.max(yearMonths.length - 1, 1)) * 0.70; // 0.30~1.0
+    const alpha = 0.30 + (mi / Math.max(yearMonths.length - 1, 1)) * 0.70;
     return {
       label: ym.slice(2),
       data: MEMBERS.map(n => S.monthly[ym]?.[n] || 0),
-      // 멤버 고유색(MEM_COLORS) 기반으로 월별 투명도만 다르게
       backgroundColor: MEMBERS.map((_,ni) => {
-        const base = MEM_COLORS[ni]; // e.g. "hsl(0,60%,58%)"
-        // hsl → hsla 변환
+        const base = MEM_COLORS[ni];
         return base.replace('hsl(', 'hsla(').replace(')', `,${alpha.toFixed(2)})`);
       }),
       borderWidth: 0,
@@ -598,13 +559,15 @@ function buildCumulBar(m) {
     };
   });
 
-  // 달성률: 해당 연도 실제 집계 기반
+  // 누적 집계
   const cumulCounts = MEMBERS.map(n =>
     yearMonths.reduce((s,ym) => s+(S.monthly[ym]?.[n]||0), 0)
   );
+
+  // ★ 소수 첫째 자리 달성률
   const rateData = MEMBERS.map((n,i) => {
     const target = S.stats.target[n] || 1;
-    return Math.round(cumulCounts[i] / target * 100);
+    return parseFloat((cumulCounts[i] / target * 100).toFixed(1));
   });
 
   datasets.push({
@@ -613,6 +576,15 @@ function buildCumulBar(m) {
     borderColor:'#fbbf24', backgroundColor:'transparent',
     borderWidth:2, pointRadius:4, pointBackgroundColor:'#fbbf24',
     tension:0.3, yAxisID:'y2', order:0,
+    datalabels: {
+      display: true,
+      anchor: 'top',
+      align: 'top',
+      color: '#fbbf24',
+      font: { size: 9, weight: '600', family: "'DM Mono', monospace" },
+      formatter: v => `${v.toFixed(1)}%`,
+      offset: 2,
+    }
   });
 
   if(isCurrentYear) {
@@ -622,32 +594,74 @@ function buildCumulBar(m) {
       borderColor:'#f87171', backgroundColor:'transparent',
       borderWidth:1.5, borderDash:[5,4], pointRadius:0,
       tension:0, yAxisID:'y2', order:0,
+      datalabels:{ display:false }
     });
   }
+
+  // ★ 목표 일수 scatter (붉은 다이아몬드 마커)
+  datasets.push({
+    label: '목표 일수',
+    type: 'scatter',
+    data: MEMBERS.map((n, i) => ({ x: labels[i], y: S.stats.target[n] || 0 })),
+    backgroundColor: '#f8717188',
+    borderColor: '#f87171',
+    borderWidth: 2,
+    pointStyle: 'rectRot',    // 다이아몬드 모양
+    pointRadius: 7,
+    pointHoverRadius: 9,
+    yAxisID: 'y',
+    order: -1,
+    datalabels: {
+      display: true,
+      anchor: 'end',
+      align: 'end',
+      color: '#f87171',
+      font: { size: 9, weight: '600', family: "'DM Mono', monospace" },
+      formatter: (v, ctx) => {
+        const n = MEMBERS[ctx.dataIndex];
+        return `목표 ${S.stats.target[n] || 0}`;
+      },
+      offset: 2,
+    }
+  });
 
   CHARTS.cumulBar = new Chart(document.getElementById('cumulBarChart'), {
     type:'bar', data:{labels, datasets},
     options:{
       responsive:true, maintainAspectRatio:false,
-      layout:{padding:{top:24}},
+      layout:{padding:{top:32, right:8}},
       plugins:{
         legend:{labels:{color:'#5a6480',font:{size:9},boxWidth:8,padding:5,
           filter: item => {
             if(item.text==='달성률(%)') return true;
+            if(item.text==='목표 일수') return true;
             if(isCurrentYear && item.text===`기준선 ${yearPct}%`) return true;
             return item.datasetIndex < yearMonths.length;
           }
         }},
-        tooltip:{callbacks:{footer:items=>{
-          const barItems=items.filter(i=>i.dataset.yAxisID==='y');
-          if(barItems.length) return `누적 합계: ${barItems.reduce((s,i)=>s+i.raw,0)}일`;
-        }}},
+        tooltip:{callbacks:{
+          footer:items=>{
+            const barItems=items.filter(i=>i.dataset.yAxisID==='y' && i.dataset.type!=='scatter');
+            if(barItems.length) {
+              const n = MEMBERS[items[0].dataIndex];
+              const total = yearMonths.reduce((s,ym)=>s+(S.monthly[ym]?.[n]||0),0);
+              const target = S.stats.target[n] || 0;
+              return `누적: ${total}일 / 목표: ${target}일`;
+            }
+          }
+        }},
+        // ★ 기본 datalabels: 바 총합 표시 (목표 일수 datalabels는 dataset 레벨에서 정의)
         datalabels:{
-          display: ctx => ctx.dataset.yAxisID==='y' && ctx.datasetIndex===yearMonths.length-1,
+          display: ctx => {
+            if(ctx.dataset.yAxisID==='y2') return false;   // 라인은 dataset 레벨에서 처리
+            if(ctx.dataset.type==='scatter') return false; // scatter도 dataset 레벨
+            return ctx.datasetIndex === yearMonths.length - 1; // 마지막 월 바 위에만
+          },
           anchor:'end', align:'end', color:'#94a3b8', font:{size:10,weight:'600'},
           formatter:(v,ctx)=>{
-            const total=yearMonths.reduce((s,ym)=>s+(S.monthly[ym]?.[MEMBERS[ctx.dataIndex]]||0),0);
-            return total>0?total:'';
+            const n = MEMBERS[ctx.dataIndex];
+            const total=yearMonths.reduce((s,ym)=>s+(S.monthly[ym]?.[n]||0),0);
+            return total>0 ? String(total) : '';
           }
         }
       },
@@ -656,7 +670,8 @@ function buildCumulBar(m) {
         y:{stacked:true,ticks:{color:'#5a6480',font:{size:10}},grid:{color:'#1f2435'},beginAtZero:true,
            title:{display:true,text:'운동 일수',color:'#5a6480',font:{size:10}}},
         y2:{position:'right',min:0,max:120,
-            ticks:{color:'#fbbf24',font:{size:10},callback:v=>`${v}%`},
+            // ★ 소수 첫째 자리
+            ticks:{color:'#fbbf24',font:{size:10},callback:v=>`${Number(v).toFixed(1)}%`},
             grid:{display:false},
             title:{display:true,text:'달성률',color:'#fbbf24',font:{size:10}}}
       }
@@ -664,36 +679,55 @@ function buildCumulBar(m) {
   });
 }
 
-// ── ⑤-1 멤버별 달성률 (1-3위 고정 헤더, 4위부터 스크롤)
+// ── ⑤ 멤버별 달성률 ★변경: 선택 연도 기준 집계 + 소수 첫째 자리 + 헤더 명시
 function buildMemberTable(m) {
   const md = S.monthly[m]||{};
-  // 달성률: 실제 전체 집계 / 목표 일수
-  const allCumul = {};
+  const year = m.slice(0,4);
+
+  // ★ 선택 연도 기준 누적 (전체 기간 아님)
+  const yearCumul = {};
   MEMBERS.forEach(n => {
-    allCumul[n] = Object.values(S.monthly).reduce((s,mo)=>s+(mo[n]||0),0);
+    yearCumul[n] = Object.keys(S.monthly)
+      .filter(ym => ym.startsWith(year))
+      .reduce((s, ym) => s + (S.monthly[ym]?.[n] || 0), 0);
   });
+
   const sorted = MEMBERS.map(n=>({
     name:n,
     count:md[n]||0,
-    rate: S.stats.target[n] ? allCumul[n]/S.stats.target[n] : 0,
+    cumul: yearCumul[n],
+    target: S.stats.target[n] || 0,
+    rate: S.stats.target[n] ? yearCumul[n]/S.stats.target[n] : 0,
   })).sort((a,b)=>b.count-a.count);
 
+  // 헤더에 연도 표시
+  const titleEl = document.getElementById('memberTblTitle');
+  if(titleEl) titleEl.textContent = `${m} · 달성률 기준: ${year}년`;
+
   function rowHtml(p, i) {
-    const pct=Math.round(p.rate*100);
-    const cls=pct>=50?'':pct>=30?'mid':'low';
-    const rc=i===0?'r1':i===1?'r2':i===2?'r3':'rn';
-    const col=pct>=50?'var(--accent)':pct>=30?'var(--amber)':'var(--red)';
+    // ★ 소수 첫째 자리
+    const pct = (p.rate * 100).toFixed(1);
+    const pctNum = parseFloat(pct);
+    const cls = pctNum>=50?'':pctNum>=30?'mid':'low';
+    const rc = i===0?'r1':i===1?'r2':i===2?'r3':'rn';
+    const col = pctNum>=50?'var(--accent)':pctNum>=30?'var(--amber)':'var(--red)';
     return `<tr>
       <td><span class="rank ${rc}">${i+1}</span></td>
       <td style="font-weight:700">${p.name}</td>
       <td style="font-family:'DM Mono',monospace;font-weight:700">${p.count}<span style="color:var(--muted);font-size:10px">일</span></td>
-      <td><div class="pbar-row">
-        <div class="pbar"><div class="pfill ${cls}" style="width:${Math.min(100,pct)}%"></div></div>
-        <span class="pct" style="color:${col}">${pct}%</span>
-      </div></td></tr>`;
+      <td>
+        <div class="pbar-row">
+          <div class="pbar"><div class="pfill ${cls}" style="width:${Math.min(100,pctNum)}%"></div></div>
+          <span class="pct" style="color:${col}">${pct}%</span>
+        </div>
+        <div class="rate-detail">${p.cumul}/${p.target}일</div>
+      </td></tr>`;
   }
 
-  const thead = `<thead><tr><th>#</th><th>이름</th><th>이달</th><th>달성률(연간)</th></tr></thead>`;
+  const thead = `<thead><tr>
+    <th>#</th><th>이름</th><th>이달</th>
+    <th title="${year}년 1월~현재 누적 / 연간 목표">달성률 (${year}년 누적/목표)</th>
+  </tr></thead>`;
   const top3 = sorted.slice(0,3).map((p,i)=>rowHtml(p,i)).join('');
   const rest = sorted.slice(3).map((p,i)=>rowHtml(p,i+3)).join('');
 
@@ -706,7 +740,7 @@ function buildMemberTable(m) {
     ${rest ? `<div class="member-scroll"><table class="mt" style="table-layout:fixed;width:100%"><colgroup><col style="width:32px"><col style="width:44px"><col style="width:44px"><col></colgroup><tbody>${rest}</tbody></table></div>` : ''}`;
 }
 
-// ── 티커: 최근 10개 운동 기록 헤더에 흘러가기
+// ── 티커
 function buildTicker() {
   const items = [];
   for(const e of [...S.raw].sort((a,b)=>b.date.localeCompare(a.date))) {
@@ -717,8 +751,6 @@ function buildTicker() {
     if(items.length >= 10) break;
   }
   if(!items.length) return;
-
-  // 무한 루프를 위해 2배 복제
   const html = [...items, ...items].map(it =>
     `<span class="ticker-item">
       <span class="t-date">${it.date}</span>
@@ -726,11 +758,9 @@ function buildTicker() {
       <span class="t-sport">${it.sport}</span>
     </span>`
   ).join('');
-
   const track = document.getElementById('tickerTrack');
   if(track) {
     track.innerHTML = html;
-    // 아이템 수에 따라 속도 조정 (많을수록 빠르게)
     const totalWidth = track.scrollWidth / 2;
     const speed = Math.max(20, Math.min(60, totalWidth / 10));
     track.style.animationDuration = `${speed}s`;
@@ -740,7 +770,6 @@ function buildTicker() {
 // ── ⑥-1 이달 종목 순위 + 장인
 function buildSportRank(m) {
   const entries = S.raw.filter(r=>r.date.startsWith(m));
-  // {sport: {total, perMember:{name:count}}}
   const sportMap = {};
   for(const e of entries){
     for(const [name,sports] of Object.entries(e.data)){
@@ -820,7 +849,7 @@ function buildHeatMonth(m) {
     </div>`;
 }
 
-// ── ⑦-2 연간 히트맵 (선택 연도, GitHub 잔디 스타일 - 날짜별 × 멤버 수)
+// ── ⑦-2 연간 히트맵
 function buildHeatAnnual(m) {
   const year = m.slice(0,4);
   document.getElementById('annualHeatTitle').textContent = `${year}년`;
@@ -829,36 +858,30 @@ function buildHeatAnnual(m) {
   const endDate = isCurrentYear ? TODAY : `${year}-12-31`;
   const startDate = `${year}-01-01`;
 
-  // 날짜 → 운동한 멤버 수
   const dayMap = {};
   for(const e of S.raw) {
     if(e.date < startDate || e.date > endDate) continue;
     dayMap[e.date] = Object.keys(e.data).length;
   }
 
-  // 1월 1일 요일 기준으로 그리드 생성
   const start = new Date(year, 0, 1);
-  const startDow = start.getDay(); // 0=일
+  const startDow = start.getDay();
   const totalDays = isCurrentYear
     ? Math.floor((NOW - start) / 86400000) + 1
     : (new Date(year,11,31) - start) / 86400000 + 1;
 
   const max = Math.max(...Object.values(dayMap), 1);
-
-  // 주(column) × 요일(row) 구조
   const cellSize = 14, gap = 3;
   const totalCells = startDow + Math.ceil(totalDays);
   const weeks = Math.ceil(totalCells / 7);
 
-  let cols = []; // cols[week][day]
+  let cols = [];
   for(let w=0; w<weeks; w++) cols.push([]);
 
   let dayIdx = 0;
   for(let cell=0; cell < weeks*7; cell++) {
     const w = Math.floor(cell/7), d = cell%7;
-    if(cell < startDow || dayIdx >= totalDays) {
-      cols[w].push(null); continue;
-    }
+    if(cell < startDow || dayIdx >= totalDays) { cols[w].push(null); continue; }
     const date = new Date(start.getTime() + dayIdx*86400000);
     const dateStr = `${year}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
     const cnt = dayMap[dateStr]||0;
@@ -867,7 +890,6 @@ function buildHeatAnnual(m) {
     dayIdx++;
   }
 
-  // 월 레이블 (각 주 중 해당 월 시작 주에 표시)
   const monthLabels = Array(weeks).fill('');
   let lastMonth = -1;
   for(let w=0; w<weeks; w++) {
@@ -879,22 +901,16 @@ function buildHeatAnnual(m) {
   }
 
   const DOW = ['일','월','화','수','목','금','토'];
-
   let html = `<div style="display:flex;gap:0">`;
-  // 요일 레이블 (왼쪽)
   html += `<div style="display:flex;flex-direction:column;gap:${gap}px;margin-right:4px;margin-top:18px">`;
   DOW.forEach(d => { html += `<div style="height:${cellSize}px;line-height:${cellSize}px;font-size:9px;color:var(--muted);text-align:right">${d}</div>`; });
   html += `</div>`;
-
-  // 주별 컬럼
   html += `<div style="display:flex;flex-direction:column">`;
-  // 월 레이블 행
   html += `<div style="display:flex;gap:${gap}px;margin-bottom:3px">`;
   for(let w=0;w<weeks;w++) {
     html += `<div style="width:${cellSize}px;font-size:9px;color:var(--muted);white-space:nowrap;overflow:visible">${monthLabels[w]}</div>`;
   }
   html += `</div>`;
-  // 셀 그리드 (요일행 × 주열)
   for(let d=0;d<7;d++) {
     html += `<div style="display:flex;gap:${gap}px;margin-bottom:${gap}px">`;
     for(let w=0;w<weeks;w++) {
@@ -906,7 +922,6 @@ function buildHeatAnnual(m) {
     html += `</div>`;
   }
   html += `</div></div>`;
-
   html += `<div class="hm-legend" style="margin-top:8px">없음
     <div class="hm-cell" style="width:${cellSize}px;height:${cellSize}px"></div>
     <div class="hm-cell lv1" style="width:${cellSize}px;height:${cellSize}px"></div>
@@ -914,11 +929,10 @@ function buildHeatAnnual(m) {
     <div class="hm-cell lv3" style="width:${cellSize}px;height:${cellSize}px"></div>많음
     <span style="margin-left:8px;color:var(--muted)">숫자 = 운동한 멤버 수</span>
   </div>`;
-
   document.getElementById('heatannual').innerHTML = html;
 }
 
-// ── 인원별 히트맵 (멤버 × 전체 월)
+// ── 인원별 히트맵
 function buildHeatCumul() {
   const allMonths = Object.keys(S.monthly).sort().filter(mo=>mo<=nowYM);
   const maxVal = Math.max(...MEMBERS.map(n=>Math.max(...allMonths.map(mo=>S.monthly[mo]?.[n]||0))),1);
