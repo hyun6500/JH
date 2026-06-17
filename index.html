@@ -61,7 +61,7 @@ header{
 .ticker-wrap{flex:1;overflow:hidden;min-width:0;
   mask-image:linear-gradient(to right,transparent,#000 7%,#000 93%,transparent);
   -webkit-mask-image:linear-gradient(to right,transparent,#000 7%,#000 93%,transparent);}
-.ticker-track{display:flex;white-space:nowrap;animation:tk 42s linear infinite;}
+.ticker-track{display:flex;white-space:nowrap;animation:tk 24s linear infinite;}
 .ticker-track:hover{animation-play-state:paused;}
 @keyframes tk{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
 .tk-item{display:inline-flex;align-items:center;gap:7px;padding:0 18px;font-size:12px;color:var(--text2);border-right:1px solid var(--border);}
@@ -328,8 +328,8 @@ header{
 <body>
 <header>
   <div class="brand">
-    <div class="mark"><span>💪</span> <span><span class="o">오</span>운완</span></div>
-    <div class="tag">우리 12명의 운동 기록 · 1년째 함께</div>
+    <div class="mark"><span>💪</span> <span class="o">오운완</span></div>
+    <div class="tag">우리들의 운동 기록</div>
   </div>
   <div class="ticker-wrap"><div class="ticker-track" id="tickerTrack"></div></div>
   <div class="header-actions">
@@ -486,7 +486,11 @@ function parse(rows){
     for(let j=0;j<MEMBERS.length;j++){
       const c=String(r[j+1]||'').trim();
       if(c&&isNaN(Number(c))){
-        const sports=c.split(/[,·、\/]+/).map(s=>s.split('/')[0].trim()).filter(Boolean);
+        // ',' '·' '、' = 여러 운동 구분 / '/' = 운동 뒤 세부부위(예: 헬스/가슴) → 앞부분만 사용
+        const raw=c.split(/[,·、]+/).map(s=>s.split('/')[0].trim()).filter(Boolean);
+        // 정규화 후 같은 종목 중복 제거(예: 헬스/가슴 → 헬스 1개)
+        const seen=new Set(), sports=[];
+        for(const s of raw){const k=normSport(s)||s; if(!seen.has(k)){seen.add(k); sports.push(s);}}
         entry.data[MEMBERS[j]]=sports;
         S.monthly[month][MEMBERS[j]]=(S.monthly[month][MEMBERS[j]]||0)+1;
       }
@@ -1190,13 +1194,35 @@ function buildProfile(name){
       </div>
     </div>
 
+    <div class="card mb14">
+      <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>🕒 최근 운동</div>
+        <span class="card-sub">${name}님 · 최근 활동순</span></div>
+      <div class="feed" id="profileRecent"></div>
+    </div>
+
     <div class="card">
       <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--cyan)"></span>${year}년 출석 히트맵</div></div>
       <div id="profileHeat" style="overflow-x:auto"></div>
     </div>`;
 
   buildProfileDonut(name, sportSorted);
+  buildProfileRecent(name);
   buildProfileHeat(name);
+}
+
+// 개인 최근 운동 리스트 (날짜 + 종목 태그)
+function buildProfileRecent(name){
+  const list=[...S.raw].reverse().filter(e=>e.data[name]).slice(0,30);
+  if(!list.length){document.getElementById('profileRecent').innerHTML=`<div class="empty-hint"><span class="ic">🗓️</span>아직 운동 기록이 없어요</div>`;return;}
+  document.getElementById('profileRecent').innerHTML=list.map(e=>{
+    const dd=new Date(e.date);
+    const label=`${dd.getMonth()+1}/${dd.getDate()} (${['일','월','화','수','목','금','토'][dd.getDay()]})`;
+    const tags=e.data[name].map(normSport).filter(Boolean).map(s=>`<span class="tag">${s}</span>`).join('');
+    return `<div class="feed-item">
+      <div class="av" style="background:${avatarColor(name)}">${initial(name)}</div>
+      <span class="nm" style="min-width:62px;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;font-weight:600">${label}</span>
+      <span class="sp">${tags}</span></div>`;
+  }).join('');
 }
 
 function buildProfileDonut(name, sportSorted){
