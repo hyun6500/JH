@@ -282,6 +282,31 @@ header{
 
 /* ============ SELECT ============ */
 .select{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;outline:none;transition:border-color .15s;}
+.period-btn{padding:6px 16px;border:none;border-radius:8px;background:transparent;color:var(--muted);font-weight:700;font-size:13px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .15s;}
+.period-btn:hover{color:var(--text2);}
+.period-btn.active{background:var(--accent);color:#0d1016;}
+
+/* ============ YEAR HIGHLIGHT BANNER ============ */
+.hl-banner{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+@media(max-width:760px){.hl-banner{grid-template-columns:repeat(2,1fr);}}
+.hl-cell{background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--border);
+  border-radius:16px;padding:18px 16px;text-align:center;box-shadow:var(--shadow-sm);}
+.hl-e{font-size:24px;margin-bottom:8px;}
+.hl-v{font-size:24px;font-weight:800;font-family:'DM Mono',monospace;line-height:1.1;margin-bottom:5px;}
+.hl-l{font-size:11px;color:var(--muted);line-height:1.4;}
+
+/* ============ TODAY STATUS NUDGE ============ */
+.status-block{}
+.status-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:9px;display:flex;align-items:center;gap:7px;}
+.status-label b{color:var(--text);font-family:'DM Mono',monospace;}
+.status-dot{width:7px;height:7px;border-radius:50%;}
+.status-chips{display:flex;flex-wrap:wrap;gap:7px;}
+.status-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px 5px 5px;border-radius:30px;
+  border:1px solid var(--border);background:var(--surface2);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;}
+.status-chip:hover{transform:translateY(-1px);border-color:var(--border2);}
+.status-chip.done{border-color:color-mix(in srgb,var(--accent) 40%,transparent);background:var(--accent-glow);}
+.status-chip.pend{opacity:.7;}
+.av-xs{width:21px;height:21px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:10px;color:#fff;}
 .select:focus{border-color:var(--accent);}
 .select option{background:var(--surface);}
 .dropdown-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
@@ -323,6 +348,19 @@ header{
 .wd-cell .d{font-size:11px;color:var(--muted);margin-bottom:5px;}
 .wd-cell .v{font-size:17px;font-weight:800;font-family:'DM Mono',monospace;}
 .wd-cell.best{border-color:var(--accent);background:var(--accent-glow);}
+
+/* ============ PROFILE CALENDAR ============ */
+.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:6px;}
+.cal-dow span{text-align:center;font-size:10.5px;font-weight:700;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+.cal-cell{aspect-ratio:1;border-radius:9px;border:1px solid var(--border);background:var(--surface2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;position:relative;min-height:38px;}
+.cal-cell.empty{background:transparent;border:none;}
+.cal-cell .cd{font-size:11px;font-weight:600;font-family:'DM Mono',monospace;}
+.cal-cell .ce{font-size:14px;line-height:1;}
+.cal-cell.on{background:var(--accent-glow);border-color:color-mix(in srgb,var(--accent) 45%,transparent);}
+.cal-cell.on .cd{color:var(--text)!important;}
+.cal-cell.today{box-shadow:0 0 0 2px var(--accent);}
 </style>
 </head>
 <body>
@@ -363,6 +401,15 @@ Chart.register(ChartDataLabels);
 const MEMBERS = ['상','성경','보현','성우','상필','주현','정현','범진','재현','윤선','아현','윤경'];
 const MEM_COLORS = MEMBERS.map((_,i)=>`hsl(${i*30},62%,56%)`);
 const SPORT_COLORS = ['#3ddc84','#34d399','#22d3ee','#5e9bff','#a78bfa','#f472b6','#fbbf24','#fb923c','#fb7185','#9aa6bd'];
+// 정규화된 종목 → 이모지 (달력 뷰용)
+const SPORT_EMOJI = {
+  '헬스':'🏋️','크로스핏':'🤸','클라이밍':'🧗','수영':'🏊','러닝':'🏃','등산':'🥾',
+  '필라테스':'🧘','요가':'🧘','발레':'🩰','자전거':'🚴','골프':'⛳','홈트':'🏠',
+  '줌바':'💃','로잉':'🚣','수중하키':'🏑','풋살':'⚽','배드민턴':'🏸','테니스':'🎾',
+  '철인3종':'🏅','주짓수':'🥋','탁구':'🏓','농구':'🏀','스키':'⛷️','아이스하키':'🏒',
+  '댄스':'💃','볼링':'🎳'
+};
+const sportEmoji = s => SPORT_EMOJI[s] || '💪';
 
 // 폴백용 명언 — 스프레드시트 '명언' 시트(1,000개)를 ?Q=quotejson 으로 불러오며,
 // 로딩 실패 시 아래 12개로 자동 대체됨
@@ -388,6 +435,8 @@ let S = {
   selMonth:null,
   selMember:null,
   quote:null,        // 서버에서 받은 오늘의 명언 (없으면 폴백)
+  rankMode:'month',  // 랭킹 탭 기간 모드: 'month' | 'year'
+  rankYear:null,     // 연간 모드에서 선택한 연도
 };
 let CHARTS = {};
 let curPage = 'home';
@@ -399,7 +448,7 @@ const startOfYear = new Date(NOW.getFullYear(),0,1);
 const yearPct = ((NOW - startOfYear)/(365.25*24*3600*1000)*100).toFixed(1);
 
 const avatarColor = n => MEM_COLORS[MEMBERS.indexOf(n)] || 'var(--muted)';
-const initial = n => n.slice(-1);  // 한 글자 이니셜
+const initial = n => n.slice(0,1);  // 한 글자 이니셜(앞글자)
 const todayQuote = () => S.quote || FALLBACK_QUOTES[(NOW.getFullYear()*1000 + dayOfYear(NOW)) % FALLBACK_QUOTES.length];
 
 // 서버에서 오늘의 명언 1개 받아오기 (실패해도 조용히 폴백)
@@ -659,6 +708,8 @@ function renderHome(){
       ${statCard('이달의 MVP',mvp?mvp[0]:'—','',mvp?`${mvp[1]}일 운동 🏆`:'','var(--purple)',true)}
     </div>
 
+    <div class="card mb14" id="todayStatusCard"></div>
+
     <div class="g2">
       <div class="card">
         <div class="card-head">
@@ -676,8 +727,44 @@ function renderHome(){
       </div>
     </div>`;
 
+  buildTodayStatus();
   buildStreakGrid('streakGrid');
   buildFeed('homeFeed', 60);
+}
+
+// 오늘의 챔피언 / 아직인 멤버 (부드러운 넛지)
+function buildTodayStatus(){
+  const todayEntry=S.raw.find(e=>e.date===TODAY);
+  const done = todayEntry ? Object.keys(todayEntry.data) : [];
+  const pending = MEMBERS.filter(n=>!done.includes(n));
+  const dowLabel=['일','월','화','수','목','금','토'][NOW.getDay()];
+  // 챔피언 칩: 오늘 운동한 사람 + 종목 이모지
+  const champChips = done.length
+    ? done.map(n=>{
+        const emos=[...new Set((todayEntry.data[n]||[]).map(s=>sportEmoji(normSport(s))))].slice(0,2).join('');
+        return `<span class="status-chip done" onclick="openMember('${n}')">
+          <span class="av-xs" style="background:${avatarColor(n)}">${initial(n)}</span>${n} ${emos}</span>`;
+      }).join('')
+    : `<span style="font-size:13px;color:var(--muted)">아직 오늘의 첫 운동을 기다리고 있어요 — 누가 먼저 끊을까요? 🏁</span>`;
+  // 아직인 멤버 칩
+  const pendChips = pending.length
+    ? pending.map(n=>`<span class="status-chip pend" onclick="openMember('${n}')">
+        <span class="av-xs" style="background:var(--surface3);color:var(--muted)">${initial(n)}</span>${n}</span>`).join('')
+    : `<span style="font-size:13px;color:var(--accent);font-weight:700">🎉 오늘 전원 달성! 대단한 ${dowLabel}요일이네요</span>`;
+
+  document.getElementById('todayStatusCard').innerHTML=`
+    <div class="card-head" style="margin-bottom:12px">
+      <div class="card-title"><span class="dot" style="background:var(--gold)"></span>📍 오늘의 현황</div>
+      <span class="card-sub">${NOW.getMonth()+1}/${NOW.getDate()} (${dowLabel}) · ${done.length}명 완료 · ${pending.length}명 대기</span>
+    </div>
+    <div class="status-block">
+      <div class="status-label"><span class="status-dot" style="background:var(--accent)"></span>오늘의 챔피언 <b>${done.length}</b></div>
+      <div class="status-chips">${champChips}</div>
+    </div>
+    <div class="status-block" style="margin-top:12px">
+      <div class="status-label"><span class="status-dot" style="background:var(--muted)"></span>아직인 멤버 <b>${pending.length}</b></div>
+      <div class="status-chips">${pendChips}</div>
+    </div>`;
 }
 
 function statCard(label,val,unit,sub,color,small){
@@ -757,6 +844,7 @@ function buildTicker(){
 
 function openMember(name){
   S.selMember=name;
+  profCalYM=null;
   goPage('me', document.querySelector('.tab[data-page="me"]'));
   renderMe();
 }
@@ -765,27 +853,37 @@ function openMember(name){
    ================================================================= */
 function renderRank(){
   const allMonths=Object.keys(S.monthly).sort().filter(mo=>mo<=nowYM);
-  const dropMonths=allMonths.filter(mo=>mo>='2023-12').reverse();
-  const m=S.selMonth, year=m.slice(0,4);
+  const years=[...new Set(allMonths.map(mo=>mo.slice(0,4)))].sort().reverse();
+  if(!S.rankYear||!years.includes(S.rankYear)) S.rankYear=S.selMonth.slice(0,4);
 
-  // 전년 동월 순위 비교용
+  // 기간 토글 + 드롭다운 (모드에 따라 내용 변경)
+  const toggle=`
+    <div class="dropdown-row">
+      <div style="display:inline-flex;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px;gap:2px">
+        <button class="period-btn ${S.rankMode==='month'?'active':''}" onclick="setRankMode('month')">월간</button>
+        <button class="period-btn ${S.rankMode==='year'?'active':''}" onclick="setRankMode('year')">연간</button>
+      </div>
+      ${S.rankMode==='month'
+        ? `<span class="dropdown-label">📅 월 선택</span>
+           <select class="select" onchange="setMonth(this.value)">
+             ${allMonths.filter(mo=>mo>='2023-12').reverse().map(mo=>`<option value="${mo}"${mo===S.selMonth?' selected':''}>${mo}</option>`).join('')}
+           </select>`
+        : `<span class="dropdown-label">📅 연도 선택</span>
+           <select class="select" onchange="setRankYear(this.value)">
+             ${years.map(y=>`<option value="${y}"${y===S.rankYear?' selected':''}>${y}년</option>`).join('')}
+           </select>`}
+    </div>`;
+
+  if(S.rankMode==='year') return renderRankYear(toggle);
+
+  const m=S.selMonth, year=m.slice(0,4);
   const prevYM=`${parseInt(year)-1}-${m.slice(5,7)}`;
-  const prevRank={};
-  if(S.monthly[prevYM]){
-    Object.entries(S.monthly[prevYM]).sort((a,b)=>b[1]-a[1]).forEach(([n],i)=>prevRank[n]=i+1);
-  }
 
   document.getElementById('page-rank').innerHTML = `
     <div class="sec-eyebrow">Leaderboard</div>
     <div class="sec-title">랭킹 · 챌린지</div>
     <div class="sec-desc">이번 달 누가 가장 열심히 했을까? 그룹 챌린지 진행 상황도 함께 확인하세요.</div>
-
-    <div class="dropdown-row">
-      <span class="dropdown-label">📅 월 선택</span>
-      <select class="select" onchange="setMonth(this.value)">
-        ${dropMonths.map(mo=>`<option value="${mo}"${mo===m?' selected':''}>${mo}</option>`).join('')}
-      </select>
-    </div>
+    ${toggle}
 
     <div class="g2 mb14">
       <div class="card">
@@ -820,6 +918,213 @@ function renderRank(){
   renderSportSection('sportMonthly', sportMapFor(S.raw.filter(r=>r.date.startsWith(m))));
   renderSportSection('sportCumul', sportMapFor(S.raw));
 }
+
+/* ---------- 연간 모드 ---------- */
+function renderRankYear(toggle){
+  const y=S.rankYear;
+  const prevY=String(parseInt(y)-1);
+  // 연 누적 일수
+  const cumul={}; MEMBERS.forEach(n=>{cumul[n]=Object.keys(S.monthly).filter(ym=>ym.startsWith(y)).reduce((s,ym)=>s+(S.monthly[ym]?.[n]||0),0);});
+  const prevCumul={}; MEMBERS.forEach(n=>{prevCumul[n]=Object.keys(S.monthly).filter(ym=>ym.startsWith(prevY)).reduce((s,ym)=>s+(S.monthly[ym]?.[n]||0),0);});
+
+  document.getElementById('page-rank').innerHTML = `
+    <div class="sec-eyebrow">Leaderboard</div>
+    <div class="sec-title">랭킹 · 챌린지</div>
+    <div class="sec-desc">${y}년 한 해 누가 가장 꾸준했을까? 연간 누적 기준 순위입니다.</div>
+    ${toggle}
+
+    <div id="yearHighlight" class="mb14"></div>
+
+    <div class="g2 mb14">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--gold)"></span>🏆 ${y}년 시상대</div><span class="card-sub">연 누적 운동 일수</span></div>
+        <div class="podium" id="podium"></div>
+      </div>
+      <div class="card" id="yearGoalCard"></div>
+    </div>
+
+    <div class="g2 mb14">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--cyan)"></span>📊 ${y}년 월별 그룹 활동</div><span class="card-sub">어느 달에 가장 뜨거웠나</span></div>
+        <div class="chart-box h260"><canvas id="yearMonthlyChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--pink)"></span>🌈 ${y}년 종목 다양성</div><span class="card-sub">시도한 종목 · 새 도전</span></div>
+        <div id="yearDiversity"></div>
+      </div>
+    </div>
+
+    <div class="card mb14">
+      <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>📋 ${y}년 연간 순위표</div><span class="card-sub">누적 일수 · 달성률 · 전년 대비 등락</span></div>
+      <table class="lb-table" id="lbTableYear"></table>
+    </div>
+
+    <div class="g2">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--amber)"></span>🏅 ${y}년 종목 순위 + 장인</div><span class="card-sub">연간 전체</span></div>
+        <div id="sportYear"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--purple)"></span>👑 누적 종목 순위 + 장인</div><span class="card-sub">전체 기간</span></div>
+        <div id="sportCumul"></div>
+      </div>
+    </div>`;
+
+  buildYearHighlight(y, cumul);
+  buildPodiumByMap('podium', cumul, '일');
+  buildYearGoalCard(y, cumul);
+  buildYearMonthlyChart(y);
+  buildYearDiversity(y, prevY);
+  buildYearLeaderboard(y, cumul, prevCumul);
+  renderSportSection('sportYear', sportMapFor(S.raw.filter(r=>r.date.startsWith(y))));
+  renderSportSection('sportCumul', sportMapFor(S.raw));
+}
+
+// 올해의 하이라이트 배너
+function buildYearHighlight(y, cumul){
+  // 최다 운동 멤버
+  const topMem=Object.entries(cumul).sort((a,b)=>b[1]-a[1])[0];
+  // 그 해 총 운동일(멤버×일 합산)
+  const totalDays=Object.values(cumul).reduce((a,b)=>a+b,0);
+  // 그 해 운동한 날(그룹 커버리지) = 누군가 한 명이라도 운동한 날 수
+  const activeDaySet=new Set(S.raw.filter(e=>e.date.startsWith(y)).map(e=>e.date));
+  // 가장 뜨거웠던 달
+  const monRows=[]; for(let mo=1;mo<=12;mo++){const ym=`${y}-${String(mo).padStart(2,'0')}`;
+    monRows.push([mo, Object.values(S.monthly[ym]||{}).reduce((a,b)=>a+b,0)]);}
+  const hotMon=monRows.slice().sort((a,b)=>b[1]-a[1])[0];
+  // 그 해 최장 연속(전체 멤버 중)
+  let bestStreak={n:'—',v:0};
+  MEMBERS.forEach(n=>{
+    const ds=[...activeDates(n)].filter(d=>d.startsWith(y)).sort();
+    let run=0,prev=null,mx=0;
+    for(const d of ds){if(prev&&(new Date(d)-new Date(prev))===86400000)run++;else run=1;mx=Math.max(mx,run);prev=d;}
+    if(mx>bestStreak.v)bestStreak={n,v:mx};
+  });
+  const cells=[
+    {e:'🥇',v:topMem?topMem[0]:'—',l:`최다 운동 (${topMem?topMem[1]:0}일)`,c:'var(--gold)'},
+    {e:'🔥',v:`${bestStreak.v}일`,l:`최장 연속 · ${bestStreak.n}`,c:'var(--red)'},
+    {e:'📅',v:`${hotMon[1]}일`,l:`가장 뜨거운 달 · ${hotMon[0]}월`,c:'var(--cyan)'},
+    {e:'💪',v:`${totalDays}일`,l:`그룹 총 운동 (${activeDaySet.size}일 활동)`,c:'var(--accent)'},
+  ];
+  document.getElementById('yearHighlight').innerHTML=`
+    <div class="hl-banner">
+      ${cells.map(x=>`<div class="hl-cell">
+        <div class="hl-e">${x.e}</div>
+        <div class="hl-v" style="color:${x.c}">${x.v}</div>
+        <div class="hl-l">${x.l}</div></div>`).join('')}
+    </div>`;
+}
+
+// 연간 월별 그룹 활동 막대
+function buildYearMonthlyChart(y){
+  const f=chartFont();
+  const labels=[],data=[];
+  const isCur=y===String(NOW.getFullYear());
+  const maxMo=isCur?parseInt(nowYM.slice(5,7)):12;
+  for(let mo=1;mo<=maxMo;mo++){const ym=`${y}-${String(mo).padStart(2,'0')}`;
+    labels.push(mo+'월');data.push(Object.values(S.monthly[ym]||{}).reduce((a,b)=>a+b,0));}
+  const maxIdx=data.indexOf(Math.max(...data));
+  CHARTS.yearMonthly=new Chart(document.getElementById('yearMonthlyChart'),{type:'bar',
+    data:{labels,datasets:[{data,backgroundColor:data.map((_,i)=>i===maxIdx?f.accent:f.accent+'70'),borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:18}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw}일 운동`}},
+        datalabels:{anchor:'end',align:'end',color:f.text,font:{size:10,weight:'700'},formatter:v=>v||''}},
+      scales:{x:{ticks:{color:f.text,font:{size:11}},grid:{display:false}},
+        y:{ticks:{color:f.muted,font:{size:10}},grid:{color:f.grid},beginAtZero:true}}}});
+}
+
+// 종목 다양성 + 신규 도전
+function buildYearDiversity(y, prevY){
+  const yearSports=new Set(Object.keys(sportMapFor(S.raw.filter(e=>e.date.startsWith(y)))));
+  const beforeSports=new Set(Object.keys(sportMapFor(S.raw.filter(e=>e.date<`${y}-01-01`))));
+  const newSports=[...yearSports].filter(s=>!beforeSports.has(s));
+  // 멤버별 시도 종목 수 TOP (올라운더)
+  const memSports={}; MEMBERS.forEach(n=>memSports[n]=new Set());
+  for(const e of S.raw){if(!e.date.startsWith(y))continue;
+    for(const[n,sp]of Object.entries(e.data))for(const s of sp){const k=normSport(s);if(k)memSports[n].add(k);}}
+  const allrounder=Object.entries(memSports).map(([n,set])=>[n,set.size]).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('yearDiversity').innerHTML=`
+    <div style="display:flex;gap:12px;margin-bottom:14px">
+      <div class="mini-stat" style="flex:1;background:var(--surface2)">
+        <div class="v" style="color:var(--pink)">${yearSports.size}</div><div class="l">시도한 종목</div></div>
+      <div class="mini-stat" style="flex:1;background:var(--surface2)">
+        <div class="v" style="color:var(--accent)">${allrounder?allrounder[1]:0}</div><div class="l">올라운더 · ${allrounder?allrounder[0]:'—'}</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px">✨ ${y}년 새로 등장한 종목</div>
+    ${newSports.length
+      ? `<div style="display:flex;flex-wrap:wrap;gap:6px">${newSports.map(s=>`<span class="tag" style="font-size:12px;padding:4px 10px">${sportEmoji(s)} ${s}</span>`).join('')}</div>`
+      : `<div style="font-size:12px;color:var(--muted)">새로 추가된 종목 없음 — 꾸준히 해오던 종목들로 채운 해네요 👏</div>`}`;
+}
+
+// 연간 목표 달성 현황 (주간 챌린지 대체)
+function buildYearGoalCard(y, cumul){
+  const isCur=y===String(NOW.getFullYear());
+  const rows=MEMBERS.map(n=>({n,c:cumul[n],t:S.stats.target[n]||0}))
+    .map(x=>({...x,rate:x.t?x.c/x.t:0}))
+    .sort((a,b)=>b.rate-a.rate);
+  const reached=rows.filter(x=>x.c>=x.t&&x.t>0).length;
+  const totalC=MEMBERS.reduce((s,n)=>s+cumul[n],0);
+  const totalT=MEMBERS.reduce((s,n)=>s+(S.stats.target[n]||0),0);
+  const groupPct=totalT?Math.round(totalC/totalT*100):0;
+  const top=rows.slice(0,6), maxV=1;
+  document.getElementById('yearGoalCard').innerHTML=`
+    <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--cyan)"></span>🎯 ${y}년 목표 달성 현황</div>
+      <span class="card-sub">${isCur?`기준 ${yearPct}% 경과`:'연말 마감'}</span></div>
+    <div class="chal-goal-bar"><div class="chal-goal-fill" style="width:${Math.min(100,groupPct)}%"><span class="v">${groupPct}%</span></div></div>
+    <div class="chal-goal-label"><span>그룹 합산 ${totalC} / ${totalT}일</span><span>목표 달성 <b style="color:var(--accent)">${reached}명</b></span></div>
+    <div class="chal-list">
+      ${top.map((x,i)=>{const pct=(x.rate*100).toFixed(0);const done=x.c>=x.t&&x.t>0;
+        return `<div class="chal-row">
+          <span class="medal">${done?'✅':['🥇','🥈','🥉','','',''][i]||''}</span>
+          <span class="nm">${x.n}</span>
+          <div class="track"><div class="fill" style="width:${Math.min(100,x.rate*100)}%;background:${done?'var(--accent)':avatarColor(x.n)}"></div></div>
+          <span class="v">${pct}%</span></div>`;}).join('')}
+    </div>`;
+}
+
+// 연간 순위표
+function buildYearLeaderboard(y, cumul, prevCumul){
+  const prevRank={}; Object.entries(prevCumul).sort((a,b)=>b[1]-a[1]).forEach(([n],i)=>prevRank[n]=i+1);
+  const isCur=y===String(NOW.getFullYear());
+  const expected=isCur?parseFloat(yearPct)/100:1;
+  function pace(r){if(r>=expected)return{c:'',col:'var(--accent)'};if(r>=expected*0.85)return{c:'mid',col:'var(--amber)'};return{c:'low',col:'var(--red)'};}
+  const sorted=MEMBERS.map(n=>({name:n,cumul:cumul[n],target:S.stats.target[n]||0,
+    rate:S.stats.target[n]?cumul[n]/S.stats.target[n]:0})).sort((a,b)=>b.cumul-a.cumul);
+  const rows=sorted.map((p,i)=>{
+    const rc=i===0?'r1':i===1?'r2':i===2?'r3':'rn';
+    const pr=prevRank[p.name];
+    let delta='';
+    if(pr){const d=pr-(i+1);delta=d>0?`<span class="delta up">▲${d}</span>`:d<0?`<span class="delta dn">▼${-d}</span>`:`<span class="delta eq">—</span>`;}
+    const pct=(p.rate*100).toFixed(1),pn=parseFloat(pct),{c,col}=pace(p.rate);
+    return `<tr onclick="openMember('${p.name}')">
+      <td><span class="rank-badge ${rc}">${i+1}</span></td>
+      <td><span class="av-sm" style="background:${avatarColor(p.name)}">${initial(p.name)}</span><b>${p.name}</b></td>
+      <td style="font-family:'DM Mono',monospace;font-weight:800">${p.cumul}<span style="color:var(--muted);font-size:10px">일</span> ${delta}</td>
+      <td><div class="pbar-row"><div class="pbar"><div class="pfill ${c}" style="width:${Math.min(100,pn)}%"></div></div>
+        <span class="pct" style="color:${col}">${pct}%</span></div>
+        <div class="rate-detail">${p.cumul}/${p.target}일</div></td></tr>`;
+  }).join('');
+  document.getElementById('lbTableYear').innerHTML=`<thead><tr><th>#</th><th>이름</th><th>연 누적</th><th>목표 달성률</th></tr></thead><tbody>${rows}</tbody>`;
+}
+
+// 범용 시상대 (임의 {name:count} 맵 기반)
+function buildPodiumByMap(elId, map, unit){
+  const top=Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  if(top.length<3||top[0][1]===0){document.getElementById(elId).innerHTML=`<div class="empty-hint" style="padding:24px"><span class="ic">🥇</span>아직 순위를 매길 데이터가 부족해요</div>`;return;}
+  const order=[top[1],top[0],top[2]],place=[2,1,3];
+  document.getElementById(elId).innerHTML=order.map((e,i)=>{
+    const[name,cnt]=e;const p=place[i];const medal=p===1?'🥇':p===2?'🥈':'🥉';
+    return `<div class="pod pod-${p}" onclick="openMember('${name}')" style="cursor:pointer">
+      <div style="font-size:18px">${medal}</div>
+      <div class="av" style="background:${avatarColor(name)}">${initial(name)}</div>
+      <div class="nm">${name}</div><div class="sc">${cnt}${unit}</div>
+      <div class="stand">${p}</div></div>`;
+  }).join('');
+}
+
+function setRankMode(mode){S.rankMode=mode;destroyAll();renderRank();}
+function setRankYear(y){S.rankYear=y;destroyAll();renderRank();}
+
 
 function buildPodium(m){
   const md=S.monthly[m]||{};
@@ -961,6 +1266,22 @@ function renderData(){
       </div>
     </div>
 
+    <div class="g2 mb14">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--pink)"></span>우린 무슨 모임? · 그룹 종목 분포</div><span class="card-sub">전체 기간</span></div>
+        <div class="chart-box h300"><canvas id="groupDonut"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--amber)"></span>월별 종목 구성 추이 · 계절성</div><span class="card-sub" id="seasonSub"></span></div>
+        <div class="chart-box h300"><canvas id="seasonChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card mb14">
+      <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--purple)"></span>멤버별 요일 성향 비교</div><span class="card-sub">각자 어느 요일에 운동하나 · 행 정규화(%)</span></div>
+      <div id="weekdayCompare" style="overflow-x:auto"></div>
+    </div>
+
     <div class="g2">
       <div class="card">
         <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>출석 히트맵</div><span class="card-sub">${m.slice(0,4)}년</span></div>
@@ -976,8 +1297,84 @@ function renderData(){
   buildCumulChart(m);
   buildWeekdayChart();
   buildTrendChart();
+  buildGroupDonut();
+  buildSeasonChart(m);
+  buildWeekdayCompare();
   buildHeatAnnual(m);
   buildHeatCumul();
+}
+
+// 그룹 종목 분포 도넛
+function buildGroupDonut(){
+  const f=chartFont();
+  const map=sportMapFor(S.raw);
+  const sorted=Object.entries(map).map(([k,v])=>[k,v.total]).sort((a,b)=>b[1]-a[1]);
+  const top=sorted.slice(0,8), rest=sorted.slice(8).reduce((s,[,c])=>s+c,0);
+  const labels=top.map(s=>s[0]).concat(rest?['기타']:[]);
+  const data=top.map(s=>s[1]).concat(rest?[rest]:[]);
+  const total=data.reduce((a,b)=>a+b,0);
+  CHARTS.groupDonut=new Chart(document.getElementById('groupDonut'),{type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:labels.map((_,i)=>SPORT_COLORS[i%10]),borderWidth:2,
+      borderColor:getComputedStyle(document.documentElement).getPropertyValue('--surface').trim()}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'56%',
+      plugins:{legend:{position:'right',labels:{color:f.text,font:{size:11},boxWidth:10,padding:6}},
+        tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw}회 (${(c.raw/total*100).toFixed(0)}%)`}},
+        datalabels:{color:'#fff',font:{size:10,weight:'700'},formatter:(v)=>{const p=v/total*100;return p>=7?Math.round(p)+'%':'';}}}}});
+}
+
+// 월별 종목 구성 추이 (상위 종목 stacked %)
+function buildSeasonChart(m){
+  const f=chartFont();
+  const year=m.slice(0,4);
+  document.getElementById('seasonSub').textContent=`${year}년`;
+  const isCur=year===String(NOW.getFullYear());
+  const maxMo=isCur?parseInt(nowYM.slice(5,7)):12;
+  // 그 해 상위 6개 종목
+  const yearMap=sportMapFor(S.raw.filter(e=>e.date.startsWith(year)));
+  const topSports=Object.entries(yearMap).sort((a,b)=>b[1].total-a[1].total).slice(0,6).map(s=>s[0]);
+  const labels=[]; const perMonth=[];
+  for(let mo=1;mo<=maxMo;mo++){
+    const ym=`${year}-${String(mo).padStart(2,'0')}`;
+    labels.push(mo+'월');
+    const mm=sportMapFor(S.raw.filter(e=>e.date.startsWith(ym)));
+    perMonth.push(mm);
+  }
+  const datasets=topSports.map((sp,i)=>({
+    label:sp, data:perMonth.map(mm=>mm[sp]?mm[sp].total:0),
+    backgroundColor:SPORT_COLORS[i%10], borderWidth:0, datalabels:{display:false}
+  }));
+  CHARTS.season=new Chart(document.getElementById('seasonChart'),{type:'bar',data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:f.text,font:{size:10},boxWidth:9,padding:5}},
+        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}회`}},datalabels:{display:false}},
+      scales:{x:{stacked:true,ticks:{color:f.text,font:{size:10}},grid:{display:false}},
+        y:{stacked:true,ticks:{color:f.muted,font:{size:10}},grid:{color:f.grid},beginAtZero:true}}}});
+}
+
+// 멤버별 요일 성향 비교 (행 정규화 히트맵)
+function buildWeekdayCompare(){
+  const DOW=['일','월','화','수','목','금','토'];
+  // 멤버별 요일 카운트
+  const data={}; MEMBERS.forEach(n=>data[n]=[0,0,0,0,0,0,0]);
+  for(const e of S.raw)for(const n of Object.keys(e.data)){if(data[n])data[n][new Date(e.date).getDay()]++;}
+  const rows=MEMBERS.map(name=>{
+    const arr=data[name], tot=arr.reduce((a,b)=>a+b,0)||1;
+    const peak=arr.indexOf(Math.max(...arr));
+    const cells=arr.map((v,i)=>{
+      const pct=v/tot*100;
+      // 색 강도: 비중에 비례
+      const alpha=Math.min(1,pct/35);
+      const bg=v===0?'var(--surface2)':`color-mix(in srgb, var(--accent) ${Math.round(alpha*85)}%, transparent)`;
+      return `<td style="text-align:center;padding:0"><div title="${name} ${DOW[i]}요일: ${v}회 (${pct.toFixed(0)}%)" style="margin:2px;height:30px;border-radius:7px;background:${bg};border:1px solid ${i===peak&&v>0?'var(--accent)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-family:'DM Mono',monospace;font-weight:700;color:${pct>=22?'#fff':'var(--muted)'}">${v||''}</div></td>`;
+    }).join('');
+    return `<tr><td style="font-weight:700;font-size:12.5px;white-space:nowrap;padding-right:8px"><span class="av-sm" style="background:${avatarColor(name)}">${initial(name)}</span>${name}</td>${cells}</tr>`;
+  }).join('');
+  document.getElementById('weekdayCompare').innerHTML=`
+    <table style="width:100%;border-collapse:collapse;min-width:520px">
+      <thead><tr><th style="width:80px"></th>${DOW.map((d,i)=>`<th style="text-align:center;font-size:11px;font-weight:600;color:${i===0?'var(--red)':i===6?'var(--blue)':'var(--muted)'};padding-bottom:6px">${d}</th>`).join('')}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="font-size:11px;color:var(--muted);margin-top:10px">색이 진할수록 그 요일 비중이 높음 · 테두리 강조 = 개인 최다 요일</div>`;
 }
 
 function buildStacked(){
@@ -1112,7 +1509,7 @@ function renderMe(){
       <div class="av" style="background:${avatarColor(n)}">${initial(n)}</div>${n}</div>`).join('');
   buildProfile(name);
 }
-function selectMember(n){S.selMember=n;renderMe();}
+function selectMember(n){S.selMember=n;profCalYM=null;renderMe();}
 
 function buildProfile(name){
   const st=streakInfo(name);
@@ -1180,8 +1577,12 @@ function buildProfile(name){
         <div class="weekday-grid">
           ${['일','월','화','수','목','금','토'].map((d,i)=>`<div class="wd-cell ${i===bestWd?'best':''}"><div class="d">${d}</div><div class="v">${wd[i]}</div></div>`).join('')}
         </div>
-        <div style="font-size:12px;color:var(--text2);margin-top:12px;text-align:center">
+        <div style="font-size:12px;color:var(--text2);margin:12px 0 16px;text-align:center">
           가장 부지런한 요일은 <b style="color:var(--accent)">${['일','월','화','수','목','금','토'][bestWd]}요일</b> 💪
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:14px">
+          <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px">📈 월별 운동 추이</div>
+          <div class="chart-box" style="height:150px"><canvas id="profileTrend"></canvas></div>
         </div>
       </div>
     </div>
@@ -1194,10 +1595,22 @@ function buildProfile(name){
       </div>
     </div>
 
-    <div class="card mb14">
-      <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>🕒 최근 운동</div>
-        <span class="card-sub">${name}님 · 최근 활동순</span></div>
-      <div class="feed" id="profileRecent"></div>
+    <div class="g2 mb14">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--purple)"></span>🗓️ 운동 달력</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button class="icon-btn" style="width:28px;height:28px;font-size:13px" onclick="profCalMove(-1)">‹</button>
+            <span class="card-sub" id="profCalLabel" style="min-width:74px;text-align:center"></span>
+            <button class="icon-btn" style="width:28px;height:28px;font-size:13px" onclick="profCalMove(1)">›</button>
+          </div>
+        </div>
+        <div id="profileCal"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>🕒 최근 운동</div>
+          <span class="card-sub">${name}님 · 최근 활동순</span></div>
+        <div class="feed" id="profileRecent" style="max-height:380px"></div>
+      </div>
     </div>
 
     <div class="card">
@@ -1206,8 +1619,73 @@ function buildProfile(name){
     </div>`;
 
   buildProfileDonut(name, sportSorted);
+  buildProfileTrend(name);
   buildProfileRecent(name);
+  buildProfileCal(name);
   buildProfileHeat(name);
+}
+
+// 개인 월별 운동 추이 (선택 멤버)
+function buildProfileTrend(name){
+  const f=chartFont();
+  const months=Object.keys(S.monthly).sort().filter(mo=>mo<=nowYM);
+  const data=months.map(mo=>S.monthly[mo]?.[name]||0);
+  CHARTS.profTrend=new Chart(document.getElementById('profileTrend'),{type:'line',
+    data:{labels:months.map(mo=>mo.slice(2)),datasets:[{data,borderColor:avatarColor(name),
+      backgroundColor:'transparent',borderWidth:2.5,pointRadius:0,tension:.35,fill:false}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw}일`}},datalabels:{display:false}},
+      scales:{x:{ticks:{color:f.muted,font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8},grid:{display:false}},
+        y:{ticks:{color:f.muted,font:{size:9}},grid:{color:f.grid},beginAtZero:true}}}});
+}
+
+// 개인 운동 달력 (월별, 운동한 날에 이모지)
+let profCalYM = null;
+function buildProfileCal(name){
+  // 최초 진입 시 가장 최근 운동월로 초기화
+  const dates=[...activeDates(name)].sort();
+  if(!profCalYM){profCalYM = dates.length?dates[dates.length-1].slice(0,7):nowYM;}
+  renderProfileCal(name);
+}
+function profCalMove(delta){
+  const [y,m]=profCalYM.split('-').map(Number);
+  const d=new Date(y,m-1+delta,1);
+  const cand=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  if(cand>nowYM) return; // 미래는 막음
+  profCalYM=cand;
+  renderProfileCal(S.selMember);
+}
+function renderProfileCal(name){
+  const ym=profCalYM, [y,mo]=ym.split('-').map(Number);
+  document.getElementById('profCalLabel').textContent=`${y}년 ${mo}월`;
+  // 해당 월 멤버 운동 기록
+  const dayMap={};
+  for(const e of S.raw){if(!e.date.startsWith(ym)||!e.data[name])continue;
+    dayMap[e.date]=e.data[name].map(normSport).filter(Boolean);}
+  const days=new Date(y,mo,0).getDate();
+  const first=new Date(y,mo-1,1).getDay();
+  let cells='';
+  for(let i=0;i<first;i++)cells+=`<div class="cal-cell empty"></div>`;
+  for(let d=1;d<=days;d++){
+    const key=`${ym}-${String(d).padStart(2,'0')}`;
+    const sports=dayMap[key];
+    const isToday=key===TODAY;
+    const dow=(first+d-1)%7;
+    const dcol=dow===0?'var(--red)':dow===6?'var(--blue)':'var(--text2)';
+    if(sports&&sports.length){
+      const emos=[...new Set(sports.map(sportEmoji))].slice(0,3).join('');
+      const title=sports.join(', ');
+      cells+=`<div class="cal-cell on${isToday?' today':''}" title="${key} · ${title}">
+        <span class="cd" style="color:${dcol}">${d}</span><span class="ce">${emos}</span></div>`;
+    }else{
+      cells+=`<div class="cal-cell${isToday?' today':''}"><span class="cd" style="color:${dcol}">${d}</span></div>`;
+    }
+  }
+  const cnt=Object.keys(dayMap).length;
+  document.getElementById('profileCal').innerHTML=`
+    <div class="cal-dow">${['일','월','화','수','목','금','토'].map((d,i)=>`<span style="color:${i===0?'var(--red)':i===6?'var(--blue)':'var(--muted)'}">${d}</span>`).join('')}</div>
+    <div class="cal-grid">${cells}</div>
+    <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">이 달 <b style="color:var(--accent)">${cnt}일</b> 운동 💪</div>`;
 }
 
 // 개인 최근 운동 리스트 (날짜 + 종목 태그)
@@ -1217,7 +1695,7 @@ function buildProfileRecent(name){
   document.getElementById('profileRecent').innerHTML=list.map(e=>{
     const dd=new Date(e.date);
     const label=`${dd.getMonth()+1}/${dd.getDate()} (${['일','월','화','수','목','금','토'][dd.getDay()]})`;
-    const tags=e.data[name].map(normSport).filter(Boolean).map(s=>`<span class="tag">${s}</span>`).join('');
+    const tags=e.data[name].map(normSport).filter(Boolean).map(s=>`<span class="tag">${sportEmoji(s)} ${s}</span>`).join('');
     return `<div class="feed-item">
       <div class="av" style="background:${avatarColor(name)}">${initial(name)}</div>
       <span class="nm" style="min-width:62px;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;font-weight:600">${label}</span>
