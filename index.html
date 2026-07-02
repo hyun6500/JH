@@ -216,7 +216,10 @@ header{
 .pfill.mid{background:var(--amber);}.pfill.low{background:var(--red);}
 .pct{font-size:12px;font-family:'DM Mono',monospace;font-weight:700;min-width:46px;text-align:right;}
 .rate-detail{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;}
-.delta{font-size:10px;font-family:'DM Mono',monospace;font-weight:700;}
+.next-chip{font-weight:800;font-family:'DM Mono',monospace;}
+.next-chip.to-green{color:var(--accent);}
+.next-chip.to-amber{color:var(--amber);}
+.delta{font-size:10px;font-family:'DM Mono',monospace;font-weight:700;cursor:help;}
 .delta.up{color:var(--accent);}.delta.dn{color:var(--red);}.delta.eq{color:var(--muted);}
 
 /* podium */
@@ -330,6 +333,15 @@ header{
 .mini-stat{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:13px 14px;text-align:center;}
 .mini-stat .v{font-size:22px;font-weight:800;font-family:'DM Mono',monospace;}
 .mini-stat .l{font-size:10.5px;color:var(--muted);margin-top:4px;}
+
+/* ============ 다음 색 등급 안내 (개인 프로필) ============ */
+.pace-nudge{margin-top:14px;padding:13px 15px;border-radius:12px;border:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;font-size:13px;line-height:1.5;}
+.pace-nudge .pn-emoji{font-size:22px;flex-shrink:0;}
+.pace-nudge .pn-text b{font-family:'DM Mono',monospace;}
+.pace-nudge.to-green{background:color-mix(in srgb,var(--accent) 10%,transparent);border-color:color-mix(in srgb,var(--accent) 35%,transparent);}
+.pace-nudge.to-amber{background:color-mix(in srgb,var(--amber) 10%,transparent);border-color:color-mix(in srgb,var(--amber) 35%,transparent);}
+.pace-nudge.keep{background:color-mix(in srgb,var(--accent) 8%,transparent);border-color:color-mix(in srgb,var(--accent) 30%,transparent);}
 
 .empty-hint{text-align:center;padding:50px 20px;color:var(--muted);font-size:13px;}
 .empty-hint .ic{font-size:34px;margin-bottom:10px;display:block;}
@@ -450,6 +462,35 @@ const yearPct = ((NOW - startOfYear)/(365.25*24*3600*1000)*100).toFixed(1);
 const avatarColor = n => MEM_COLORS[MEMBERS.indexOf(n)] || 'var(--muted)';
 const initial = n => n.slice(0,1);  // 한 글자 이니셜(앞글자)
 const todayQuote = () => S.quote || FALLBACK_QUOTES[(NOW.getFullYear()*1000 + dayOfYear(NOW)) % FALLBACK_QUOTES.length];
+
+/* ---------- 페이스 판정 공통 로직 ----------
+   달성률(r = 누적/목표)을 연 경과율(expected)과 비교해 색 등급을 매김.
+   - r >= expected           → 초록 (페이스 유지/초과)
+   - r >= expected*0.85      → 노랑 (조금 뒤처짐)
+   - 그 외                   → 빨강 (많이 뒤처짐)
+   PACE_MID_FACTOR: 노랑/빨강 경계 계수 (0.85). 이 값을 바꾸면 색 기준이 함께 이동함. */
+const PACE_MID_FACTOR = 0.85;
+function expectedRate(){ return parseFloat(yearPct)/100; }
+function paceGrade(r){
+  const e=expectedRate();
+  if(r>=e)               return {level:'green', c:'',    col:'var(--accent)'};
+  if(r>=e*PACE_MID_FACTOR) return {level:'amber', c:'mid', col:'var(--amber)'};
+  return {level:'red', c:'low', col:'var(--red)'};
+}
+// 다음 색 등급 도달까지 며칠(누적) 더 필요한가.
+// green이면 null (더 표시할 것 없음). 반환: {toColor:'green'|'amber', need:일수}
+function daysToNextGrade(cumul, target){
+  if(!target) return null;
+  const e=expectedRate();
+  const r=cumul/target;
+  const g=paceGrade(r);
+  if(g.level==='green') return null;
+  if(g.level==='amber'){ // 노랑 → 초록
+    return {toColor:'green', need:Math.max(0, Math.ceil(target*e) - cumul)};
+  }
+  // 빨강 → 노랑
+  return {toColor:'amber', need:Math.max(0, Math.ceil(target*e*PACE_MID_FACTOR) - cumul)};
+}
 
 // 서버에서 오늘의 명언 1개 받아오기 (실패해도 조용히 폴백)
 async function loadQuote(){
@@ -877,7 +918,8 @@ function renderRank(){
   if(S.rankMode==='year') return renderRankYear(toggle);
 
   const m=S.selMonth, year=m.slice(0,4);
-  const prevYM=`${parseInt(year)-1}-${m.slice(5,7)}`;
+  // 전월(직전 달) 계산 — 순위 등락 비교용
+  const prevYM=prevMonthOf(m);
 
   document.getElementById('page-rank').innerHTML = `
     <div class="sec-eyebrow">Leaderboard</div>
@@ -896,8 +938,12 @@ function renderRank(){
     <div class="card mb14" id="monthlyChalCard"></div>
 
     <div class="card mb14">
-      <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>📋 전체 순위표</div><span class="card-sub">${m} 운동 일수 · 전월 대비 등락</span></div>
+      <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>📋 전체 순위표</div><span class="card-sub">${m} 운동 일수 · 화살표는 전월 대비 순위 등락</span></div>
       <table class="lb-table" id="lbTable"></table>
+      <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">
+        🟡·🟢 표시는 다음 단계 색까지 <b>며칠 더</b> 운동하면 되는지를 뜻해요 · 초록불(페이스 유지)은 표시 없음 ·
+        <span class="delta up">▲n</span>/<span class="delta dn">▼n</span> 은 전월 대비 순위가 n계단 오르내렸다는 뜻
+      </div>
     </div>
 
     <div class="g2">
@@ -917,6 +963,13 @@ function renderRank(){
   buildLeaderboard(m, prevYM);
   renderSportSection('sportMonthly', sportMapFor(S.raw.filter(r=>r.date.startsWith(m))));
   renderSportSection('sportCumul', sportMapFor(S.raw));
+}
+
+// 직전 달 'YYYY-MM' 반환
+function prevMonthOf(m){
+  const [y,mo]=m.split('-').map(Number);
+  const d=new Date(y,mo-2,1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 }
 
 /* ---------- 연간 모드 ---------- */
@@ -957,6 +1010,10 @@ function renderRankYear(toggle){
     <div class="card mb14">
       <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>📋 ${y}년 연간 순위표</div><span class="card-sub">누적 일수 · 달성률 · 전년 대비 등락</span></div>
       <table class="lb-table" id="lbTableYear"></table>
+      <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">
+        🟡·🟢 표시는 다음 단계 색까지 <b>며칠 더</b> 운동하면 되는지를 뜻해요 · 초록불(페이스 유지)은 표시 없음 ·
+        <span class="delta up">▲n</span>/<span class="delta dn">▼n</span> 은 전년 대비 순위가 n계단 오르내렸다는 뜻
+      </div>
     </div>
 
     <div class="g2">
@@ -1086,25 +1143,38 @@ function buildYearGoalCard(y, cumul){
 function buildYearLeaderboard(y, cumul, prevCumul){
   const prevRank={}; Object.entries(prevCumul).sort((a,b)=>b[1]-a[1]).forEach(([n],i)=>prevRank[n]=i+1);
   const isCur=y===String(NOW.getFullYear());
-  const expected=isCur?parseFloat(yearPct)/100:1;
-  function pace(r){if(r>=expected)return{c:'',col:'var(--accent)'};if(r>=expected*0.85)return{c:'mid',col:'var(--amber)'};return{c:'low',col:'var(--red)'};}
   const sorted=MEMBERS.map(n=>({name:n,cumul:cumul[n],target:S.stats.target[n]||0,
     rate:S.stats.target[n]?cumul[n]/S.stats.target[n]:0})).sort((a,b)=>b.cumul-a.cumul);
   const rows=sorted.map((p,i)=>{
     const rc=i===0?'r1':i===1?'r2':i===2?'r3':'rn';
     const pr=prevRank[p.name];
     let delta='';
-    if(pr){const d=pr-(i+1);delta=d>0?`<span class="delta up">▲${d}</span>`:d<0?`<span class="delta dn">▼${-d}</span>`:`<span class="delta eq">—</span>`;}
-    const pct=(p.rate*100).toFixed(1),pn=parseFloat(pct),{c,col}=pace(p.rate);
+    if(pr){const d=pr-(i+1);
+      delta=d>0?`<span class="delta up" title="전년 대비 순위 ${d}계단 상승">▲${d}</span>`
+        :d<0?`<span class="delta dn" title="전년 대비 순위 ${-d}계단 하락">▼${-d}</span>`
+        :`<span class="delta eq" title="전년과 순위 동일">—</span>`;}
+    const pct=(p.rate*100).toFixed(1),pn=parseFloat(pct),{c,col}=paceGrade(p.rate);
+    const nextChip=nextGradeChip(p.cumul, p.target);
     return `<tr onclick="openMember('${p.name}')">
       <td><span class="rank-badge ${rc}">${i+1}</span></td>
       <td><span class="av-sm" style="background:${avatarColor(p.name)}">${initial(p.name)}</span><b>${p.name}</b></td>
       <td style="font-family:'DM Mono',monospace;font-weight:800">${p.cumul}<span style="color:var(--muted);font-size:10px">일</span> ${delta}</td>
       <td><div class="pbar-row"><div class="pbar"><div class="pfill ${c}" style="width:${Math.min(100,pn)}%"></div></div>
         <span class="pct" style="color:${col}">${pct}%</span></div>
-        <div class="rate-detail">${p.cumul}/${p.target}일</div></td></tr>`;
+        <div class="rate-detail">${p.cumul}/${p.target}일${nextChip}</div></td></tr>`;
   }).join('');
   document.getElementById('lbTableYear').innerHTML=`<thead><tr><th>#</th><th>이름</th><th>연 누적</th><th>목표 달성률</th></tr></thead><tbody>${rows}</tbody>`;
+}
+
+// 순위표 rate-detail 뒤에 붙일 "다음 색까지 +N일" 칩 (노랑·빨강만, 초록은 빈 문자열)
+function nextGradeChip(cumul, target){
+  const nx=daysToNextGrade(cumul, target);
+  if(!nx) return ''; // 초록불이면 표시 안 함
+  if(nx.toColor==='green'){ // 노랑 → 초록
+    return ` · <span class="next-chip to-green" title="초록불(페이스 유지)까지 ${nx.need}일 더">🟢 +${nx.need}일</span>`;
+  }
+  // 빨강 → 노랑
+  return ` · <span class="next-chip to-amber" title="노란불까지 ${nx.need}일 더">🟡 +${nx.need}일</span>`;
 }
 
 // 범용 시상대 (임의 {name:count} 맵 기반)
@@ -1201,21 +1271,23 @@ function buildLeaderboard(m, prevYM){
   MEMBERS.forEach(n=>{yearCumul[n]=Object.keys(S.monthly).filter(ym=>ym.startsWith(year)&&ym<=m).reduce((s,ym)=>s+(S.monthly[ym]?.[n]||0),0);});
   const sorted=MEMBERS.map(n=>({name:n,count:md[n]||0,cumul:yearCumul[n],target:S.stats.target[n]||0,
     rate:S.stats.target[n]?yearCumul[n]/S.stats.target[n]:0})).sort((a,b)=>b.count-a.count);
-  const expected=parseFloat(yearPct)/100;
-  function pace(r){if(r>=expected)return{c:'',col:'var(--accent)'};if(r>=expected*0.85)return{c:'mid',col:'var(--amber)'};return{c:'low',col:'var(--red)'};}
   const rows=sorted.map((p,i)=>{
     const rc=i===0?'r1':i===1?'r2':i===2?'r3':'rn';
     const pr=prevRank[p.name];
     let delta='';
-    if(pr){const d=pr-(i+1); delta=d>0?`<span class="delta up">▲${d}</span>`:d<0?`<span class="delta dn">▼${-d}</span>`:`<span class="delta eq">—</span>`;}
-    const pct=(p.rate*100).toFixed(1),pn=parseFloat(pct),{c,col}=pace(p.rate);
+    if(pr){const d=pr-(i+1);
+      delta=d>0?`<span class="delta up" title="전월 대비 순위 ${d}계단 상승">▲${d}</span>`
+        :d<0?`<span class="delta dn" title="전월 대비 순위 ${-d}계단 하락">▼${-d}</span>`
+        :`<span class="delta eq" title="전월과 순위 동일">—</span>`;}
+    const pct=(p.rate*100).toFixed(1),pn=parseFloat(pct),{c,col}=paceGrade(p.rate);
+    const nextChip=nextGradeChip(p.cumul, p.target);
     return `<tr onclick="openMember('${p.name}')">
       <td><span class="rank-badge ${rc}">${i+1}</span></td>
       <td><span class="av-sm" style="background:${avatarColor(p.name)}">${initial(p.name)}</span><b>${p.name}</b></td>
       <td style="font-family:'DM Mono',monospace;font-weight:800">${p.count}<span style="color:var(--muted);font-size:10px">일</span> ${delta}</td>
       <td><div class="pbar-row"><div class="pbar"><div class="pfill ${c}" style="width:${Math.min(100,pn)}%"></div></div>
         <span class="pct" style="color:${col}">${pct}%</span></div>
-        <div class="rate-detail">${p.cumul}/${p.target}일</div></td></tr>`;
+        <div class="rate-detail">${p.cumul}/${p.target}일${nextChip}</div></td></tr>`;
   }).join('');
   document.getElementById('lbTable').innerHTML=`<thead><tr><th>#</th><th>이름</th><th>이달</th><th>${year}년 누적 달성률</th></tr></thead><tbody>${rows}</tbody>`;
 }
@@ -1537,6 +1609,10 @@ function buildProfile(name){
   const allSports=sportMapFor(S.raw);
   for(const[sp,{per}]of Object.entries(allSports)){const top=Object.entries(per).sort((a,b)=>b[1]-a[1])[0];if(top&&top[0]===name)masteryCount++;}
 
+  // 페이스(색 등급) 판정 + 다음 색까지 필요 일수
+  const paceG=paceGrade(target?cumulYear/target:0);
+  const nx=daysToNextGrade(cumulYear, target);
+
   // 배지
   const achvs=[
     {on:st.longest>=7,e:'🔥',t:'일주일 연속',s:'최장 7일+'},
@@ -1565,6 +1641,7 @@ function buildProfile(name){
         <div class="mini-stat"><div class="v" style="color:var(--accent)">${cumulYear}</div><div class="l">${year} 누적</div></div>
         <div class="mini-stat"><div class="v" style="color:var(--purple)">${masteryCount}</div><div class="l">종목 장인 🏅</div></div>
       </div>
+      ${buildPaceNudge(paceG, nx, target)}
     </div>
 
     <div class="g2 mb14">
@@ -1623,6 +1700,25 @@ function buildProfile(name){
   buildProfileRecent(name);
   buildProfileCal(name);
   buildProfileHeat(name);
+}
+
+// 개인 프로필 — 다음 색 등급까지 안내 카드 (초록불이면 "페이스 유지 중" 문구)
+function buildPaceNudge(paceG, nx, target){
+  if(!target){
+    return `<div class="pace-nudge keep"><span class="pn-emoji">🎯</span>
+      <span class="pn-text">아직 목표가 설정되지 않았어요. 목표를 정하면 페이스 안내를 볼 수 있어요.</span></div>`;
+  }
+  if(!nx || paceG.level==='green'){
+    return `<div class="pace-nudge keep"><span class="pn-emoji">🟢</span>
+      <span class="pn-text"><b>초록불</b> — 목표 페이스를 유지하고 있어요! 이대로만 꾸준히 💪</span></div>`;
+  }
+  if(nx.toColor==='green'){ // 현재 노랑 → 초록
+    return `<div class="pace-nudge to-green"><span class="pn-emoji">🟡</span>
+      <span class="pn-text">지금은 <b>노란불</b>이에요. <b>${nx.need}일</b> 더 운동하면 <b style="color:var(--accent)">초록불</b>로 바뀌어요 🟢</span></div>`;
+  }
+  // 현재 빨강 → 노랑
+  return `<div class="pace-nudge to-amber"><span class="pn-emoji">🔴</span>
+    <span class="pn-text">지금은 <b>빨간불</b>이에요. <b>${nx.need}일</b> 더 운동하면 <b style="color:var(--amber)">노란불</b>로 올라가요 🟡</span></div>`;
 }
 
 // 개인 월별 운동 추이 (선택 멤버)
