@@ -219,6 +219,7 @@ header{
 .next-chip{font-weight:800;font-family:'DM Mono',monospace;}
 .next-chip.to-green{color:var(--accent);}
 .next-chip.to-amber{color:var(--amber);}
+.next-chip.unreachable{color:var(--red);}
 .delta{font-size:10px;font-family:'DM Mono',monospace;font-weight:700;cursor:help;}
 .delta.up{color:var(--accent);}.delta.dn{color:var(--red);}.delta.eq{color:var(--muted);}
 
@@ -477,19 +478,37 @@ function paceGrade(r){
   if(r>=e*PACE_MID_FACTOR) return {level:'amber', c:'mid', col:'var(--amber)'};
   return {level:'red', c:'low', col:'var(--red)'};
 }
-// 다음 색 등급 도달까지 며칠(누적) 더 필요한가.
-// green이면 null (더 표시할 것 없음). 반환: {toColor:'green'|'amber', need:일수}
+// 올해 남은 날짜 수 (오늘 제외, 12/31까지). 하루 최대 1회 제약과 임계선 이동 계산에 사용.
+function daysLeftThisYear(){
+  const end=new Date(NOW.getFullYear(),11,31);
+  return Math.max(0, Math.ceil((end - NOW)/86400000));
+}
+// 하루당 경과율 증가폭(%p 아님, 비율). 임계선이 시간에 따라 오르는 속도.
+const RATE_PER_DAY = 1/365.25;
+
+/* 다음 색 등급 도달까지 며칠 더 필요한가 — B(정밀) 버전.
+   핵심: 색 기준(expected)은 시간이 갈수록 계속 올라감. 게다가 하루 최대 1회.
+   그래서 "오늘부터 매일 하루도 안 빠지고 운동한다"고 가정하고, 며칠째에
+   달성률(=(cumul+d)/target)이 그날의 임계선을 따라잡는지 시뮬레이션한다.
+   - green이면 null (표시할 것 없음)
+   - 남은 날짜 안에 매일 운동해도 못 따라잡으면 {unreachable:true}
+   반환: {toColor, need} 또는 {toColor, unreachable:true, daysLeft} 또는 null */
 function daysToNextGrade(cumul, target){
   if(!target) return null;
-  const e=expectedRate();
-  const r=cumul/target;
-  const g=paceGrade(r);
+  const g=paceGrade(cumul/target);
   if(g.level==='green') return null;
-  if(g.level==='amber'){ // 노랑 → 초록
-    return {toColor:'green', need:Math.max(0, Math.ceil(target*e) - cumul)};
+  const toColor = g.level==='amber' ? 'green' : 'amber';
+  // 목표 계수: 노랑→초록은 expected, 빨강→노랑은 expected*0.85
+  const goalFactor = g.level==='amber' ? 1 : PACE_MID_FACTOR;
+  const base = expectedRate();               // 오늘 경과율
+  const left = daysLeftThisYear();
+  for(let d=1; d<=left; d++){
+    const expD = base + RATE_PER_DAY*d;        // d일 뒤 경과율(임계선이 이동)
+    const rD   = (cumul + d)/target;           // 매일 운동 시 d일 뒤 달성률
+    if(rD >= expD*goalFactor) return {toColor, need:d};
   }
-  // 빨강 → 노랑
-  return {toColor:'amber', need:Math.max(0, Math.ceil(target*e*PACE_MID_FACTOR) - cumul)};
+  // 남은 날짜 내내 매일 운동해도 도달 불가
+  return {toColor, unreachable:true, daysLeft:left};
 }
 
 // 서버에서 오늘의 명언 1개 받아오기 (실패해도 조용히 폴백)
@@ -941,7 +960,8 @@ function renderRank(){
       <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>📋 전체 순위표</div><span class="card-sub">${m} 운동 일수 · 화살표는 전월 대비 순위 등락</span></div>
       <table class="lb-table" id="lbTable"></table>
       <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">
-        🟡·🟢 표시는 다음 단계 색까지 <b>며칠 더</b> 운동하면 되는지를 뜻해요 · 초록불(페이스 유지)은 표시 없음 ·
+        🟡·🟢 <b>N일 필요</b>는 오늘부터 <b>매일 하루도 안 빠지고</b> 운동한다고 가정했을 때 며칠째에 다음 색으로 바뀌는지를 뜻해요
+        (하루 1회 · 목표선이 매일 조금씩 오르는 것까지 반영) · 초록불은 표시 없음 · ⚠️ 연내 어려움 = 올해 안엔 매일 해도 도달이 힘든 상태 ·
         <span class="delta up">▲n</span>/<span class="delta dn">▼n</span> 은 전월 대비 순위가 n계단 오르내렸다는 뜻
       </div>
     </div>
@@ -1011,7 +1031,8 @@ function renderRankYear(toggle){
       <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>📋 ${y}년 연간 순위표</div><span class="card-sub">누적 일수 · 달성률 · 전년 대비 등락</span></div>
       <table class="lb-table" id="lbTableYear"></table>
       <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">
-        🟡·🟢 표시는 다음 단계 색까지 <b>며칠 더</b> 운동하면 되는지를 뜻해요 · 초록불(페이스 유지)은 표시 없음 ·
+        🟡·🟢 <b>N일 필요</b>는 오늘부터 <b>매일 하루도 안 빠지고</b> 운동한다고 가정했을 때 며칠째에 다음 색으로 바뀌는지를 뜻해요
+        (하루 1회 · 목표선이 매일 조금씩 오르는 것까지 반영) · 초록불은 표시 없음 · ⚠️ 연내 어려움 = 올해 안엔 매일 해도 도달이 힘든 상태 ·
         <span class="delta up">▲n</span>/<span class="delta dn">▼n</span> 은 전년 대비 순위가 n계단 오르내렸다는 뜻
       </div>
     </div>
@@ -1167,14 +1188,19 @@ function buildYearLeaderboard(y, cumul, prevCumul){
 }
 
 // 순위표 rate-detail 뒤에 붙일 "다음 색까지 +N일" 칩 (노랑·빨강만, 초록은 빈 문자열)
+// need는 "오늘부터 매일 운동한다고 가정했을 때 며칠째에 색이 바뀌는가"(달력 기준).
 function nextGradeChip(cumul, target){
   const nx=daysToNextGrade(cumul, target);
   if(!nx) return ''; // 초록불이면 표시 안 함
-  if(nx.toColor==='green'){ // 노랑 → 초록
-    return ` · <span class="next-chip to-green" title="초록불(페이스 유지)까지 ${nx.need}일 더">🟢 +${nx.need}일</span>`;
+  const toGreen = nx.toColor==='green';
+  const dotEmoji = toGreen ? '🟢' : '🟡';
+  const cls = toGreen ? 'to-green' : 'to-amber';
+  const colorName = toGreen ? '초록불' : '노란불';
+  if(nx.unreachable){
+    // 남은 날짜 안엔 매일 해도 도달 불가
+    return ` · <span class="next-chip unreachable" title="남은 ${nx.daysLeft}일 동안 매일 운동해도 올해 안엔 ${colorName} 도달이 어려워요">⚠️ 연내 어려움</span>`;
   }
-  // 빨강 → 노랑
-  return ` · <span class="next-chip to-amber" title="노란불까지 ${nx.need}일 더">🟡 +${nx.need}일</span>`;
+  return ` · <span class="next-chip ${cls}" title="오늘부터 매일 운동하면 ${nx.need}일째에 ${colorName}로 바뀌어요 (하루 1회 · 색 기준 상승 반영)">${dotEmoji} ${nx.need}일 필요</span>`;
 }
 
 // 범용 시상대 (임의 {name:count} 맵 기반)
@@ -1703,6 +1729,7 @@ function buildProfile(name){
 }
 
 // 개인 프로필 — 다음 색 등급까지 안내 카드 (초록불이면 "페이스 유지 중" 문구)
+// nx.need는 "오늘부터 하루도 안 빠지고 매일 운동한다고 가정"한 달력 일수(색 기준 상승 반영).
 function buildPaceNudge(paceG, nx, target){
   if(!target){
     return `<div class="pace-nudge keep"><span class="pn-emoji">🎯</span>
@@ -1712,13 +1739,22 @@ function buildPaceNudge(paceG, nx, target){
     return `<div class="pace-nudge keep"><span class="pn-emoji">🟢</span>
       <span class="pn-text"><b>초록불</b> — 목표 페이스를 유지하고 있어요! 이대로만 꾸준히 💪</span></div>`;
   }
-  if(nx.toColor==='green'){ // 현재 노랑 → 초록
-    return `<div class="pace-nudge to-green"><span class="pn-emoji">🟡</span>
-      <span class="pn-text">지금은 <b>노란불</b>이에요. <b>${nx.need}일</b> 더 운동하면 <b style="color:var(--accent)">초록불</b>로 바뀌어요 🟢</span></div>`;
+  const curColor = paceG.level==='amber' ? '노란불' : '빨간불';
+  const curEmoji = paceG.level==='amber' ? '🟡' : '🔴';
+  const nextColor = nx.toColor==='green' ? '초록불' : '노란불';
+  const nextVar   = nx.toColor==='green' ? 'var(--accent)' : 'var(--amber)';
+  const nextEmoji = nx.toColor==='green' ? '🟢' : '🟡';
+  const cls = nx.toColor==='green' ? 'to-green' : 'to-amber';
+  if(nx.unreachable){
+    // 올해 남은 날짜 안엔 매일 해도 도달 불가
+    return `<div class="pace-nudge to-amber"><span class="pn-emoji">${curEmoji}</span>
+      <span class="pn-text">지금은 <b>${curColor}</b>이에요. 아쉽지만 올해 남은 <b>${nx.daysLeft}일</b> 동안 매일 운동해도
+      ${nextColor} 도달은 어려워요. 그래도 오늘 한 번이 내년의 나를 만듭니다 💪</span></div>`;
   }
-  // 현재 빨강 → 노랑
-  return `<div class="pace-nudge to-amber"><span class="pn-emoji">🔴</span>
-    <span class="pn-text">지금은 <b>빨간불</b>이에요. <b>${nx.need}일</b> 더 운동하면 <b style="color:var(--amber)">노란불</b>로 올라가요 🟡</span></div>`;
+  return `<div class="pace-nudge ${cls}"><span class="pn-emoji">${curEmoji}</span>
+    <span class="pn-text">지금은 <b>${curColor}</b>이에요. 오늘부터 <b>매일 운동하면 ${nx.need}일째</b>에
+    <b style="color:${nextVar}">${nextColor}</b>로 바뀌어요 ${nextEmoji}
+    <span style="color:var(--muted);font-size:11px">(하루 1회 · 색 기준이 매일 조금씩 오르는 것까지 반영)</span></span></div>`;
 }
 
 // 개인 월별 운동 추이 (선택 멤버)
