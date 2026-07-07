@@ -449,9 +449,28 @@ const FALLBACK_QUOTES = [
   {q:'미래는 자신의 꿈의 아름다움을 믿는 사람들의 것이다.', by:'엘리너 루스벨트', role:'영부인'},
 ];
 
+/* ---------- 데이터 표시 기준 시작점 ----------
+   집계·표시는 이 날짜(포함)부터. 그 이전(24년 등)은 S.legacy로 분리 보관해
+   "이전 기록"으로만 참고 표시. 대시보드 전체 수치를 한 기준으로 통일하기 위함. */
+const DATA_START = '2025-01-01';
+const DATA_START_YM = DATA_START.slice(0,7);   // '2025-01'
+// DATA_START부터 오늘까지 함께한 개월 수 (올림, 최소 1)
+function monthsTogether(){
+  const s=new Date(DATA_START);
+  let m=(NOW.getFullYear()-s.getFullYear())*12 + (NOW.getMonth()-s.getMonth());
+  if(NOW.getDate()>=s.getDate()) m+=1;   // 이번 달도 함께한 것으로 카운트
+  return Math.max(1, m);
+}
+
 let S = {
-  raw:[],            // [{date:'YYYY-MM-DD', data:{name:[sports]}}]
-  monthly:{},        // {'YYYY-MM':{name:count}}
+  raw:[],            // [{date:'YYYY-MM-DD', data:{name:[sports]}}]  ← 25.01~ 만
+  monthly:{},        // {'YYYY-MM':{name:count}}                     ← 25.01~ 만
+  legacy:{           // 24년 이전 "이전 기록" (참고용, 집계엔 미포함)
+    perMember:{},    //   {name:count}
+    total:0,         //   전체 이전 기록 일수 합
+    firstDate:null,  //   가장 오래된 기록일
+    monthly:{},      //   {'YYYY-MM':{name:count}}  (필요 시 확장용)
+  },
   stats:{target:{},remain:{},rate:{},cumul:{}},
   selMonth:null,
   selMember:null,
@@ -461,6 +480,7 @@ let S = {
 };
 let CHARTS = {};
 let curPage = 'home';
+
 
 const NOW = new Date();
 const nowYM = `${NOW.getFullYear()}-${String(NOW.getMonth()+1).padStart(2,'0')}`;
@@ -578,6 +598,7 @@ async function init(){
 
 function parse(rows){
   S.raw=[]; S.monthly={}; S.stats={target:{},remain:{},rate:{},cumul:{}};
+  S.legacy={perMember:{}, total:0, firstDate:null, monthly:{}};
   const dateRe=/^\d{4}-\d{2}-\d{2}/;
   function toKSTDate(raw){
     const s=String(raw||'');
@@ -598,6 +619,22 @@ function parse(rows){
     const hasData=MEMBERS.some((_,j)=>{const c=String(r[j+1]||'').trim();return c&&isNaN(Number(c));});
     if(!hasData) continue;
     const month=date.slice(0,7);
+    // ---- DATA_START 이전은 '이전 기록'(S.legacy)으로 분리, 집계엔 미포함 ----
+    const isLegacy = date < DATA_START;
+    if(isLegacy){
+      for(let j=0;j<MEMBERS.length;j++){
+        const c=String(r[j+1]||'').trim();
+        if(c&&isNaN(Number(c))){
+          const n=MEMBERS[j];
+          S.legacy.perMember[n]=(S.legacy.perMember[n]||0)+1;
+          S.legacy.total++;
+          if(!S.legacy.monthly[month]) S.legacy.monthly[month]={};
+          S.legacy.monthly[month][n]=(S.legacy.monthly[month][n]||0)+1;
+          if(!S.legacy.firstDate || date<S.legacy.firstDate) S.legacy.firstDate=date;
+        }
+      }
+      continue; // S.raw / S.monthly 에는 넣지 않음
+    }
     if(!S.monthly[month]) S.monthly[month]={};
     const entry={date,data:{}};
     for(let j=0;j<MEMBERS.length;j++){
@@ -934,7 +971,7 @@ function renderRank(){
       ${S.rankMode==='month'
         ? `<span class="dropdown-label">📅 월 선택</span>
            <select class="select" onchange="setMonth(this.value)">
-             ${allMonths.filter(mo=>mo>='2023-12').reverse().map(mo=>`<option value="${mo}"${mo===S.selMonth?' selected':''}>${mo}</option>`).join('')}
+             ${allMonths.filter(mo=>mo>=DATA_START_YM).reverse().map(mo=>`<option value="${mo}"${mo===S.selMonth?' selected':''}>${mo}</option>`).join('')}
            </select>`
         : `<span class="dropdown-label">📅 연도 선택</span>
            <select class="select" onchange="setRankYear(this.value)">
@@ -980,7 +1017,7 @@ function renderRank(){
         <div id="sportMonthly"></div>
       </div>
       <div class="card">
-        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--purple)"></span>👑 누적 종목 순위 + 장인</div><span class="card-sub">전체 기간</span></div>
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--purple)"></span>👑 누적 종목 순위 + 장인</div><span class="card-sub">25.01~ 전체</span></div>
         <div id="sportCumul"></div>
       </div>
     </div>`;
@@ -1051,7 +1088,7 @@ function renderRankYear(toggle){
         <div id="sportYear"></div>
       </div>
       <div class="card">
-        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--purple)"></span>👑 누적 종목 순위 + 장인</div><span class="card-sub">전체 기간</span></div>
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--purple)"></span>👑 누적 종목 순위 + 장인</div><span class="card-sub">25.01~ 전체</span></div>
         <div id="sportCumul"></div>
       </div>
     </div>`;
@@ -1363,7 +1400,7 @@ function renderData(){
 
     <div class="g2 mb14">
       <div class="card">
-        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--blue)"></span>그룹 요일별 운동 패턴</div><span class="card-sub">전체 기간 합산</span></div>
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--blue)"></span>그룹 요일별 운동 패턴</div><span class="card-sub">25.01~ 합산</span></div>
         <div class="chart-box h260"><canvas id="weekdayChart"></canvas></div>
       </div>
       <div class="card">
@@ -1374,7 +1411,7 @@ function renderData(){
 
     <div class="g2 mb14">
       <div class="card">
-        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--pink)"></span>우린 무슨 모임? · 그룹 종목 분포</div><span class="card-sub">전체 기간</span></div>
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--pink)"></span>우린 무슨 모임? · 그룹 종목 분포</div><span class="card-sub">25.01~ 전체</span></div>
         <div class="chart-box h300"><canvas id="groupDonut"></canvas></div>
       </div>
       <div class="card">
@@ -1394,7 +1431,7 @@ function renderData(){
         <div id="heatAnnual" style="overflow-x:auto"></div>
       </div>
       <div class="card">
-        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--blue)"></span>인원별 히트맵</div><span class="card-sub">멤버 × 전체 기간</span></div>
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--blue)"></span>인원별 히트맵</div><span class="card-sub">멤버 × 25.01~</span></div>
         <div id="heatCumul"></div>
       </div>
     </div>`;
@@ -1660,6 +1697,7 @@ function buildProfile(name){
   ];
 
   // 스토리 카드 렌더링에 쓸 데이터 스냅샷 (다운로드 버튼이 참조)
+  // totalAll 은 이제 25.01~ 기준(S.raw가 그 이후만 담음). 24년치는 S.legacy에 별도.
   S.storyData={
     name, year, cumulYear, target, rate, totalAll,
     curStreak:st.current, longestStreak:st.longest,
@@ -1668,6 +1706,8 @@ function buildProfile(name){
     bestWd:['일','월','화','수','목','금','토'][bestWd],
     paceLevel:paceG.level, nx,
     badgesOn:achvs.filter(a=>a.on),
+    monthsTogether:monthsTogether(),
+    legacyCount:(S.legacy.perMember[name]||0),  // 이 멤버의 24년 이전 기록 수
   };
 
   document.getElementById('profileBody').innerHTML=`
@@ -1677,7 +1717,7 @@ function buildProfile(name){
         <div class="info">
           <h2>${name}</h2>
           <div class="meta">${year}년 누적 <b>${cumulYear}일</b> · 목표 ${target}일 · 달성률 <b>${rate.toFixed(1)}%</b></div>
-          <div class="meta" style="margin-top:2px">가장 좋아하는 운동: <b>${favSport}</b> · 전체 누적 ${totalAll}회</div>
+          <div class="meta" style="margin-top:2px">가장 좋아하는 운동: <b>${favSport}</b> · <b>25.01~</b> 누적 ${totalAll}회${(S.legacy.perMember[name]||0)?` <span style="color:var(--muted)">(이전 기록 ${S.legacy.perMember[name]}회 별도)</span>`:''}</div>
         </div>
         <button class="story-btn" onclick="downloadStoryCard()" title="인스타 스토리용 9:16 이미지로 저장">
           <span style="font-size:15px">📸</span> 스토리 이미지 저장
@@ -1690,6 +1730,8 @@ function buildProfile(name){
         <div class="mini-stat"><div class="v" style="color:var(--purple)">${masteryCount}</div><div class="l">종목 장인 🏅</div></div>
       </div>
       ${buildPaceNudge(paceG, nx, target)}
+      ${(S.legacy.perMember[name]||0) ? `<div style="margin-top:10px;font-size:12px;color:var(--muted);text-align:center">
+        📎 이전 기록(24년 이전) <b style="color:var(--text2)">${S.legacy.perMember[name]}회</b> — 지금 지표는 모두 <b style="color:var(--text2)">25.01~</b> 기준이에요</div>` : ''}
     </div>
 
     <div class="g2 mb14">
@@ -1698,7 +1740,7 @@ function buildProfile(name){
         <div class="chart-box h260"><canvas id="profileDonut"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--blue)"></span>요일별 패턴</div><span class="card-sub">전체 기간</span></div>
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--blue)"></span>요일별 패턴</div><span class="card-sub">25.01~ 전체</span></div>
         <div class="weekday-grid">
           ${['일','월','화','수','목','금','토'].map((d,i)=>`<div class="wd-cell ${i===bestWd?'best':''}"><div class="d">${d}</div><div class="v">${wd[i]}</div></div>`).join('')}
         </div>
@@ -2001,7 +2043,7 @@ async function downloadStoryCard(){
     c.fillText(`최애 운동 · ${D.favSport}   |   가장 부지런한 ${D.bestWd}요일`, avX, avY+avR+160);
 
     // ---- 히어로 스탯: 올해 누적 (대형) ----
-    let y=760;
+    let y=740;
     c.textAlign='center';
     c.font='600 30px "Noto Sans KR", sans-serif'; c.fillStyle=dim;
     c.fillText(`${D.year}년 누적 운동`, avX, y);
@@ -2014,6 +2056,9 @@ async function downloadStoryCard(){
     if(D.target>0){
       c.fillText(`목표 ${D.target}일 중 ${D.rate.toFixed(0)}% 달성`, avX, y+215);
     }
+    // 함께한 개월 서사 (살짝)
+    c.font='500 28px "Noto Sans KR", sans-serif'; c.fillStyle=accentSoft;
+    c.fillText(`오운완과 함께한 지 ${D.monthsTogether}개월째`, avX, y+270);
 
     // ---- 2×2 스탯 그리드 ----
     y=1060;
@@ -2021,7 +2066,7 @@ async function downloadStoryCard(){
     const stats=[
       {label:'현재 연속', val:D.curStreak, unit:'일', tag:D.curStreak>0?'진행중 🔥':'휴식중'},
       {label:'최장 연속', val:D.longestStreak, unit:'일', tag:'기록'},
-      {label:'전체 누적', val:D.totalAll, unit:'회', tag:'통산'},
+      {label:'25.01~ 누적', val:D.totalAll, unit:'회', tag:D.legacyCount?`+이전 ${D.legacyCount}회`:'누적'},
       {label:'종목 장인', val:D.masteryCount, unit:'개', tag:'1위 종목'},
     ];
     stats.forEach((s,i)=>{
