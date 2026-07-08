@@ -7,42 +7,58 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Gabarito:wght@500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;700;800;900&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Archivo:wght@500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;700;800;900&family=DM+Mono:wght@400;500&display=swap');
 
-/* ============ THEME TOKENS ============ */
+/* ============ THEME TOKENS — "새벽 트랙" ============ */
 :root[data-theme="dark"]{
-  --bg:#0d1016; --bg2:#10141d; --surface:#161b26; --surface2:#1d2433; --surface3:#232c3e;
-  --border:#272f42; --border2:#323d54;
-  --text:#e8edf6; --text2:#aeb8cc; --muted:#697288;
-  --accent:#3ddc84; --accent-dim:#1c8a52; --accent-glow:#3ddc8433;
-  --amber:#fbbf24; --red:#fb7185; --blue:#5e9bff; --purple:#a78bfa; --pink:#f472b6; --cyan:#22d3ee;
-  --gold:#fbbf24; --silver:#9aa6bd; --bronze:#d08a4a;
-  --shadow:0 8px 30px rgba(0,0,0,.45); --shadow-sm:0 2px 12px rgba(0,0,0,.3);
-  --grid:#1c2434;
+  --bg:#0a0c13; --bg2:#0d1019; --surface:#11141f; --surface2:#171b2a; --surface3:#1f2436;
+  --border:#232940; --border2:#303a58;
+  --text:#f0f2fb; --text2:#a9b0c8; --muted:#6d7590;
+  --accent:#ff6b3d; --accent2:#ffd23f;
+  --accent-dim:#b2431f; --accent-glow:rgba(255,107,61,.15); --accent2-glow:rgba(255,210,63,.13);
+  --green:#2edd8a; --green-glow:rgba(46,221,138,.13);
+  --amber:#ffc233; --red:#ff5d7a;
+  --blue:#6c8cff; --purple:#a78bfa; --pink:#f26d9d; --cyan:#35cfe3;
+  --gold:#ffd23f; --silver:#9aa6bd; --bronze:#d08a4a;
+  --shadow:0 8px 30px rgba(0,0,0,.5); --shadow-sm:0 2px 12px rgba(0,0,0,.32);
+  --grid:#1a2032;
+  --sunrise:linear-gradient(90deg,#ff6b3d 0%,#ffb13d 55%,#ffd23f 100%);
+  --board-bg:radial-gradient(120% 150% at 85% -25%, rgba(255,107,61,.20), transparent 55%),
+             radial-gradient(90% 130% at -10% 115%, rgba(108,140,255,.10), transparent 60%),
+             linear-gradient(160deg,#131628 0%,#0b0e18 100%);
 }
 :root[data-theme="light"]{
-  --bg:#f4f6fb; --bg2:#eef1f8; --surface:#ffffff; --surface2:#f4f6fb; --surface3:#e9edf6;
-  --border:#e2e7f1; --border2:#d3dae8;
-  --text:#1a2233; --text2:#48526a; --muted:#8590a6;
-  --accent:#16a85a; --accent-dim:#a8e6c4; --accent-glow:#16a85a18;
-  --amber:#d99106; --red:#e23d5b; --blue:#2f74e0; --purple:#7c5cf0; --pink:#db2f8e; --cyan:#0b7f98;
+  --bg:#f7f4ee; --bg2:#f1ede3; --surface:#fffdf9; --surface2:#f4f0e7; --surface3:#ece5d8;
+  --border:#e5ded0; --border2:#d3cab6;
+  --text:#1c1f2b; --text2:#4b5164; --muted:#8b8f9e;
+  --accent:#e8501f; --accent2:#d99106;
+  --accent-dim:#f3b9a2; --accent-glow:rgba(232,80,31,.10); --accent2-glow:rgba(217,145,6,.12);
+  --green:#0f9d63; --green-glow:rgba(15,157,99,.10);
+  --amber:#c98a06; --red:#d93a58;
+  --blue:#2f5fd0; --purple:#6d4fd8; --pink:#c62f7f; --cyan:#0b8ba3;
   --gold:#d99106; --silver:#7a8398; --bronze:#b06a2c;
-  --shadow:0 10px 34px rgba(40,55,90,.10); --shadow-sm:0 2px 12px rgba(40,55,90,.06);
-  --grid:#eef1f7;
+  --shadow:0 10px 34px rgba(60,50,30,.10); --shadow-sm:0 2px 12px rgba(60,50,30,.06);
+  --grid:#ece7da;
+  --sunrise:linear-gradient(90deg,#e8501f 0%,#ef8e1e 55%,#d99106 100%);
+  --board-bg:radial-gradient(120% 150% at 85% -25%, rgba(232,80,31,.13), transparent 55%),
+             radial-gradient(90% 130% at -10% 115%, rgba(47,95,208,.07), transparent 60%),
+             linear-gradient(160deg,#fffdf7 0%,#f6f1e6 100%);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
 body{
   font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);
   min-height:100vh;transition:background .3s,color .3s;
-  background-image:radial-gradient(120% 80% at 50% -10%, var(--accent-glow), transparent 55%);
+  background-image:radial-gradient(130% 70% at 50% -12%, var(--accent-glow), transparent 55%);
   background-attachment:fixed;
 }
 ::selection{background:var(--accent-glow);}
+.disp{font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-weight:400;letter-spacing:.2px;}
+.num{font-family:'Archivo','DM Mono',sans-serif;font-weight:800;font-feature-settings:'tnum';letter-spacing:-.5px;}
 
 /* ============ HEADER ============ */
 header{
-  background:color-mix(in srgb, var(--surface) 82%, transparent);
+  background:color-mix(in srgb, var(--surface) 84%, transparent);
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   border-bottom:1px solid var(--border);
   padding:0 22px;height:60px;display:flex;align-items:center;gap:16px;
@@ -50,10 +66,10 @@ header{
 }
 .brand{display:flex;align-items:center;gap:10px;flex-shrink:0;}
 .brand .mark{
-  font-family:'Gabarito',sans-serif;font-weight:900;font-size:21px;letter-spacing:-.5px;
+  font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:22px;letter-spacing:.5px;
   display:flex;align-items:center;gap:7px;
 }
-.brand .mark .o{color:var(--accent);}
+.brand .mark .o{background:var(--sunrise);-webkit-background-clip:text;background-clip:text;color:transparent;}
 .brand .tag{font-size:10.5px;color:var(--muted);font-weight:500;letter-spacing:.2px;display:none;}
 @media(min-width:980px){.brand .tag{display:block;}}
 
@@ -78,6 +94,8 @@ header{
 }
 .icon-btn:hover{color:var(--text);border-color:var(--border2);transform:translateY(-1px);}
 .icon-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.kbd-hint{display:none;font-size:9px;color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:1px 4px;font-family:'DM Mono',monospace;margin-left:2px;}
+@media(min-width:980px){.icon-btn.search-btn{width:auto;padding:0 12px;gap:6px;}.kbd-hint{display:inline-block;}}
 
 /* ============ TAB NAV ============ */
 .tabnav{
@@ -88,7 +106,7 @@ header{
 }
 .tabnav::-webkit-scrollbar{display:none;}
 .tab{
-  position:relative;padding:13px 16px;font-size:13.5px;font-weight:700;color:var(--muted);
+  position:relative;padding:13px 15px;font-size:13.5px;font-weight:700;color:var(--muted);
   background:none;border:none;cursor:pointer;white-space:nowrap;transition:color .15s;
   font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;gap:7px;
 }
@@ -97,7 +115,30 @@ header{
 .tab.active{color:var(--text);}
 .tab.active::after{
   content:'';position:absolute;left:12px;right:12px;bottom:-1px;height:2.5px;
-  background:var(--accent);border-radius:3px 3px 0 0;
+  background:var(--sunrise);border-radius:3px 3px 0 0;
+}
+
+/* ============ BOTTOM NAV (mobile) ============ */
+.bottomnav{
+  display:none;position:fixed;bottom:0;left:0;right:0;z-index:320;
+  background:color-mix(in srgb, var(--surface) 90%, transparent);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-top:1px solid var(--border);
+  padding:6px 8px calc(6px + env(safe-area-inset-bottom));
+  justify-content:space-around;
+}
+.bn-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:none;cursor:pointer;padding:6px 2px;border-radius:12px;
+  color:var(--muted);font-family:'Noto Sans KR',sans-serif;transition:color .15s;
+}
+.bn-item .ic{font-size:19px;line-height:1;}
+.bn-item .lb{font-size:9.5px;font-weight:700;}
+.bn-item.active{color:var(--accent);}
+@media(max-width:760px){
+  .bottomnav{display:flex;}
+  .tabnav{display:none;}
+  .container{padding-bottom:100px !important;}
 }
 
 /* ============ LAYOUT ============ */
@@ -121,8 +162,8 @@ header{
 .card-sub{font-size:11px;color:var(--muted);font-weight:500;}
 
 /* ============ SECTION TITLE ============ */
-.sec-eyebrow{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;}
-.sec-title{font-family:'Gabarito','Noto Sans KR',sans-serif;font-size:24px;font-weight:800;letter-spacing:-.6px;margin-bottom:3px;}
+.sec-eyebrow{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;font-family:'Archivo',sans-serif;}
+.sec-title{font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:26px;letter-spacing:.3px;margin-bottom:3px;}
 .sec-desc{font-size:13px;color:var(--text2);margin-bottom:18px;}
 
 .chart-box{position:relative;}
@@ -136,33 +177,68 @@ header{
 .err h3{font-size:16px;margin-bottom:8px;}
 .err p{font-size:13px;color:var(--muted);line-height:1.7;}
 
-/* ============ HERO (홈) ============ */
-.hero{
-  background:linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
-  border:1px solid var(--border);border-radius:20px;padding:26px 28px;margin-bottom:14px;
-  position:relative;overflow:hidden;box-shadow:var(--shadow);
+/* ============ 전광판 HERO (홈 시그니처) ============ */
+.board{
+  position:relative;border:1px solid var(--border);border-radius:24px;
+  padding:26px 28px 24px;margin-bottom:14px;overflow:hidden;
+  background:var(--board-bg);box-shadow:var(--shadow);
 }
-.hero::before{
-  content:'';position:absolute;top:-40%;right:-10%;width:340px;height:340px;border-radius:50%;
-  background:radial-gradient(circle, var(--accent-glow), transparent 70%);pointer-events:none;
+.board-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;position:relative;}
+.board-date{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.board-live{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;color:var(--accent);letter-spacing:1px;font-family:'Archivo',sans-serif;}
+.board-live::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 1.6s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.45;transform:scale(.8);}}
+.board-bigwrap{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+.board-big{font-family:'Archivo',sans-serif;font-weight:900;font-size:82px;line-height:.95;letter-spacing:-3px;
+  background:var(--sunrise);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.board-of{font-family:'Archivo',sans-serif;font-weight:700;font-size:26px;color:var(--muted);letter-spacing:-1px;}
+.board-label{font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:19px;color:var(--text);margin-top:2px;}
+.board-label b{color:var(--accent2);}
+.board-sub{font-size:12px;color:var(--text2);margin-top:6px;}
+/* 12 레인 전구 */
+.lanes{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;margin-top:20px;position:relative;}
+@media(max-width:640px){.lanes{grid-template-columns:repeat(6,1fr);}}
+.lane{
+  height:38px;border-radius:9px;background:color-mix(in srgb,var(--surface2) 70%,transparent);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:800;color:var(--muted);cursor:pointer;transition:all .2s;position:relative;
 }
-.hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;position:relative;flex-wrap:wrap;}
-.hero-date{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:6px;}
-.hero-greet{font-size:25px;font-weight:800;letter-spacing:-.6px;line-height:1.25;}
-.hero-greet b{color:var(--accent);}
-.hero-quote{
-  margin-top:16px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);
-  border-left:3px solid var(--accent);border-radius:0 12px 12px 0;position:relative;
+.lane:hover{border-color:var(--border2);}
+.lane.on{color:#fff;border-color:transparent;animation:lanePop .45s cubic-bezier(.34,1.56,.64,1) backwards;}
+@keyframes lanePop{from{transform:scale(.6);opacity:0;}to{transform:scale(1);opacity:1;}}
+.lane .lk{position:absolute;bottom:2px;right:5px;font-size:8px;opacity:.75;font-family:'DM Mono',monospace;}
+.board-quote{
+  max-width:360px;min-width:240px;flex:1;
+  padding:14px 16px;background:color-mix(in srgb,var(--surface) 55%,transparent);
+  border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 12px 12px 0;
+  backdrop-filter:blur(4px);
 }
-.hero-quote .q{font-size:14px;line-height:1.6;color:var(--text);font-weight:500;}
-.hero-quote .by{font-size:11.5px;color:var(--muted);margin-top:7px;}
-.hero-quote .by b{color:var(--text2);font-weight:700;}
-.year-ring{display:flex;align-items:center;gap:14px;}
-.ring-wrap{position:relative;width:74px;height:74px;flex-shrink:0;}
+.board-quote .q{font-size:13.5px;line-height:1.6;color:var(--text);font-weight:500;}
+.board-quote .by{font-size:11px;color:var(--muted);margin-top:7px;}
+.board-quote .by b{color:var(--text2);font-weight:700;}
+.year-ring{display:flex;align-items:center;gap:10px;margin-top:12px;}
+.ring-wrap{position:relative;width:64px;height:64px;flex-shrink:0;}
 .ring-wrap svg{transform:rotate(-90deg);}
 .ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.ring-label .pct{font-size:16px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent);}
-.ring-label .txt{font-size:9px;color:var(--muted);}
+.ring-label .pct{font-size:13px;font-weight:800;font-family:'Archivo',sans-serif;color:var(--accent2);}
+.ring-label .txt{font-size:8.5px;color:var(--muted);}
+
+/* ============ 인사이트 카드 ============ */
+.ins-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;
+  scroll-snap-type:x mandatory;scrollbar-width:thin;}
+.ins-row::-webkit-scrollbar{height:5px;}
+.ins-row::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+.ins-card{
+  min-width:225px;max-width:280px;flex-shrink:0;scroll-snap-align:start;
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:13px 15px;
+  display:flex;gap:11px;align-items:flex-start;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;
+}
+.ins-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ins-c,var(--accent));}
+.ins-card .e{font-size:21px;flex-shrink:0;margin-top:1px;}
+.ins-card .t{font-size:12.5px;font-weight:800;line-height:1.35;}
+.ins-card .t b{color:var(--ins-c,var(--accent));}
+.ins-card .s{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.45;}
+.ins-title{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-family:'Archivo',sans-serif;margin:2px 0 8px;display:flex;align-items:center;gap:6px;}
 
 /* ============ STAT CARDS ============ */
 .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
@@ -173,9 +249,8 @@ header{
 }
 .stat-card .bar{position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);}
 .s-label{font-size:11px;color:var(--muted);letter-spacing:.4px;margin-bottom:7px;font-weight:600;display:flex;align-items:center;gap:5px;}
-.s-val{font-size:29px;font-weight:800;font-family:'DM Mono',monospace;line-height:1;}
+.s-val{font-size:30px;font-weight:800;font-family:'Archivo',sans-serif;line-height:1;letter-spacing:-1px;}
 .s-sub{font-size:11px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
-.yoy-up{color:var(--accent);font-weight:700;}.yoy-dn{color:var(--red);font-weight:700;}.yoy-eq{color:var(--muted);}
 
 /* ============ STREAK CARDS ============ */
 .streak-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:11px;}
@@ -188,14 +263,14 @@ header{
 .streak-card .nm{font-weight:800;font-size:15px;}
 .streak-card .av{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;}
 .streak-flame{display:flex;align-items:baseline;gap:5px;}
-.streak-flame .num{font-size:26px;font-weight:800;font-family:'DM Mono',monospace;line-height:1;}
+.streak-flame .num{font-size:27px;font-weight:800;font-family:'Archivo',sans-serif;line-height:1;letter-spacing:-1px;}
 .streak-flame .unit{font-size:11px;color:var(--muted);}
 .streak-flame.cold .num{color:var(--muted);}
 .streak-meta{font-size:10.5px;color:var(--muted);display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:8px;}
 .streak-meta b{color:var(--text2);}
 .alert-chip{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--red);color:#fff;}
-.alert-chip.safe{background:var(--accent);}
-.alert-chip.warn{background:var(--amber);color:#1a2233;}
+.alert-chip.safe{background:var(--green);color:#0a2a1a;}
+.alert-chip.warn{background:var(--amber);color:#2a2005;}
 
 /* ============ LEADERBOARD ============ */
 .lb-table{width:100%;border-collapse:collapse;}
@@ -204,24 +279,26 @@ header{
 .lb-table tr:last-child td{border-bottom:none;}
 .lb-table tbody tr{cursor:pointer;transition:background .12s;}
 .lb-table tbody tr:hover td{background:var(--surface2);}
-.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:8px;font-size:11px;font-weight:800;font-family:'DM Mono',monospace;}
-.r1{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#3a2800;}
+.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:8px;font-size:11px;font-weight:800;font-family:'Archivo',sans-serif;}
+.r1{background:linear-gradient(135deg,#ffd23f,#f59e0b);color:#3a2800;}
 .r2{background:linear-gradient(135deg,#cbd5e1,#94a3b8);color:#1e2530;}
 .r3{background:linear-gradient(135deg,#e0a878,#cd7c45);color:#3a1f00;}
 .rn{background:var(--surface2);color:var(--muted);border:1px solid var(--border);font-size:10px;}
 .av-sm{width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff;margin-right:8px;vertical-align:middle;}
 .pbar-row{display:flex;align-items:center;gap:8px;}
 .pbar{flex:1;height:6px;background:var(--surface2);border-radius:4px;overflow:hidden;min-width:50px;}
-.pfill{height:100%;border-radius:4px;background:var(--accent);transition:width .5s;}
+.pfill{height:100%;border-radius:4px;background:var(--green);transition:width .5s;}
 .pfill.mid{background:var(--amber);}.pfill.low{background:var(--red);}
 .pct{font-size:12px;font-family:'DM Mono',monospace;font-weight:700;min-width:46px;text-align:right;}
 .rate-detail{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;}
 .next-chip{font-weight:800;font-family:'DM Mono',monospace;}
-.next-chip.to-green{color:var(--accent);}
+.next-chip.to-green{color:var(--green);}
 .next-chip.to-amber{color:var(--amber);}
 .next-chip.unreachable{color:var(--red);}
+.proj-chip{font-weight:700;color:var(--cyan);}
+.proj-chip.hit{color:var(--green);}
 .delta{font-size:10px;font-family:'DM Mono',monospace;font-weight:700;cursor:help;}
-.delta.up{color:var(--accent);}.delta.dn{color:var(--red);}.delta.eq{color:var(--muted);}
+.delta.up{color:var(--green);}.delta.dn{color:var(--red);}.delta.eq{color:var(--muted);}
 
 /* podium */
 .podium{display:flex;align-items:flex-end;justify-content:center;gap:14px;padding:10px 0 4px;}
@@ -229,10 +306,10 @@ header{
 .pod .av{width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#fff;box-shadow:var(--shadow-sm);}
 .pod .nm{font-weight:800;font-size:14px;}
 .pod .sc{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
-.pod .stand{width:78px;border-radius:12px 12px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;font-weight:800;font-family:'DM Mono',monospace;color:#fff;font-size:18px;}
-.pod-1 .stand{height:74px;background:linear-gradient(180deg,#fbbf24,#d99106);}
-.pod-2 .stand{height:56px;background:linear-gradient(180deg,#cbd5e1,#94a3b8);}
-.pod-3 .stand{height:42px;background:linear-gradient(180deg,#e0a878,#cd7c45);}
+.pod .stand{width:78px;border-radius:12px 12px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;font-weight:800;font-family:'Archivo',sans-serif;font-size:18px;}
+.pod-1 .stand{height:74px;background:linear-gradient(180deg,#ffd23f,#e8940a);color:#3a2800;}
+.pod-2 .stand{height:56px;background:linear-gradient(180deg,#cbd5e1,#94a3b8);color:#1e2530;}
+.pod-3 .stand{height:42px;background:linear-gradient(180deg,#e0a878,#cd7c45);color:#3a1f00;}
 
 /* ============ CHALLENGE ============ */
 .chal-card{
@@ -243,8 +320,8 @@ header{
 .chal-title{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px;}
 .chal-period{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
 .chal-goal-bar{height:30px;background:var(--surface2);border-radius:10px;overflow:hidden;position:relative;border:1px solid var(--border);}
-.chal-goal-fill{height:100%;background:linear-gradient(90deg,var(--accent-dim),var(--accent));border-radius:9px;transition:width .6s;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;}
-.chal-goal-fill .v{font-size:12px;font-weight:800;color:#fff;font-family:'DM Mono',monospace;}
+.chal-goal-fill{height:100%;background:var(--sunrise);border-radius:9px;transition:width .6s;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;}
+.chal-goal-fill .v{font-size:12px;font-weight:800;color:#2a1405;font-family:'Archivo',sans-serif;white-space:nowrap;}
 .chal-goal-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;}
 .chal-list{display:flex;flex-direction:column;gap:9px;margin-top:4px;}
 .chal-row{display:flex;align-items:center;gap:10px;}
@@ -268,8 +345,8 @@ header{
 /* ============ HEATMAP ============ */
 .hm-cell{width:13px;height:13px;border-radius:3px;background:var(--surface2);border:1px solid var(--border);transition:transform .1s;display:inline-block;}
 .hm-cell:hover{transform:scale(1.55);z-index:10;position:relative;}
-.hm-cell.lv1{background:color-mix(in srgb,var(--accent) 28%,transparent);}
-.hm-cell.lv2{background:color-mix(in srgb,var(--accent) 60%,transparent);}
+.hm-cell.lv1{background:color-mix(in srgb,var(--accent) 30%,transparent);}
+.hm-cell.lv2{background:color-mix(in srgb,var(--accent) 62%,transparent);}
 .hm-cell.lv3{background:var(--accent);border-color:var(--accent);}
 .hm-legend{display:flex;align-items:center;gap:5px;margin-top:9px;font-size:10px;color:var(--muted);}
 
@@ -284,11 +361,16 @@ header{
 .feed-item .sp{font-size:12px;color:var(--text2);}
 .feed-item .sp .tag{display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:1px 7px;font-size:11px;margin-right:4px;}
 
-/* ============ SELECT ============ */
+/* ============ SELECT / TOGGLE ============ */
 .select{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;outline:none;transition:border-color .15s;}
+.select:focus{border-color:var(--accent);}
+.select option{background:var(--surface);}
 .period-btn{padding:6px 16px;border:none;border-radius:8px;background:transparent;color:var(--muted);font-weight:700;font-size:13px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .15s;}
 .period-btn:hover{color:var(--text2);}
-.period-btn.active{background:var(--accent);color:#0d1016;}
+.period-btn.active{background:var(--accent);color:#fff;}
+:root[data-theme="dark"] .period-btn.active{color:#2a1405;}
+.dropdown-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.dropdown-label{font-size:13px;color:var(--text2);font-weight:600;}
 
 /* ============ YEAR HIGHLIGHT BANNER ============ */
 .hl-banner{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
@@ -296,39 +378,82 @@ header{
 .hl-cell{background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--border);
   border-radius:16px;padding:18px 16px;text-align:center;box-shadow:var(--shadow-sm);}
 .hl-e{font-size:24px;margin-bottom:8px;}
-.hl-v{font-size:24px;font-weight:800;font-family:'DM Mono',monospace;line-height:1.1;margin-bottom:5px;}
+.hl-v{font-size:24px;font-weight:800;font-family:'Archivo',sans-serif;line-height:1.1;margin-bottom:5px;letter-spacing:-.5px;}
 .hl-l{font-size:11px;color:var(--muted);line-height:1.4;}
 
-/* ============ TODAY STATUS NUDGE ============ */
-.status-block{}
+/* ============ TODAY STATUS ============ */
 .status-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:9px;display:flex;align-items:center;gap:7px;}
-.status-label b{color:var(--text);font-family:'DM Mono',monospace;}
+.status-label b{color:var(--text);font-family:'Archivo',sans-serif;}
 .status-dot{width:7px;height:7px;border-radius:50%;}
 .status-chips{display:flex;flex-wrap:wrap;gap:7px;}
 .status-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px 5px 5px;border-radius:30px;
   border:1px solid var(--border);background:var(--surface2);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;}
 .status-chip:hover{transform:translateY(-1px);border-color:var(--border2);}
-.status-chip.done{border-color:color-mix(in srgb,var(--accent) 40%,transparent);background:var(--accent-glow);}
+.status-chip.done{border-color:color-mix(in srgb,var(--green) 40%,transparent);background:var(--green-glow);}
 .status-chip.pend{opacity:.7;}
 .av-xs{width:21px;height:21px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:10px;color:#fff;}
-.select:focus{border-color:var(--accent);}
-.select option{background:var(--surface);}
-.dropdown-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
-.dropdown-label{font-size:13px;color:var(--text2);font-weight:600;}
 
-/* ============ MEMBER PICKER (개인) ============ */
+/* ============ VS 비교 ============ */
+.vs-head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;margin-bottom:16px;}
+.vs-side{display:flex;flex-direction:column;gap:10px;align-items:center;}
+.vs-side .big-av{width:76px;height:76px;border-radius:22px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:32px;color:#fff;box-shadow:var(--shadow);transition:transform .2s;}
+.vs-side.winner .big-av{transform:scale(1.06);box-shadow:0 0 0 3px var(--accent2),var(--shadow);}
+.vs-side .nm{font-weight:800;font-size:16px;display:flex;align-items:center;gap:6px;}
+.vs-mark{font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:44px;line-height:1;
+  background:var(--sunrise);-webkit-background-clip:text;background-clip:text;color:transparent;text-align:center;}
+.vs-verdict{text-align:center;font-size:13px;color:var(--text2);margin:-4px 0 16px;}
+.vs-verdict b{color:var(--accent2);}
+.h2h{display:flex;flex-direction:column;gap:11px;}
+.h2h-row{display:grid;grid-template-columns:56px 1fr 130px 1fr 56px;align-items:center;gap:8px;}
+@media(max-width:640px){.h2h-row{grid-template-columns:44px 1fr 96px 1fr 44px;}}
+.h2h-val{font-family:'Archivo',sans-serif;font-weight:800;font-size:15px;letter-spacing:-.5px;}
+.h2h-val.l{text-align:right;}.h2h-val.r{text-align:left;}
+.h2h-val.win{color:var(--accent2);}
+.h2h-label{text-align:center;font-size:11px;color:var(--muted);font-weight:700;}
+.h2h-bar{height:9px;background:var(--surface2);border-radius:5px;overflow:hidden;display:flex;}
+.h2h-bar.l{justify-content:flex-end;}
+.h2h-fill{height:100%;border-radius:5px;transition:width .5s;}
+
+/* ============ CMD-K 팔레트 ============ */
+.cmdk-overlay{position:fixed;inset:0;background:rgba(5,7,12,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  z-index:500;display:none;align-items:flex-start;justify-content:center;padding:14vh 16px 0;}
+.cmdk-overlay.open{display:flex;}
+.cmdk{width:100%;max-width:540px;background:var(--surface);border:1px solid var(--border2);border-radius:18px;
+  box-shadow:0 24px 70px rgba(0,0,0,.5);overflow:hidden;animation:cmdkIn .18s ease;}
+@keyframes cmdkIn{from{opacity:0;transform:translateY(-10px) scale(.98);}to{opacity:1;transform:none;}}
+.cmdk-input{width:100%;padding:16px 18px;background:transparent;border:none;outline:none;color:var(--text);
+  font-size:15px;font-family:'Noto Sans KR',sans-serif;font-weight:600;border-bottom:1px solid var(--border);}
+.cmdk-input::placeholder{color:var(--muted);}
+.cmdk-list{max-height:330px;overflow-y:auto;padding:8px;}
+.cmdk-list::-webkit-scrollbar{width:4px;}.cmdk-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.cmdk-group{font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1.2px;padding:8px 10px 4px;text-transform:uppercase;font-family:'Archivo',sans-serif;}
+.cmdk-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--text2);}
+.cmdk-item .e{font-size:16px;width:22px;text-align:center;}
+.cmdk-item.active,.cmdk-item:hover{background:var(--surface2);color:var(--text);}
+.cmdk-item.active{box-shadow:inset 2.5px 0 0 var(--accent);}
+.cmdk-empty{padding:26px;text-align:center;color:var(--muted);font-size:13px;}
+.cmdk-foot{display:flex;gap:14px;padding:9px 16px;border-top:1px solid var(--border);font-size:10.5px;color:var(--muted);}
+.cmdk-foot kbd{font-family:'DM Mono',monospace;border:1px solid var(--border);border-radius:4px;padding:0 4px;background:var(--surface2);}
+
+/* ============ MEMBER PICKER / PROFILE ============ */
 .member-picker{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
 .mp-chip{display:flex;align-items:center;gap:7px;padding:7px 13px 7px 8px;border-radius:30px;border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:all .15s;font-weight:700;font-size:13px;}
 .mp-chip:hover{border-color:var(--border2);transform:translateY(-1px);}
 .mp-chip.active{border-color:var(--accent);background:var(--accent-glow);}
 .mp-chip .av{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff;}
 
-/* profile header */
 .profile-hero{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:6px;}
 .profile-hero .big-av{width:72px;height:72px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:30px;color:#fff;box-shadow:var(--shadow);}
-.profile-hero .info h2{font-size:24px;font-weight:800;letter-spacing:-.5px;}
+.profile-hero .info h2{font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:26px;font-weight:400;letter-spacing:.5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .profile-hero .info .meta{font-size:13px;color:var(--text2);margin-top:4px;}
 .profile-hero .info .meta b{color:var(--accent);}
+.lv-badge{display:inline-flex;align-items:center;gap:5px;font-family:'Noto Sans KR',sans-serif;font-size:11.5px;font-weight:800;
+  padding:4px 11px;border-radius:20px;background:var(--accent2-glow);border:1px solid color-mix(in srgb,var(--accent2) 45%,transparent);color:var(--accent2);letter-spacing:0;}
+.xp-wrap{margin-top:14px;}
+.xp-head{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px;}
+.xp-head b{color:var(--accent2);}
+.xp-bar{height:9px;background:var(--surface2);border-radius:5px;overflow:hidden;border:1px solid var(--border);}
+.xp-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--accent2),#ffe58a);transition:width .6s;}
 .story-btn{margin-left:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:7px;
   padding:10px 16px;border-radius:12px;border:1px solid var(--border2);
   background:linear-gradient(135deg,var(--surface2),var(--surface3));color:var(--text);
@@ -337,28 +462,28 @@ header{
 .story-btn:active{transform:translateY(0);}
 .story-btn:disabled{opacity:.6;cursor:wait;}
 @media(max-width:680px){.story-btn{margin-left:0;margin-top:10px;width:100%;justify-content:center;}}
-.mini-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0;}
+.mini-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0 0;}
 @media(max-width:680px){.mini-stats{grid-template-columns:repeat(2,1fr);}}
 .mini-stat{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:13px 14px;text-align:center;}
-.mini-stat .v{font-size:22px;font-weight:800;font-family:'DM Mono',monospace;}
+.mini-stat .v{font-size:23px;font-weight:800;font-family:'Archivo',sans-serif;letter-spacing:-.5px;}
 .mini-stat .l{font-size:10.5px;color:var(--muted);margin-top:4px;}
 
-/* ============ 다음 색 등급 안내 (개인 프로필) ============ */
+/* 페이스 넛지 */
 .pace-nudge{margin-top:14px;padding:13px 15px;border-radius:12px;border:1px solid var(--border);
   display:flex;align-items:center;gap:12px;font-size:13px;line-height:1.5;}
 .pace-nudge .pn-emoji{font-size:22px;flex-shrink:0;}
 .pace-nudge .pn-text b{font-family:'DM Mono',monospace;}
-.pace-nudge.to-green{background:color-mix(in srgb,var(--accent) 10%,transparent);border-color:color-mix(in srgb,var(--accent) 35%,transparent);}
+.pace-nudge.to-green{background:var(--green-glow);border-color:color-mix(in srgb,var(--green) 35%,transparent);}
 .pace-nudge.to-amber{background:color-mix(in srgb,var(--amber) 10%,transparent);border-color:color-mix(in srgb,var(--amber) 35%,transparent);}
-.pace-nudge.keep{background:color-mix(in srgb,var(--accent) 8%,transparent);border-color:color-mix(in srgb,var(--accent) 30%,transparent);}
+.pace-nudge.keep{background:var(--green-glow);border-color:color-mix(in srgb,var(--green) 30%,transparent);}
 
 .empty-hint{text-align:center;padding:50px 20px;color:var(--muted);font-size:13px;}
 .empty-hint .ic{font-size:34px;margin-bottom:10px;display:block;}
 
-/* badges row */
+/* badges */
 .badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
 .achv{display:flex;align-items:center;gap:7px;padding:8px 12px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);font-size:12px;}
-.achv.on{border-color:var(--accent);background:var(--accent-glow);}
+.achv.on{border-color:color-mix(in srgb,var(--accent2) 55%,transparent);background:var(--accent2-glow);}
 .achv.off{opacity:.45;}
 .achv .e{font-size:16px;}
 .achv .t b{display:block;font-weight:700;font-size:12px;}
@@ -367,10 +492,10 @@ header{
 .weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;}
 .wd-cell{text-align:center;padding:10px 4px;border-radius:11px;background:var(--surface2);border:1px solid var(--border);}
 .wd-cell .d{font-size:11px;color:var(--muted);margin-bottom:5px;}
-.wd-cell .v{font-size:17px;font-weight:800;font-family:'DM Mono',monospace;}
+.wd-cell .v{font-size:17px;font-weight:800;font-family:'Archivo',sans-serif;}
 .wd-cell.best{border-color:var(--accent);background:var(--accent-glow);}
 
-/* ============ PROFILE CALENDAR ============ */
+/* profile calendar */
 .cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:6px;}
 .cal-dow span{text-align:center;font-size:10.5px;font-weight:700;}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
@@ -382,6 +507,88 @@ header{
 .cal-cell.on{background:var(--accent-glow);border-color:color-mix(in srgb,var(--accent) 45%,transparent);}
 .cal-cell.on .cd{color:var(--text)!important;}
 .cal-cell.today{box-shadow:0 0 0 2px var(--accent);}
+
+/* 콘페티 캔버스 */
+#confettiCanvas{position:fixed;inset:0;pointer-events:none;z-index:600;}
+
+/* 접근성/모션 */
+button:focus-visible,.select:focus-visible,.cmdk-input:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
+  .ticker-track{animation:none;}
+  html{scroll-behavior:auto;}
+}
+/* ---------- 레벨 가이드 모달 ---------- */
+.lvl-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;z-index:210;padding:20px}
+.lvl-overlay.open{display:flex;animation:fadeIn .15s ease}
+.lvl-modal{width:100%;max-width:430px;max-height:82vh;overflow-y:auto;background:var(--surface);
+  border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 22px 60px rgba(0,0,0,.4)}
+.lvl-modal h3{font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-weight:400;font-size:19px;
+  color:var(--text);display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.lvl-modal .sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6}
+.lvl-row{display:flex;align-items:flex-start;gap:12px;padding:11px 12px;border-radius:12px;
+  border:1px solid var(--border);background:var(--surface2);margin-bottom:8px;position:relative}
+.lvl-row.cur{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--surface2));
+  box-shadow:0 0 0 1px var(--accent)}
+.lvl-row.done{opacity:.85}
+.lvl-row.locked{opacity:.55}
+.lvl-row .e{font-size:22px;width:30px;text-align:center;flex-shrink:0;margin-top:2px}
+.lvl-row .st{margin-top:4px}
+.lvl-row .t{flex:1;min-width:0}
+.lvl-row .t b{font-size:13.5px;color:var(--text);display:block}
+.lvl-row .t span{font-size:11px;color:var(--muted)}
+.lvl-row .st{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:7px;flex-shrink:0;white-space:nowrap}
+.lvl-row .st.now{background:var(--accent);color:#fff}
+.lvl-row .st.ok{background:color-mix(in srgb,var(--green) 18%,transparent);color:var(--green)}
+.lvl-row .st.togo{background:var(--surface3);color:var(--muted)}
+.lvl-mems{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.lvl-mem{display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 4px;border-radius:99px;
+  background:var(--surface3);border:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text2);cursor:pointer}
+.lvl-mem:hover{border-color:var(--accent);color:var(--text)}
+.lvl-mem.me{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--surface3));color:var(--text)}
+.lvl-mem .av-xs{width:17px;height:17px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:800;color:#fff}
+.lvl-mems .none{font-size:10.5px;color:var(--muted);padding:2px 0}
+.lvl-close{width:100%;margin-top:10px;padding:11px;border:none;border-radius:11px;cursor:pointer;
+  background:var(--surface3);color:var(--text2);font-weight:700;font-size:13px;font-family:'Noto Sans KR',sans-serif}
+.lvl-close:hover{background:var(--border)}
+.lv-badge{cursor:pointer}
+.lv-badge:hover{filter:brightness(1.12)}
+/* ---------- 인바디 섹션 ---------- */
+.ib-latest{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:9px;margin-bottom:14px}
+.ib-stat{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:11px 12px;text-align:center}
+.ib-stat .l{font-size:10.5px;color:var(--muted);font-weight:700;margin-bottom:4px}
+.ib-stat .v{font-family:'Archivo','DM Mono',monospace;font-weight:800;font-size:21px;color:var(--text);line-height:1.1}
+.ib-stat .v small{font-size:10px;color:var(--muted);font-weight:600;margin-left:1px}
+.ib-stat .chg{display:block;font-size:10.5px;font-weight:800;margin-top:4px;font-family:'DM Mono',monospace}
+.ib-stat .chg.good{color:var(--green)} .ib-stat .chg.bad{color:var(--red)} .ib-stat .chg.eq{color:var(--muted)}
+.ib-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border:none;border-radius:11px;cursor:pointer;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:800;font-size:13px;
+  font-family:'Noto Sans KR',sans-serif;box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 35%,transparent)}
+.ib-btn:hover{filter:brightness(1.08)} .ib-btn:disabled{opacity:.55;cursor:default}
+.ib-table{width:100%;border-collapse:collapse;font-size:12px}
+.ib-table th{text-align:right;font-size:10.5px;color:var(--muted);font-weight:700;padding:6px 8px;border-bottom:1px solid var(--border)}
+.ib-table th:first-child{text-align:left}
+.ib-table td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;color:var(--text2)}
+.ib-table td:first-child{text-align:left;font-family:'Noto Sans KR',sans-serif;font-weight:600;color:var(--text)}
+.ib-del{border:none;background:none;cursor:pointer;font-size:13px;opacity:.5;padding:2px}
+.ib-del:hover{opacity:1}
+/* 인바디 입력 모달 (레벨 모달 스타일 재사용 + 폼 요소) */
+.ib-form label{display:block;font-size:11px;font-weight:700;color:var(--muted);margin:11px 0 4px}
+.ib-form input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface2);
+  color:var(--text);font-size:14px;font-family:'DM Mono','Noto Sans KR',monospace;outline:none;box-sizing:border-box}
+.ib-form input:focus{border-color:var(--accent)}
+.ib-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ib-msg{font-size:12px;font-weight:700;margin-top:10px;line-height:1.5}
+.ib-msg.err{color:var(--red)} .ib-msg.ok{color:var(--green)}
+.ib-confirm{background:var(--surface2);border:1px solid var(--accent);border-radius:12px;padding:14px;margin-top:12px}
+.ib-confirm .who{font-size:14px;font-weight:800;color:var(--text);margin-bottom:8px}
+.ib-confirm .row{display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;color:var(--text2)}
+.ib-confirm .row b{font-family:'DM Mono',monospace;color:var(--text)}
+.ib-actions{display:flex;gap:8px;margin-top:14px}
+.ib-actions .lvl-close{margin-top:0;flex:1}
+.ib-actions .ib-btn{flex:1.4;justify-content:center}
 </style>
 </head>
 <body>
@@ -392,25 +599,52 @@ header{
   </div>
   <div class="ticker-wrap"><div class="ticker-track" id="tickerTrack"></div></div>
   <div class="header-actions">
+    <button class="icon-btn search-btn" title="빠른 검색 (Ctrl+K)" onclick="openCmdk()">🔍<span class="kbd-hint">⌘K</span></button>
     <button class="icon-btn" id="themeBtn" title="라이트/다크 전환" onclick="toggleTheme()">🌙</button>
     <button class="icon-btn" id="refreshBtn" title="새로고침" onclick="init()">🔄</button>
   </div>
 </header>
 
 <nav class="tabnav" id="tabnav">
-  <button class="tab active" data-page="home"  onclick="goPage('home',this)"><span class="ic">🏠</span> 홈</button>
-  <button class="tab" data-page="rank"  onclick="goPage('rank',this)"><span class="ic">🏆</span> 랭킹·챌린지</button>
-  <button class="tab" data-page="data"  onclick="goPage('data',this)"><span class="ic">📊</span> 데이터·분석</button>
-  <button class="tab" data-page="me"    onclick="goPage('me',this)"><span class="ic">👤</span> 개인 기록</button>
+  <button class="tab active" data-page="home" onclick="goPage('home')"><span class="ic">🏠</span> 홈</button>
+  <button class="tab" data-page="rank" onclick="goPage('rank')"><span class="ic">🏆</span> 랭킹·챌린지</button>
+  <button class="tab" data-page="data" onclick="goPage('data')"><span class="ic">📊</span> 데이터·분석</button>
+  <button class="tab" data-page="vs"   onclick="goPage('vs')"><span class="ic">⚔️</span> VS 비교</button>
+  <button class="tab" data-page="me"   onclick="goPage('me')"><span class="ic">👤</span> 개인 기록</button>
 </nav>
 
 <div class="container">
   <div id="app"><div class="loading"><div class="spin"></div><h3 style="font-size:15px;color:var(--text)">데이터 불러오는 중…</h3></div></div>
 </div>
 
+<nav class="bottomnav" id="bottomnav">
+  <button class="bn-item active" data-page="home" onclick="goPage('home')"><span class="ic">🏠</span><span class="lb">홈</span></button>
+  <button class="bn-item" data-page="rank" onclick="goPage('rank')"><span class="ic">🏆</span><span class="lb">랭킹</span></button>
+  <button class="bn-item" data-page="data" onclick="goPage('data')"><span class="ic">📊</span><span class="lb">분석</span></button>
+  <button class="bn-item" data-page="vs"   onclick="goPage('vs')"><span class="ic">⚔️</span><span class="lb">VS</span></button>
+  <button class="bn-item" data-page="me"   onclick="goPage('me')"><span class="ic">👤</span><span class="lb">개인</span></button>
+</nav>
+
+<div class="cmdk-overlay" id="cmdkOverlay" onclick="if(event.target===this)closeCmdk()">
+  <div class="cmdk">
+    <input class="cmdk-input" id="cmdkInput" placeholder="멤버, 탭, 월 검색…" autocomplete="off"
+      oninput="cmdkFilter()" onkeydown="cmdkKey(event)">
+    <div class="cmdk-list" id="cmdkList"></div>
+    <div class="cmdk-foot"><span><kbd>↑↓</kbd> 이동</span><span><kbd>Enter</kbd> 선택</span><span><kbd>Esc</kbd> 닫기</span></div>
+  </div>
+</div>
+
+<div class="lvl-overlay" id="lvlOverlay" onclick="if(event.target===this)closeLevelGuide()">
+  <div class="lvl-modal" id="lvlModal"></div>
+</div>
+
+<div class="lvl-overlay" id="ibOverlay" onclick="if(event.target===this)closeIbModal()">
+  <div class="lvl-modal" id="ibModal"></div>
+</div>
+
 <script>
 /* =================================================================
-   오운완 대시보드 v2 — 데이터 레이어
+   오운완 대시보드 v3 "새벽 트랙" — 데이터 레이어
    기존 Google Apps Script 엔드포인트와 동일한 데이터 계약 유지
    (행 배열: [날짜/키, 멤버1, 멤버2, …] 형식)
    ================================================================= */
@@ -418,10 +652,11 @@ const API_BASE = 'https://script.google.com/macros/s/AKfycbzhCy5M8_IpwhJO2EUzrc7
 const API_URL = API_BASE + '?Q=dashboard';
 const QUOTE_URL = API_BASE + '?Q=quotejson';
 Chart.register(ChartDataLabels);
+Chart.defaults.plugins.datalabels.display = false; // 필요한 차트에서만 켠다
 
 const MEMBERS = ['상','성경','보현','성우','상필','주현','정현','범진','재현','윤선','아현','윤경'];
 const MEM_COLORS = MEMBERS.map((_,i)=>`hsl(${i*30},62%,56%)`);
-const SPORT_COLORS = ['#3ddc84','#34d399','#22d3ee','#5e9bff','#a78bfa','#f472b6','#fbbf24','#fb923c','#fb7185','#9aa6bd'];
+const SPORT_COLORS = ['#ff6b3d','#ffd23f','#35cfe3','#6c8cff','#a78bfa','#f26d9d','#2edd8a','#fb923c','#ff5d7a','#9aa6bd'];
 // 정규화된 종목 → 이모지 (달력 뷰용)
 const SPORT_EMOJI = {
   '헬스':'🏋️','크로스핏':'🤸','클라이밍':'🧗','수영':'🏊','러닝':'🏃','등산':'🥾',
@@ -462,6 +697,73 @@ function monthsTogether(){
   return Math.max(1, m);
 }
 
+/* ---------- 레벨/칭호 시스템 (25.01~ 누적 운동일 기준) ---------- */
+const LEVELS = [
+  {min:300, lv:6, title:'오운완 레전드', e:'👑'},
+  {min:200, lv:5, title:'아이언',       e:'🏔️'},
+  {min:120, lv:4, title:'강철체력',     e:'🦾'},
+  {min:60,  lv:3, title:'근성러',       e:'💪'},
+  {min:25,  lv:2, title:'출석 요정',    e:'🏃'},
+  {min:0,   lv:1, title:'운동 새싹',    e:'🌱'},
+];
+function levelInfo(totalAll){
+  const cur = LEVELS.find(l=>totalAll>=l.min) || LEVELS[LEVELS.length-1];
+  const next = LEVELS.filter(l=>l.min>cur.min).sort((a,b)=>a.min-b.min)[0] || null;
+  const base = cur.min, cap = next ? next.min : null;
+  const progress = cap ? Math.min(1,(totalAll-base)/(cap-base)) : 1;
+  return {...cur, next, progress, need: cap ? cap-totalAll : 0};
+}
+
+/* ---------- 레벨 가이드 모달 ----------
+   프로필의 레벨 배지를 클릭하면 전체 레벨 체계 · 기준 · 현재 위치를 보여줌 */
+function openLevelGuide(){
+  const name=S.selMember||MEMBERS[0];
+  const total=activeDates(name).size;
+  const lv=levelInfo(total);
+  // 전체 멤버를 각자 레벨로 분류 (누적 많은 순 정렬)
+  const byLv={};
+  MEMBERS.forEach(n=>{
+    const t=activeDates(n).size;
+    const l=levelInfo(t);
+    (byLv[l.lv]=byLv[l.lv]||[]).push({n,t});
+  });
+  Object.values(byLv).forEach(arr=>arr.sort((a,b)=>b.t-a.t));
+  const asc=[...LEVELS].sort((a,b)=>a.min-b.min);
+  const rows=asc.map((l,i)=>{
+    const nextMin=asc[i+1]?asc[i+1].min:null;
+    const range=nextMin!==null?`${l.min}~${nextMin-1}회`:`${l.min}회 이상`;
+    const isCur=l.lv===lv.lv;
+    const done=total>=(nextMin!==null?nextMin:l.min)&&!isCur;
+    const cls=isCur?'cur':done?'done':'locked';
+    const st=isCur
+      ?`<span class="st now">현재 ${total}회</span>`
+      :done?`<span class="st ok">달성 ✓</span>`
+      :`<span class="st togo">${l.min-total}회 남음</span>`;
+    const mems=byLv[l.lv]||[];
+    const chips=mems.length
+      ?mems.map(m=>`<span class="lvl-mem ${m.n===name?'me':''}" title="${m.n} · 누적 ${m.t}회"
+          onclick="closeLevelGuide();openMember('${m.n}')">
+          <span class="av-xs" style="background:${avatarColor(m.n)}">${initial(m.n)}</span>${m.n}</span>`).join('')
+      :`<span class="none">아직 이 레벨의 멤버가 없어요</span>`;
+    return `<div class="lvl-row ${cls}">
+      <span class="e">${l.e}</span>
+      <div class="t"><b>Lv.${l.lv} ${l.title} <span style="font-weight:600;color:var(--muted);font-size:11px">· ${mems.length}명</span></b>
+        <span>누적 ${range}</span>
+        <div class="lvl-mems">${chips}</div>
+      </div>
+      ${st}</div>`;
+  }).join('');
+  document.getElementById('lvlModal').innerHTML=`
+    <h3>🏅 레벨 가이드</h3>
+    <div class="sub"><b style="color:var(--text2)">${name}</b>님의 <b style="color:var(--text2)">25.01~ 누적 운동일</b> 기준이에요.
+      하루에 여러 운동을 해도 <b style="color:var(--text2)">1일 1회</b>로 계산되고, 멤버를 누르면 그 사람 기록으로 이동해요.
+      ${lv.next?`다음 레벨 <b style="color:var(--accent)">${lv.next.e} ${lv.next.title}</b>까지 <b style="color:var(--accent)">${lv.need}회</b> 남았어요!`:'이미 최고 레벨이에요 👑'}</div>
+    ${rows}
+    <button class="lvl-close" onclick="closeLevelGuide()">닫기</button>`;
+  document.getElementById('lvlOverlay').classList.add('open');
+}
+function closeLevelGuide(){document.getElementById('lvlOverlay').classList.remove('open');}
+
 let S = {
   raw:[],            // [{date:'YYYY-MM-DD', data:{name:[sports]}}]  ← 25.01~ 만
   monthly:{},        // {'YYYY-MM':{name:count}}                     ← 25.01~ 만
@@ -477,16 +779,17 @@ let S = {
   quote:null,        // 서버에서 받은 오늘의 명언 (없으면 폴백)
   rankMode:'month',  // 랭킹 탭 기간 모드: 'month' | 'year'
   rankYear:null,     // 연간 모드에서 선택한 연도
+  vsA:null, vsB:null,// VS 비교 대상 두 명
 };
 let CHARTS = {};
 let curPage = 'home';
-
 
 const NOW = new Date();
 const nowYM = `${NOW.getFullYear()}-${String(NOW.getMonth()+1).padStart(2,'0')}`;
 const TODAY = `${NOW.getFullYear()}-${String(NOW.getMonth()+1).padStart(2,'0')}-${String(NOW.getDate()).padStart(2,'0')}`;
 const startOfYear = new Date(NOW.getFullYear(),0,1);
 const yearPct = ((NOW - startOfYear)/(365.25*24*3600*1000)*100).toFixed(1);
+const DOW_KR = ['일','월','화','수','목','금','토'];
 
 const avatarColor = n => MEM_COLORS[MEMBERS.indexOf(n)] || 'var(--muted)';
 const initial = n => n.slice(0,1);  // 한 글자 이니셜(앞글자)
@@ -502,7 +805,7 @@ const PACE_MID_FACTOR = 0.85;
 function expectedRate(){ return parseFloat(yearPct)/100; }
 function paceGrade(r){
   const e=expectedRate();
-  if(r>=e)               return {level:'green', c:'',    col:'var(--accent)'};
+  if(r>=e)                 return {level:'green', c:'',    col:'var(--green)'};
   if(r>=e*PACE_MID_FACTOR) return {level:'amber', c:'mid', col:'var(--amber)'};
   return {level:'red', c:'low', col:'var(--red)'};
 }
@@ -511,32 +814,36 @@ function daysLeftThisYear(){
   const end=new Date(NOW.getFullYear(),11,31);
   return Math.max(0, Math.ceil((end - NOW)/86400000));
 }
-// 하루당 경과율 증가폭(%p 아님, 비율). 임계선이 시간에 따라 오르는 속도.
+// 하루당 경과율 증가폭(비율). 임계선이 시간에 따라 오르는 속도.
 const RATE_PER_DAY = 1/365.25;
 
-/* 다음 색 등급 도달까지 며칠 더 필요한가 — B(정밀) 버전.
-   핵심: 색 기준(expected)은 시간이 갈수록 계속 올라감. 게다가 하루 최대 1회.
-   그래서 "오늘부터 매일 하루도 안 빠지고 운동한다"고 가정하고, 며칠째에
-   달성률(=(cumul+d)/target)이 그날의 임계선을 따라잡는지 시뮬레이션한다.
-   - green이면 null (표시할 것 없음)
-   - 남은 날짜 안에 매일 운동해도 못 따라잡으면 {unreachable:true}
-   반환: {toColor, need} 또는 {toColor, unreachable:true, daysLeft} 또는 null */
+/* 다음 색 등급 도달까지 며칠 더 필요한가 — 정밀 버전.
+   색 기준(expected)은 시간이 갈수록 계속 올라가고, 하루 최대 1회이므로
+   "오늘부터 매일 하루도 안 빠지고 운동한다"고 가정하고, 며칠째에
+   달성률(=(cumul+d)/target)이 그날의 임계선을 따라잡는지 시뮬레이션한다. */
 function daysToNextGrade(cumul, target){
   if(!target) return null;
   const g=paceGrade(cumul/target);
   if(g.level==='green') return null;
   const toColor = g.level==='amber' ? 'green' : 'amber';
-  // 목표 계수: 노랑→초록은 expected, 빨강→노랑은 expected*0.85
   const goalFactor = g.level==='amber' ? 1 : PACE_MID_FACTOR;
-  const base = expectedRate();               // 오늘 경과율
+  const base = expectedRate();
   const left = daysLeftThisYear();
   for(let d=1; d<=left; d++){
-    const expD = base + RATE_PER_DAY*d;        // d일 뒤 경과율(임계선이 이동)
-    const rD   = (cumul + d)/target;           // 매일 운동 시 d일 뒤 달성률
+    const expD = base + RATE_PER_DAY*d;
+    const rD   = (cumul + d)/target;
     if(rD >= expD*goalFactor) return {toColor, need:d};
   }
-  // 남은 날짜 내내 매일 운동해도 도달 불가
   return {toColor, unreachable:true, daysLeft:left};
+}
+
+/* ---------- 연말 예상 프로젝션 ----------
+   올해 누적을 연 경과일로 나눠 하루 페이스를 구하고 365일로 환산.
+   해가 바뀐 직후(표본 7일 미만)엔 노이즈가 커서 표시하지 않음. */
+function projectYearEnd(cumulYear){
+  const elapsed = dayOfYear(NOW);
+  if(elapsed < 7) return null;
+  return Math.round(cumulYear / elapsed * 365);
 }
 
 // 서버에서 오늘의 명언 1개 받아오기 (실패해도 조용히 폴백)
@@ -550,6 +857,30 @@ async function loadQuote(){
 }
 function dayOfYear(d){return Math.floor((d - new Date(d.getFullYear(),0,0))/86400000);}
 
+/* ---------- 인바디 데이터 ----------
+   ?Q=inbody : {records:[{ts,name,date,weight,smm,bfm,whr,vfl}], members:{name:{height,hasPin}}}
+   POST      : {action:'setup'|'add'|'delete', name, pin, ...}
+   서버(Apps Script)가 아직 업데이트 전이면 loaded=false 상태로 안내만 표시 */
+S.inbody={loaded:false,records:[],members:{}};
+async function loadInbody(){
+  try{
+    const res=await fetch(API_BASE+'?Q=inbody');
+    if(!res.ok) return;
+    const j=await res.json();
+    if(j && !j.error && Array.isArray(j.records)){
+      S.inbody={loaded:true,records:j.records,members:j.members||{}};
+    }
+  }catch(e){ /* 미연결 상태 유지 */ }
+}
+async function ibPost(payload){
+  // text/plain 으로 보내 preflight(CORS 사전요청)를 피함 — Apps Script 웹앱 표준 패턴
+  const res=await fetch(API_BASE,{method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(payload)});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.json();
+}
+
 /* ---------- 테마 토글 ---------- */
 function toggleTheme(){
   const cur = document.documentElement.getAttribute('data-theme');
@@ -559,20 +890,26 @@ function toggleTheme(){
   if(S.raw.length) renderAll();  // 차트 색상 갱신
 }
 
-/* ---------- 탭 이동 ---------- */
-function goPage(p, el){
+function goPage(p){
   curPage = p;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  if(el) el.classList.add('active');
+  document.querySelectorAll('.tab, .bn-item').forEach(t=>t.classList.toggle('active', t.dataset.page===p));
   document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
   const target = document.getElementById('page-'+p);
   if(target) target.classList.add('active');
+  // ---- 지연 렌더링: 탭이 화면에 보이는 상태에서 그려야 차트 크기가 올바름 ----
+  if(S.raw.length || S.legacy.total){
+    if(PAGE_DIRTY[p]) renderPage(p);
+    else requestAnimationFrame(()=>{ // 이미 렌더된 페이지: 혹시 모를 0크기 차트 보정
+      Object.values(CHARTS).forEach(c=>{try{c.resize();}catch(e){}});
+    });
+  }
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
 /* ---------- 데이터 로드 ---------- */
 async function init(){
-  document.getElementById('refreshBtn').disabled = true;
+  const rBtn=document.getElementById('refreshBtn');
+  if(rBtn) rBtn.disabled = true;
   if(!S.raw.length){
     document.getElementById('app').innerHTML =
       `<div class="loading"><div class="spin"></div><h3 style="font-size:15px;color:var(--text)">데이터 불러오는 중…</h3></div>`;
@@ -586,13 +923,17 @@ async function init(){
     buildShell();
     renderAll();
     // 명언이 나중에 도착하면 홈 히어로만 갱신
-    quoteP.then(()=>{ if(S.quote && curPage==='home') renderHome(); });
+    quoteP.then(()=>{ if(S.quote && curPage==='home') renderPage('home'); });
+    // 인바디도 병렬 로딩 — 도착하면 개인기록 탭만 갱신
+    loadInbody().then(()=>{
+      if(S.inbody.loaded){ PAGE_DIRTY.me=true; if(curPage==='me') renderPage('me'); }
+    });
   }catch(e){
     document.getElementById('app').innerHTML =
       `<div class="err"><div class="ic">⚠️</div><h3>데이터를 불러오지 못했어요</h3>
        <p>잠시 후 새로고침을 눌러주세요.<br><span style="opacity:.6">${e.message}</span></p></div>`;
   }finally{
-    document.getElementById('refreshBtn').disabled = false;
+    if(rBtn) rBtn.disabled = false;
   }
 }
 
@@ -656,6 +997,10 @@ function parse(rows){
   if(S.monthly[nowYM]) S.selMonth=nowYM;
   else if(!S.selMonth||!months.includes(S.selMonth)) S.selMonth=months[months.length-1];
   if(!S.selMember) S.selMember = bestMemberThisMonth() || MEMBERS[0];
+  // VS 기본 매치업: 이달 1·2위
+  const top2=Object.entries(S.monthly[S.selMonth]||{}).sort((a,b)=>b[1]-a[1]).slice(0,2).map(e=>e[0]);
+  if(!S.vsA) S.vsA = top2[0] || MEMBERS[0];
+  if(!S.vsB) S.vsB = (top2[1] && top2[1]!==S.vsA) ? top2[1] : MEMBERS.find(n=>n!==S.vsA);
 }
 
 function bestMemberThisMonth(){
@@ -738,15 +1083,15 @@ function sportMapFor(entries){
 }
 
 /* =================================================================
-   SHELL: 4개 페이지 컨테이너 1회 생성 (탭 전환 시 재사용)
+   SHELL: 5개 페이지 컨테이너 1회 생성 (탭 전환 시 재사용)
    ================================================================= */
 function buildShell(){
   document.getElementById('app').innerHTML = `
     <section class="page active" id="page-home"></section>
     <section class="page" id="page-rank"></section>
     <section class="page" id="page-data"></section>
+    <section class="page" id="page-vs"></section>
     <section class="page" id="page-me"></section>`;
-  // 탭 active 상태를 현재 페이지로 동기화
   document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.id==='page-'+curPage));
 }
 
@@ -754,62 +1099,110 @@ function destroyAll(){Object.values(CHARTS).forEach(c=>{try{c.destroy();}catch(e
 function chartFont(){const s=getComputedStyle(document.documentElement);return{
   text:s.getPropertyValue('--text2').trim(),muted:s.getPropertyValue('--muted').trim(),
   grid:s.getPropertyValue('--grid').trim(),accent:s.getPropertyValue('--accent').trim(),
+  accent2:s.getPropertyValue('--accent2').trim(),green:s.getPropertyValue('--green').trim(),
   amber:s.getPropertyValue('--amber').trim(),red:s.getPropertyValue('--red').trim(),
 };}
+
+/* ---------- 지연 렌더링 시스템 ----------
+   숨겨진 탭(display:none)에서 Chart.js를 생성하면 canvas 크기가 0으로 잡혀
+   빈 차트가 되는 문제가 있어, "지금 보이는 탭"만 그리고 나머지는
+   dirty 표시 후 탭 진입 시점에 그린다. */
+const PAGE_DIRTY = {home:true, rank:true, data:true, vs:true, me:true};
+// 페이지별 소유 차트 키 (페이지 재렌더 전 해당 차트만 파기해 메모리 누수 방지)
+const PAGE_CHARTS = {
+  home:[], rank:['yearMonthly'],
+  data:['stacked','cumul','weekday','trend','groupDonut','season'],
+  vs:['vsRadar','vsDuel','vsWeekday'],
+  me:['donut','profTrend','inbodyTrend'],
+};
+function destroyPageCharts(p){
+  (PAGE_CHARTS[p]||[]).forEach(k=>{
+    if(CHARTS[k]){try{CHARTS[k].destroy();}catch(e){} delete CHARTS[k];}
+  });
+}
+function renderPage(p){
+  destroyPageCharts(p);
+  if(p==='home') renderHome();
+  else if(p==='rank') renderRank();
+  else if(p==='data') renderData();
+  else if(p==='vs') renderVS();
+  else if(p==='me') renderMe();
+  PAGE_DIRTY[p]=false;
+}
+function markDirty(pages){ pages.forEach(p=>PAGE_DIRTY[p]=true); }
 
 function renderAll(){
   destroyAll();
   buildTicker();
-  renderHome();
-  renderRank();
-  renderData();
-  renderMe();
+  markDirty(['home','rank','data','vs','me']);
+  renderPage(curPage);   // 지금 보이는 탭만 즉시 렌더, 나머지는 진입 시
 }
 
 /* =================================================================
-   페이지 1: 홈 — 오늘 요약 + 명언 + 스트릭 + 최근 피드
+   페이지 1: 홈 — 전광판 히어로 + 인사이트 + 오늘 현황 + 스트릭 + 피드
    ================================================================= */
 function renderHome(){
   const m=S.selMonth, md=S.monthly[m]||{};
   const total=Object.values(md).reduce((a,b)=>a+b,0);
   const active=Object.keys(md).filter(n=>md[n]>0).length;
-  const todayCount = (S.raw.find(e=>e.date===TODAY)?Object.keys(S.raw.find(e=>e.date===TODAY).data).length:0);
+  const todayEntry=S.raw.find(e=>e.date===TODAY);
+  const doneNames = todayEntry ? Object.keys(todayEntry.data) : [];
+  const todayCount = doneNames.length;
   const q=todayQuote();
-  // 전체 평균 달성률
   const avgRate = MEMBERS.reduce((s,n)=>s+(S.stats.rate[n]||0),0)/MEMBERS.length;
-  const ringC=2*Math.PI*32, ringFill=ringC*(1-parseFloat(yearPct)/100);
+  const ringC=2*Math.PI*27, ringFill=ringC*(1-parseFloat(yearPct)/100);
 
-  // MVP
+  // MVP + 가장 뜨거운 스트릭
   const mvp=Object.entries(md).sort((a,b)=>b[1]-a[1])[0];
-  // 가장 뜨거운 스트릭
   const hot=MEMBERS.map(n=>({n,...streakInfo(n)})).filter(x=>x.current>0).sort((a,b)=>b.current-a.current)[0];
 
+  // 레인 전구: 완료 순서(피드 기준으론 알 수 없으니 멤버 순) — 완료자는 점등
+  const lanes=MEMBERS.map((n,i)=>{
+    const on=doneNames.includes(n);
+    const emos=on?[...new Set((todayEntry.data[n]||[]).map(s=>sportEmoji(normSport(s))))].slice(0,1).join(''):'';
+    return `<div class="lane ${on?'on':''}" style="${on?`background:${avatarColor(n)};animation-delay:${i*45}ms;`:''}"
+      title="${n}${on?' · 오늘 완료':' · 아직'}" onclick="openMember('${n}')">${initial(n)}${on?`<span class="lk">${emos}</span>`:''}</div>`;
+  }).join('');
+
   document.getElementById('page-home').innerHTML = `
-    <div class="hero">
-      <div class="hero-top">
-        <div style="flex:1;min-width:240px">
-          <div class="hero-date">${NOW.getFullYear()}년 ${NOW.getMonth()+1}월 ${NOW.getDate()}일 · ${['일','월','화','수','목','금','토'][NOW.getDay()]}요일</div>
-          <div class="hero-greet">오늘 <b>${todayCount}명</b>이 운동을 끝냈어요 💪</div>
-          <div class="hero-quote">
-            <div class="q">"${q.q}"</div>
-            <div class="by">— <b>${q.by||'작자 미상'}</b>${q.life?` (${q.life})`:''}${(q.role||q.cat)?` · ${[q.role,q.cat].filter(Boolean).join(' · ')}`:''}</div>
+    <div class="board">
+      <div class="board-top">
+        <div style="flex:1;min-width:250px">
+          <div class="board-date"><span class="board-live">LIVE</span>
+            ${NOW.getFullYear()}.${String(NOW.getMonth()+1).padStart(2,'0')}.${String(NOW.getDate()).padStart(2,'0')} ${DOW_KR[NOW.getDay()]}요일</div>
+          <div class="board-bigwrap">
+            <span class="board-big" id="boardBig" data-count="${todayCount}">0</span>
+            <span class="board-of">/ ${MEMBERS.length}</span>
           </div>
+          <div class="board-label">오늘의 <b>오운완</b></div>
+          <div class="board-sub">${todayCount===MEMBERS.length?'🎉 전원 달성! 역사적인 날이에요':
+            todayCount===0?'아직 첫 주자를 기다리는 중 — 누가 먼저 불을 켤까요? 🏁':
+            hot?`🔥 지금 가장 뜨거운 스트릭: <b style="color:var(--accent2)">${hot.n} ${hot.current}일 연속</b>`:'오늘도 하나씩 불을 켜봐요'}</div>
         </div>
-        <div class="year-ring">
-          <div class="ring-wrap">
-            <svg width="74" height="74"><circle cx="37" cy="37" r="32" fill="none" stroke="var(--surface3)" stroke-width="6"/>
-            <circle cx="37" cy="37" r="32" fill="none" stroke="var(--accent)" stroke-width="6" stroke-linecap="round"
-              stroke-dasharray="${ringC}" stroke-dashoffset="${ringFill}"/></svg>
-            <div class="ring-label"><div class="pct">${yearPct}%</div><div class="txt">올해 경과</div></div>
+        <div class="board-quote">
+          <div class="q">"${q.q}"</div>
+          <div class="by">— <b>${q.by||'작자 미상'}</b>${q.life?` (${q.life})`:''}${(q.role||q.cat)?` · ${[q.role,q.cat].filter(Boolean).join(' · ')}`:''}</div>
+          <div class="year-ring">
+            <div class="ring-wrap">
+              <svg width="64" height="64"><circle cx="32" cy="32" r="27" fill="none" stroke="var(--surface3)" stroke-width="6"/>
+              <circle cx="32" cy="32" r="27" fill="none" stroke="var(--accent2)" stroke-width="6" stroke-linecap="round"
+                stroke-dasharray="${ringC}" stroke-dashoffset="${ringFill}"/></svg>
+              <div class="ring-label"><div class="pct">${yearPct}%</div><div class="txt">올해 경과</div></div>
+            </div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.5">올해가 <b style="color:var(--text2)">${yearPct}%</b> 지났어요.<br>남은 ${daysLeftThisYear()}일도 함께 💪</div>
           </div>
         </div>
       </div>
+      <div class="lanes">${lanes}</div>
     </div>
 
+    <div class="ins-title">⚡ 오늘의 인사이트 <span style="font-weight:500;letter-spacing:0;text-transform:none;font-family:'Noto Sans KR'">— 데이터가 발견한 이야기</span></div>
+    <div class="ins-row" id="insRow"></div>
+
     <div class="stat-row mb14">
-      ${statCard('이달 총 운동',total+'','회',(hot?`🔥 ${hot.n} ${hot.current}일 연속`:''),'var(--accent)')}
-      ${statCard('활동 멤버',active+'','명',`전체 ${MEMBERS.length}명 중`,'var(--amber)')}
-      ${statCard('평균 달성률',(avgRate*100).toFixed(1),'%',`기준 ${yearPct}% 경과`,'var(--blue)')}
+      ${statCard('이달 총 운동',total,'회',(hot?`🔥 ${hot.n} ${hot.current}일 연속`:''),'var(--accent)')}
+      ${statCard('활동 멤버',active,'명',`전체 ${MEMBERS.length}명 중`,'var(--amber)')}
+      ${statCard('평균 달성률',(avgRate*100).toFixed(1),'%',`기준 ${yearPct}% 경과`,'var(--blue)',false,1)}
       ${statCard('이달의 MVP',mvp?mvp[0]:'—','',mvp?`${mvp[1]}일 운동 🏆`:'','var(--purple)',true)}
     </div>
 
@@ -832,9 +1225,112 @@ function renderHome(){
       </div>
     </div>`;
 
+  buildInsights();
   buildTodayStatus();
   buildStreakGrid('streakGrid');
   buildFeed('homeFeed', 60);
+  runCountUps(document.getElementById('page-home'));
+  // 전원 달성 축하 (하루 1회)
+  if(todayCount===MEMBERS.length && MEMBERS.length>0){
+    try{
+      if(!sessionStorage.getItem('confetti-'+TODAY)){
+        sessionStorage.setItem('confetti-'+TODAY,'1');
+        fireConfetti();
+      }
+    }catch(e){ /* sessionStorage 불가 환경 무시 */ }
+  }
+}
+
+/* ---------- 인사이트 엔진 (규칙 기반) ----------
+   데이터에서 "지금 말할 가치가 있는 것"을 찾아 카드로 요약.
+   각 규칙은 {e:이모지, t:제목(HTML), s:부연, c:색, w:가중치} 반환. 상위 6개 노출. */
+function buildInsights(){
+  const cards=[];
+  const md=S.monthly[S.selMonth]||{};
+  const todayEntry=S.raw.find(e=>e.date===TODAY);
+  const doneNames=todayEntry?Object.keys(todayEntry.data):[];
+
+  // 1) 전원 달성
+  if(doneNames.length===MEMBERS.length)
+    cards.push({e:'🎉',t:`오늘 <b>전원 달성</b>!`,s:'12명이 모두 불을 켠 날. 캡처해 두세요.',c:'var(--accent2)',w:100});
+
+  // 2) 이번 주 모멘텀 (월~오늘 vs 지난주 같은 구간)
+  {
+    const dow=NOW.getDay(); const monday=new Date(NOW); monday.setDate(NOW.getDate()-((dow+6)%7));
+    const wkStart=monday.toISOString().slice(0,10);
+    const prevMon=new Date(monday.getTime()-7*86400000).toISOString().slice(0,10);
+    const prevEnd=new Date(new Date(TODAY).getTime()-7*86400000).toISOString().slice(0,10);
+    const cnt=r=>{let c=0;for(const e of S.raw){if(e.date>=r[0]&&e.date<=r[1])c+=Object.keys(e.data).length;}return c;};
+    const cur=cnt([wkStart,TODAY]), prev=cnt([prevMon,prevEnd]);
+    if(prev>0){
+      const diff=Math.round((cur-prev)/prev*100);
+      if(diff>=10) cards.push({e:'📈',t:`이번 주 그룹 활동 <b>+${diff}%</b>`,s:`지난주 같은 요일까지 ${prev}회 → 이번 주 ${cur}회`,c:'var(--green)',w:60});
+      else if(diff<=-10) cards.push({e:'📉',t:`이번 주 그룹 활동 <b>${diff}%</b>`,s:`지난주 ${prev}회 → 이번 주 ${cur}회. 오늘 한 명이 흐름을 바꿔요`,c:'var(--red)',w:55});
+    }
+  }
+
+  // 3) 스트릭 신기록 감시
+  {
+    const watch=MEMBERS.map(n=>({n,...streakInfo(n)}))
+      .filter(x=>x.current>=3 && x.longest>=4 && (x.longest-x.current)<=2)
+      .sort((a,b)=>(a.longest-a.current)-(b.longest-b.current))[0];
+    if(watch){
+      const gap=watch.longest-watch.current;
+      cards.push(gap<=0
+        ? {e:'🏅',t:`<b>${watch.n}</b> 최장 스트릭 <b>신기록 진행 중</b>`,s:`${watch.current}일 연속 — 매일이 새 기록입니다`,c:'var(--accent2)',w:80}
+        : {e:'⏱️',t:`<b>${watch.n}</b> 신기록까지 <b>${gap+1}일</b>`,s:`현재 ${watch.current}일 연속 · 최장 ${watch.longest}일`,c:'var(--accent)',w:70});
+    }
+  }
+
+  // 4) 이달 라이징 스타 (전월 대비 증가 최대)
+  {
+    const prevYM=prevMonthOf(S.selMonth), pmd=S.monthly[prevYM]||{};
+    const rise=MEMBERS.map(n=>({n,d:(md[n]||0)-(pmd[n]||0),cur:md[n]||0}))
+      .filter(x=>x.d>=3&&x.cur>0).sort((a,b)=>b.d-a.d)[0];
+    if(rise) cards.push({e:'🚀',t:`이달의 라이징 스타 <b>${rise.n}</b>`,s:`전월 대비 +${rise.d}일 (이달 ${rise.cur}일)`,c:'var(--pink)',w:50});
+  }
+
+  // 5) 그룹 무결석 릴레이 (누군가는 매일 운동한 연속일)
+  {
+    const set=new Set(S.raw.map(e=>e.date));
+    let cursor = set.has(TODAY)?TODAY:new Date(new Date(TODAY).getTime()-86400000).toISOString().slice(0,10);
+    let run=0;
+    while(set.has(cursor)){run++;cursor=new Date(new Date(cursor).getTime()-86400000).toISOString().slice(0,10);}
+    if(run>=7) cards.push({e:'🔗',t:`그룹 무결석 릴레이 <b>${run}일째</b>`,s:'매일 최소 한 명은 운동 중 — 바통을 이어가요',c:'var(--cyan)',w:45});
+  }
+
+  // 6) 연말 페이스 리더
+  {
+    const year=String(NOW.getFullYear());
+    const lead=MEMBERS.map(n=>{
+      const c=Object.keys(S.monthly).filter(ym=>ym.startsWith(year)).reduce((s,ym)=>s+(S.monthly[ym]?.[n]||0),0);
+      const t=S.stats.target[n]||0;
+      return {n,rate:t?c/t:0,proj:projectYearEnd(c),t};
+    }).filter(x=>x.t>0).sort((a,b)=>b.rate-a.rate)[0];
+    if(lead&&lead.proj) cards.push({e:'🧭',t:`페이스 1위 <b>${lead.n}</b> · 달성률 ${(lead.rate*100).toFixed(0)}%`,s:`이 페이스면 연말 예상 약 ${lead.proj}일`,c:'var(--green)',w:40});
+  }
+
+  // 7) 이번 달 새 종목
+  {
+    const monthSports=new Set(Object.keys(sportMapFor(S.raw.filter(e=>e.date.startsWith(S.selMonth)))));
+    const before=new Set(Object.keys(sportMapFor(S.raw.filter(e=>e.date<S.selMonth+'-01'))));
+    const news=[...monthSports].filter(s=>!before.has(s));
+    if(news.length) cards.push({e:'✨',t:`새 종목 등장: <b>${news.slice(0,3).join(', ')}</b>`,s:'이번 달 처음 기록된 운동이에요',c:'var(--purple)',w:35});
+  }
+
+  // 8) 이번 달 가장 뜨거운 요일
+  {
+    const wd=[0,0,0,0,0,0,0];
+    for(const e of S.raw){if(!e.date.startsWith(S.selMonth))continue;wd[new Date(e.date).getDay()]+=Object.keys(e.data).length;}
+    const mx=Math.max(...wd);
+    if(mx>=5) cards.push({e:'📅',t:`이달 최애 요일은 <b>${DOW_KR[wd.indexOf(mx)]}요일</b>`,s:`${mx}회 운동 — 우리 그룹의 리듬`,c:'var(--blue)',w:25});
+  }
+
+  const top=cards.sort((a,b)=>b.w-a.w).slice(0,6);
+  document.getElementById('insRow').innerHTML = top.length
+    ? top.map(c=>`<div class="ins-card" style="--ins-c:${c.c}"><span class="e">${c.e}</span>
+        <div><div class="t">${c.t}</div><div class="s">${c.s}</div></div></div>`).join('')
+    : `<div class="ins-card"><span class="e">🌱</span><div><div class="t">데이터가 쌓이는 중</div><div class="s">기록이 더 모이면 인사이트가 나타나요</div></div></div>`;
 }
 
 // 오늘의 챔피언 / 아직인 멤버 (부드러운 넛지)
@@ -842,8 +1338,7 @@ function buildTodayStatus(){
   const todayEntry=S.raw.find(e=>e.date===TODAY);
   const done = todayEntry ? Object.keys(todayEntry.data) : [];
   const pending = MEMBERS.filter(n=>!done.includes(n));
-  const dowLabel=['일','월','화','수','목','금','토'][NOW.getDay()];
-  // 챔피언 칩: 오늘 운동한 사람 + 종목 이모지
+  const dowLabel=DOW_KR[NOW.getDay()];
   const champChips = done.length
     ? done.map(n=>{
         const emos=[...new Set((todayEntry.data[n]||[]).map(s=>sportEmoji(normSport(s))))].slice(0,2).join('');
@@ -851,31 +1346,34 @@ function buildTodayStatus(){
           <span class="av-xs" style="background:${avatarColor(n)}">${initial(n)}</span>${n} ${emos}</span>`;
       }).join('')
     : `<span style="font-size:13px;color:var(--muted)">아직 오늘의 첫 운동을 기다리고 있어요 — 누가 먼저 끊을까요? 🏁</span>`;
-  // 아직인 멤버 칩
   const pendChips = pending.length
     ? pending.map(n=>`<span class="status-chip pend" onclick="openMember('${n}')">
         <span class="av-xs" style="background:var(--surface3);color:var(--muted)">${initial(n)}</span>${n}</span>`).join('')
-    : `<span style="font-size:13px;color:var(--accent);font-weight:700">🎉 오늘 전원 달성! 대단한 ${dowLabel}요일이네요</span>`;
+    : `<span style="font-size:13px;color:var(--green);font-weight:700">🎉 오늘 전원 달성! 대단한 ${dowLabel}요일이네요</span>`;
 
   document.getElementById('todayStatusCard').innerHTML=`
     <div class="card-head" style="margin-bottom:12px">
       <div class="card-title"><span class="dot" style="background:var(--gold)"></span>📍 오늘의 현황</div>
       <span class="card-sub">${NOW.getMonth()+1}/${NOW.getDate()} (${dowLabel}) · ${done.length}명 완료 · ${pending.length}명 대기</span>
     </div>
-    <div class="status-block">
-      <div class="status-label"><span class="status-dot" style="background:var(--accent)"></span>오늘의 챔피언 <b>${done.length}</b></div>
+    <div>
+      <div class="status-label"><span class="status-dot" style="background:var(--green)"></span>오늘의 챔피언 <b>${done.length}</b></div>
       <div class="status-chips">${champChips}</div>
     </div>
-    <div class="status-block" style="margin-top:12px">
+    <div style="margin-top:12px">
       <div class="status-label"><span class="status-dot" style="background:var(--muted)"></span>아직인 멤버 <b>${pending.length}</b></div>
       <div class="status-chips">${pendChips}</div>
     </div>`;
 }
 
-function statCard(label,val,unit,sub,color,small){
+function statCard(label,val,unit,sub,color,small,dec){
+  const isNum = !small && val!=='' && !isNaN(parseFloat(val));
+  const valHtml = isNum
+    ? `<span class="cu" data-count="${val}" data-dec="${dec||0}">0</span>`
+    : `${val}`;
   return `<div class="stat-card"><div class="bar" style="background:${color}"></div>
     <div class="s-label">${label}</div>
-    <div class="s-val" style="color:${color};${small?'font-size:21px':''}">${val}<span style="font-size:13px;color:var(--muted);font-weight:600">${unit}</span></div>
+    <div class="s-val" style="color:${color};${small?'font-size:21px;font-family:\'Noto Sans KR\',sans-serif':''}">${valHtml}<span style="font-size:13px;color:var(--muted);font-weight:600">${unit}</span></div>
     <div class="s-sub">${sub}</div></div>`;
 }
 
@@ -915,7 +1413,7 @@ function buildFeed(elId, limit){
   for(const date of Object.keys(byDate).sort().reverse()){
     if(cnt>=limit)break;
     const dd=new Date(date);
-    const label=`${dd.getMonth()+1}/${dd.getDate()} (${['일','월','화','수','목','금','토'][dd.getDay()]})`;
+    const label=`${dd.getMonth()+1}/${dd.getDate()} (${DOW_KR[dd.getDay()]})`;
     html+=`<div class="feed-day">${label} · ${byDate[date].length}명</div>`;
     for(const it of byDate[date]){
       if(cnt>=limit)break;
@@ -950,9 +1448,10 @@ function buildTicker(){
 function openMember(name){
   S.selMember=name;
   profCalYM=null;
-  goPage('me', document.querySelector('.tab[data-page="me"]'));
-  renderMe();
+  markDirty(['me']);
+  goPage('me');   // goPage가 dirty 상태를 보고 렌더 (탭이 보이는 상태에서 차트 생성)
 }
+
 /* =================================================================
    페이지 2: 랭킹·챌린지
    ================================================================= */
@@ -961,7 +1460,6 @@ function renderRank(){
   const years=[...new Set(allMonths.map(mo=>mo.slice(0,4)))].sort().reverse();
   if(!S.rankYear||!years.includes(S.rankYear)) S.rankYear=S.selMonth.slice(0,4);
 
-  // 기간 토글 + 드롭다운 (모드에 따라 내용 변경)
   const toggle=`
     <div class="dropdown-row">
       <div style="display:inline-flex;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px;gap:2px">
@@ -982,7 +1480,6 @@ function renderRank(){
   if(S.rankMode==='year') return renderRankYear(toggle);
 
   const m=S.selMonth, year=m.slice(0,4);
-  // 전월(직전 달) 계산 — 순위 등락 비교용
   const prevYM=prevMonthOf(m);
 
   document.getElementById('page-rank').innerHTML = `
@@ -1002,7 +1499,7 @@ function renderRank(){
     <div class="card mb14" id="monthlyChalCard"></div>
 
     <div class="card mb14">
-      <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>📋 전체 순위표</div><span class="card-sub">${m} 운동 일수 · 화살표는 전월 대비 순위 등락</span></div>
+      <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--green)"></span>📋 전체 순위표</div><span class="card-sub">${m} 운동 일수 · 화살표는 전월 대비 순위 등락</span></div>
       <table class="lb-table" id="lbTable"></table>
       <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">
         🟡·🟢 <b>N일 필요</b>는 오늘부터 <b>매일 하루도 안 빠지고</b> 운동한다고 가정했을 때 며칠째에 다음 색으로 바뀌는지를 뜻해요
@@ -1041,7 +1538,6 @@ function prevMonthOf(m){
 function renderRankYear(toggle){
   const y=S.rankYear;
   const prevY=String(parseInt(y)-1);
-  // 연 누적 일수
   const cumul={}; MEMBERS.forEach(n=>{cumul[n]=Object.keys(S.monthly).filter(ym=>ym.startsWith(y)).reduce((s,ym)=>s+(S.monthly[ym]?.[n]||0),0);});
   const prevCumul={}; MEMBERS.forEach(n=>{prevCumul[n]=Object.keys(S.monthly).filter(ym=>ym.startsWith(prevY)).reduce((s,ym)=>s+(S.monthly[ym]?.[n]||0),0);});
 
@@ -1073,11 +1569,12 @@ function renderRankYear(toggle){
     </div>
 
     <div class="card mb14">
-      <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--accent)"></span>📋 ${y}년 연간 순위표</div><span class="card-sub">누적 일수 · 달성률 · 전년 대비 등락</span></div>
+      <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--green)"></span>📋 ${y}년 연간 순위표</div><span class="card-sub">누적 일수 · 달성률 · 전년 대비 등락 · 🧭 연말 예상</span></div>
       <table class="lb-table" id="lbTableYear"></table>
       <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">
         🟡·🟢 <b>N일 필요</b>는 오늘부터 <b>매일 하루도 안 빠지고</b> 운동한다고 가정했을 때 며칠째에 다음 색으로 바뀌는지를 뜻해요
         (하루 1회 · 목표선이 매일 조금씩 오르는 것까지 반영) · 초록불은 표시 없음 · ⚠️ 연내 어려움 = 올해 안엔 매일 해도 도달이 힘든 상태 ·
+        <span class="proj-chip">🧭 예상 N일</span>은 지금까지의 페이스가 연말까지 이어진다고 가정한 추정치 ·
         <span class="delta up">▲n</span>/<span class="delta dn">▼n</span> 은 전년 대비 순위가 n계단 오르내렸다는 뜻
       </div>
     </div>
@@ -1105,17 +1602,12 @@ function renderRankYear(toggle){
 
 // 올해의 하이라이트 배너
 function buildYearHighlight(y, cumul){
-  // 최다 운동 멤버
   const topMem=Object.entries(cumul).sort((a,b)=>b[1]-a[1])[0];
-  // 그 해 총 운동일(멤버×일 합산)
   const totalDays=Object.values(cumul).reduce((a,b)=>a+b,0);
-  // 그 해 운동한 날(그룹 커버리지) = 누군가 한 명이라도 운동한 날 수
   const activeDaySet=new Set(S.raw.filter(e=>e.date.startsWith(y)).map(e=>e.date));
-  // 가장 뜨거웠던 달
   const monRows=[]; for(let mo=1;mo<=12;mo++){const ym=`${y}-${String(mo).padStart(2,'0')}`;
     monRows.push([mo, Object.values(S.monthly[ym]||{}).reduce((a,b)=>a+b,0)]);}
   const hotMon=monRows.slice().sort((a,b)=>b[1]-a[1])[0];
-  // 그 해 최장 연속(전체 멤버 중)
   let bestStreak={n:'—',v:0};
   MEMBERS.forEach(n=>{
     const ds=[...activeDates(n)].filter(d=>d.startsWith(y)).sort();
@@ -1151,7 +1643,7 @@ function buildYearMonthlyChart(y){
     data:{labels,datasets:[{data,backgroundColor:data.map((_,i)=>i===maxIdx?f.accent:f.accent+'70'),borderRadius:6}]},
     options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:18}},
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw}일 운동`}},
-        datalabels:{anchor:'end',align:'end',color:f.text,font:{size:10,weight:'700'},formatter:v=>v||''}},
+        datalabels:{display:true,anchor:'end',align:'end',color:f.text,font:{size:10,weight:'700'},formatter:v=>v||''}},
       scales:{x:{ticks:{color:f.text,font:{size:11}},grid:{display:false}},
         y:{ticks:{color:f.muted,font:{size:10}},grid:{color:f.grid},beginAtZero:true}}}});
 }
@@ -1161,7 +1653,6 @@ function buildYearDiversity(y, prevY){
   const yearSports=new Set(Object.keys(sportMapFor(S.raw.filter(e=>e.date.startsWith(y)))));
   const beforeSports=new Set(Object.keys(sportMapFor(S.raw.filter(e=>e.date<`${y}-01-01`))));
   const newSports=[...yearSports].filter(s=>!beforeSports.has(s));
-  // 멤버별 시도 종목 수 TOP (올라운더)
   const memSports={}; MEMBERS.forEach(n=>memSports[n]=new Set());
   for(const e of S.raw){if(!e.date.startsWith(y))continue;
     for(const[n,sp]of Object.entries(e.data))for(const s of sp){const k=normSport(s);if(k)memSports[n].add(k);}}
@@ -1171,15 +1662,15 @@ function buildYearDiversity(y, prevY){
       <div class="mini-stat" style="flex:1;background:var(--surface2)">
         <div class="v" style="color:var(--pink)">${yearSports.size}</div><div class="l">시도한 종목</div></div>
       <div class="mini-stat" style="flex:1;background:var(--surface2)">
-        <div class="v" style="color:var(--accent)">${allrounder?allrounder[1]:0}</div><div class="l">올라운더 · ${allrounder?allrounder[0]:'—'}</div></div>
+        <div class="v" style="color:var(--green)">${allrounder?allrounder[1]:0}</div><div class="l">올라운더 · ${allrounder?allrounder[0]:'—'}</div></div>
     </div>
     <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px">✨ ${y}년 새로 등장한 종목</div>
     ${newSports.length
-      ? `<div style="display:flex;flex-wrap:wrap;gap:6px">${newSports.map(s=>`<span class="tag" style="font-size:12px;padding:4px 10px">${sportEmoji(s)} ${s}</span>`).join('')}</div>`
+      ? `<div style="display:flex;flex-wrap:wrap;gap:6px">${newSports.map(s=>`<span class="tag" style="display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:9px;font-size:12px;padding:4px 10px">${sportEmoji(s)} ${s}</span>`).join('')}</div>`
       : `<div style="font-size:12px;color:var(--muted)">새로 추가된 종목 없음 — 꾸준히 해오던 종목들로 채운 해네요 👏</div>`}`;
 }
 
-// 연간 목표 달성 현황 (주간 챌린지 대체)
+// 연간 목표 달성 현황
 function buildYearGoalCard(y, cumul){
   const isCur=y===String(NOW.getFullYear());
   const rows=MEMBERS.map(n=>({n,c:cumul[n],t:S.stats.target[n]||0}))
@@ -1189,23 +1680,23 @@ function buildYearGoalCard(y, cumul){
   const totalC=MEMBERS.reduce((s,n)=>s+cumul[n],0);
   const totalT=MEMBERS.reduce((s,n)=>s+(S.stats.target[n]||0),0);
   const groupPct=totalT?Math.round(totalC/totalT*100):0;
-  const top=rows.slice(0,6), maxV=1;
+  const top=rows.slice(0,6);
   document.getElementById('yearGoalCard').innerHTML=`
     <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--cyan)"></span>🎯 ${y}년 목표 달성 현황</div>
       <span class="card-sub">${isCur?`기준 ${yearPct}% 경과`:'연말 마감'}</span></div>
     <div class="chal-goal-bar"><div class="chal-goal-fill" style="width:${Math.min(100,groupPct)}%"><span class="v">${groupPct}%</span></div></div>
-    <div class="chal-goal-label"><span>그룹 합산 ${totalC} / ${totalT}일</span><span>목표 달성 <b style="color:var(--accent)">${reached}명</b></span></div>
+    <div class="chal-goal-label"><span>그룹 합산 ${totalC} / ${totalT}일</span><span>목표 달성 <b style="color:var(--green)">${reached}명</b></span></div>
     <div class="chal-list">
       ${top.map((x,i)=>{const pct=(x.rate*100).toFixed(0);const done=x.c>=x.t&&x.t>0;
         return `<div class="chal-row">
           <span class="medal">${done?'✅':['🥇','🥈','🥉','','',''][i]||''}</span>
           <span class="nm">${x.n}</span>
-          <div class="track"><div class="fill" style="width:${Math.min(100,x.rate*100)}%;background:${done?'var(--accent)':avatarColor(x.n)}"></div></div>
+          <div class="track"><div class="fill" style="width:${Math.min(100,x.rate*100)}%;background:${done?'var(--green)':avatarColor(x.n)}"></div></div>
           <span class="v">${pct}%</span></div>`;}).join('')}
     </div>`;
 }
 
-// 연간 순위표
+// 연간 순위표 (+연말 예상 프로젝션)
 function buildYearLeaderboard(y, cumul, prevCumul){
   const prevRank={}; Object.entries(prevCumul).sort((a,b)=>b[1]-a[1]).forEach(([n],i)=>prevRank[n]=i+1);
   const isCur=y===String(NOW.getFullYear());
@@ -1221,28 +1712,35 @@ function buildYearLeaderboard(y, cumul, prevCumul){
         :`<span class="delta eq" title="전년과 순위 동일">—</span>`;}
     const pct=(p.rate*100).toFixed(1),pn=parseFloat(pct),{c,col}=paceGrade(p.rate);
     const nextChip=nextGradeChip(p.cumul, p.target);
+    // 연말 예상 (올해만)
+    let projChip='';
+    if(isCur){
+      const proj=projectYearEnd(p.cumul);
+      if(proj!==null){
+        const hit=p.target>0&&proj>=p.target;
+        projChip=` · <span class="proj-chip ${hit?'hit':''}" title="지금 페이스가 연말까지 이어질 때의 추정치">🧭 예상 ${proj}일${hit?' ✓':''}</span>`;
+      }
+    }
     return `<tr onclick="openMember('${p.name}')">
       <td><span class="rank-badge ${rc}">${i+1}</span></td>
       <td><span class="av-sm" style="background:${avatarColor(p.name)}">${initial(p.name)}</span><b>${p.name}</b></td>
-      <td style="font-family:'DM Mono',monospace;font-weight:800">${p.cumul}<span style="color:var(--muted);font-size:10px">일</span> ${delta}</td>
+      <td style="font-family:'Archivo',sans-serif;font-weight:800">${p.cumul}<span style="color:var(--muted);font-size:10px">일</span> ${delta}</td>
       <td><div class="pbar-row"><div class="pbar"><div class="pfill ${c}" style="width:${Math.min(100,pn)}%"></div></div>
         <span class="pct" style="color:${col}">${pct}%</span></div>
-        <div class="rate-detail">${p.cumul}/${p.target}일${nextChip}</div></td></tr>`;
+        <div class="rate-detail">${p.cumul}/${p.target}일${nextChip}${projChip}</div></td></tr>`;
   }).join('');
   document.getElementById('lbTableYear').innerHTML=`<thead><tr><th>#</th><th>이름</th><th>연 누적</th><th>목표 달성률</th></tr></thead><tbody>${rows}</tbody>`;
 }
 
-// 순위표 rate-detail 뒤에 붙일 "다음 색까지 +N일" 칩 (노랑·빨강만, 초록은 빈 문자열)
-// need는 "오늘부터 매일 운동한다고 가정했을 때 며칠째에 색이 바뀌는가"(달력 기준).
+// 순위표 rate-detail 뒤에 붙일 "다음 색까지 +N일" 칩
 function nextGradeChip(cumul, target){
   const nx=daysToNextGrade(cumul, target);
-  if(!nx) return ''; // 초록불이면 표시 안 함
+  if(!nx) return '';
   const toGreen = nx.toColor==='green';
   const dotEmoji = toGreen ? '🟢' : '🟡';
   const cls = toGreen ? 'to-green' : 'to-amber';
   const colorName = toGreen ? '초록불' : '노란불';
   if(nx.unreachable){
-    // 남은 날짜 안엔 매일 해도 도달 불가
     return ` · <span class="next-chip unreachable" title="남은 ${nx.daysLeft}일 동안 매일 운동해도 올해 안엔 ${colorName} 도달이 어려워요">⚠️ 연내 어려움</span>`;
   }
   return ` · <span class="next-chip ${cls}" title="오늘부터 매일 운동하면 ${nx.need}일째에 ${colorName}로 바뀌어요 (하루 1회 · 색 기준 상승 반영)">${dotEmoji} ${nx.need}일 필요</span>`;
@@ -1263,25 +1761,11 @@ function buildPodiumByMap(elId, map, unit){
   }).join('');
 }
 
-function setRankMode(mode){S.rankMode=mode;destroyAll();renderRank();}
-function setRankYear(y){S.rankYear=y;destroyAll();renderRank();}
-
+function setRankMode(mode){S.rankMode=mode;renderPage('rank');}
+function setRankYear(y){S.rankYear=y;renderPage('rank');}
 
 function buildPodium(m){
-  const md=S.monthly[m]||{};
-  const top=Object.entries(md).sort((a,b)=>b[1]-a[1]).slice(0,3);
-  if(top.length<3){document.getElementById('podium').innerHTML=`<div class="empty-hint" style="padding:24px"><span class="ic">🥇</span>아직 순위를 매길 데이터가 부족해요</div>`;return;}
-  const order=[top[1],top[0],top[2]]; // 2-1-3
-  const place=[2,1,3];
-  document.getElementById('podium').innerHTML=order.map((e,i)=>{
-    const [name,cnt]=e; const p=place[i];
-    const medal=p===1?'🥇':p===2?'🥈':'🥉';
-    return `<div class="pod pod-${p}" onclick="openMember('${name}')" style="cursor:pointer">
-      <div style="font-size:18px">${medal}</div>
-      <div class="av" style="background:${avatarColor(name)}">${initial(name)}</div>
-      <div class="nm">${name}</div><div class="sc">${cnt}일</div>
-      <div class="stand">${p}</div></div>`;
-  }).join('');
+  buildPodiumByMap('podium', S.monthly[m]||{}, '일');
 }
 
 // 주간 그룹 챌린지: 이번 주(월~일) 그룹 전체 운동 횟수 목표
@@ -1302,7 +1786,7 @@ function buildWeeklyChallenge(){
     <div class="chal-goal-label"><span>그룹 합산 운동 횟수</span><span>${pct}% 달성</span></div>
     <div class="chal-list">
       ${top.map((e,i)=>{const[n,c]=e;return `<div class="chal-row">
-        <span class="medal">${['🥇','🥈','🥉','','',][i]||''}</span>
+        <span class="medal">${['🥇','🥈','🥉','',''][i]||''}</span>
         <span class="nm">${n}</span>
         <div class="track"><div class="fill" style="width:${c/maxV*100}%;background:${avatarColor(n)}"></div></div>
         <span class="v">${c}회</span></div>`;}).join('') || '<div class="empty-hint" style="padding:14px">이번 주 첫 운동을 시작해보세요!</div>'}
@@ -1313,9 +1797,7 @@ function buildWeeklyChallenge(){
 function buildMonthlyChallenge(m){
   const md=S.monthly[m]||{};
   const total=Object.values(md).reduce((a,b)=>a+b,0);
-  // 전월
-  const [y,mo]=m.split('-').map(Number);
-  const prevDate=new Date(y,mo-2,1); const prevYM=`${prevDate.getFullYear()}-${String(prevDate.getMonth()+1).padStart(2,'0')}`;
+  const prevYM=prevMonthOf(m);
   const prevTotal=Object.values(S.monthly[prevYM]||{}).reduce((a,b)=>a+b,0);
   const goal=prevTotal>0?Math.ceil(prevTotal*1.05):60; // 전월 대비 +5% 도전
   const pct=Math.min(100,Math.round(total/goal*100));
@@ -1323,11 +1805,11 @@ function buildMonthlyChallenge(m){
   document.getElementById('monthlyChalCard').innerHTML=`
     <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--cyan)"></span>🎯 이달 그룹 도전 — 전월 기록 넘기</div>
       <span class="card-sub">${prevYM} 대비 +5% 목표</span></div>
-    <div class="chal-goal-bar"><div class="chal-goal-fill" style="width:${pct}%;background:${beat?'linear-gradient(90deg,var(--accent-dim),var(--accent))':'linear-gradient(90deg,var(--blue),var(--cyan))'}">
-      <span class="v">${total}일</span></div></div>
+    <div class="chal-goal-bar"><div class="chal-goal-fill" style="width:${pct}%;${beat?'':'background:linear-gradient(90deg,var(--blue),var(--cyan))'}">
+      <span class="v" style="${beat?'':'color:#fff'}">${total}일</span></div></div>
     <div class="chal-goal-label">
       <span>목표 ${goal}일 (전월 ${prevTotal}일)</span>
-      <span style="color:${beat?'var(--accent)':'var(--text2)'};font-weight:700">${beat?'🎉 목표 달성!':`${pct}% · ${goal-total}일 남음`}</span>
+      <span style="color:${beat?'var(--green)':'var(--text2)'};font-weight:700">${beat?'🎉 목표 달성!':`${pct}% · ${goal-total}일 남음`}</span>
     </div>`;
 }
 
@@ -1337,7 +1819,6 @@ function buildLeaderboard(m, prevYM){
   const prevRank={};
   Object.entries(prevMd).sort((a,b)=>b[1]-a[1]).forEach(([n],i)=>prevRank[n]=i+1);
   const year=m.slice(0,4);
-  // 연 누적 (선택월까지)
   const yearCumul={};
   MEMBERS.forEach(n=>{yearCumul[n]=Object.keys(S.monthly).filter(ym=>ym.startsWith(year)&&ym<=m).reduce((s,ym)=>s+(S.monthly[ym]?.[n]||0),0);});
   const sorted=MEMBERS.map(n=>({name:n,count:md[n]||0,cumul:yearCumul[n],target:S.stats.target[n]||0,
@@ -1355,7 +1836,7 @@ function buildLeaderboard(m, prevYM){
     return `<tr onclick="openMember('${p.name}')">
       <td><span class="rank-badge ${rc}">${i+1}</span></td>
       <td><span class="av-sm" style="background:${avatarColor(p.name)}">${initial(p.name)}</span><b>${p.name}</b></td>
-      <td style="font-family:'DM Mono',monospace;font-weight:800">${p.count}<span style="color:var(--muted);font-size:10px">일</span> ${delta}</td>
+      <td style="font-family:'Archivo',sans-serif;font-weight:800">${p.count}<span style="color:var(--muted);font-size:10px">일</span> ${delta}</td>
       <td><div class="pbar-row"><div class="pbar"><div class="pfill ${c}" style="width:${Math.min(100,pn)}%"></div></div>
         <span class="pct" style="color:${col}">${pct}%</span></div>
         <div class="rate-detail">${p.cumul}/${p.target}일${nextChip}</div></td></tr>`;
@@ -1376,7 +1857,12 @@ function renderSportSection(elId, sportMap){
   }).join('')}</div>`;
 }
 
-function setMonth(m){S.selMonth=m;destroyAll();buildTicker();renderHome();renderRank();renderData();}
+function setMonth(m){
+  S.selMonth=m;
+  buildTicker();
+  markDirty(['home','rank','data','vs']);  // 월 의존 페이지만 무효화 (개인기록은 자체 달력 유지)
+  renderPage(curPage);
+}
 /* =================================================================
    페이지 3: 데이터·분석
    ================================================================= */
@@ -1462,42 +1948,38 @@ function buildGroupDonut(){
     options:{responsive:true,maintainAspectRatio:false,cutout:'56%',
       plugins:{legend:{position:'right',labels:{color:f.text,font:{size:11},boxWidth:10,padding:6}},
         tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw}회 (${(c.raw/total*100).toFixed(0)}%)`}},
-        datalabels:{color:'#fff',font:{size:10,weight:'700'},formatter:(v)=>{const p=v/total*100;return p>=7?Math.round(p)+'%':'';}}}}});
+        datalabels:{display:true,color:'#fff',font:{size:10,weight:'700'},formatter:(v)=>{const p=v/total*100;return p>=7?Math.round(p)+'%':'';}}}}});
 }
 
-// 월별 종목 구성 추이 (상위 종목 stacked %)
+// 월별 종목 구성 추이 (상위 종목 stacked)
 function buildSeasonChart(m){
   const f=chartFont();
   const year=m.slice(0,4);
   document.getElementById('seasonSub').textContent=`${year}년`;
   const isCur=year===String(NOW.getFullYear());
   const maxMo=isCur?parseInt(nowYM.slice(5,7)):12;
-  // 그 해 상위 6개 종목
   const yearMap=sportMapFor(S.raw.filter(e=>e.date.startsWith(year)));
   const topSports=Object.entries(yearMap).sort((a,b)=>b[1].total-a[1].total).slice(0,6).map(s=>s[0]);
   const labels=[]; const perMonth=[];
   for(let mo=1;mo<=maxMo;mo++){
     const ym=`${year}-${String(mo).padStart(2,'0')}`;
     labels.push(mo+'월');
-    const mm=sportMapFor(S.raw.filter(e=>e.date.startsWith(ym)));
-    perMonth.push(mm);
+    perMonth.push(sportMapFor(S.raw.filter(e=>e.date.startsWith(ym))));
   }
   const datasets=topSports.map((sp,i)=>({
     label:sp, data:perMonth.map(mm=>mm[sp]?mm[sp].total:0),
-    backgroundColor:SPORT_COLORS[i%10], borderWidth:0, datalabels:{display:false}
+    backgroundColor:SPORT_COLORS[i%10], borderWidth:0
   }));
   CHARTS.season=new Chart(document.getElementById('seasonChart'),{type:'bar',data:{labels,datasets},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{labels:{color:f.text,font:{size:10},boxWidth:9,padding:5}},
-        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}회`}},datalabels:{display:false}},
+        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}회`}}},
       scales:{x:{stacked:true,ticks:{color:f.text,font:{size:10}},grid:{display:false}},
         y:{stacked:true,ticks:{color:f.muted,font:{size:10}},grid:{color:f.grid},beginAtZero:true}}}});
 }
 
 // 멤버별 요일 성향 비교 (행 정규화 히트맵)
 function buildWeekdayCompare(){
-  const DOW=['일','월','화','수','목','금','토'];
-  // 멤버별 요일 카운트
   const data={}; MEMBERS.forEach(n=>data[n]=[0,0,0,0,0,0,0]);
   for(const e of S.raw)for(const n of Object.keys(e.data)){if(data[n])data[n][new Date(e.date).getDay()]++;}
   const rows=MEMBERS.map(name=>{
@@ -1505,16 +1987,15 @@ function buildWeekdayCompare(){
     const peak=arr.indexOf(Math.max(...arr));
     const cells=arr.map((v,i)=>{
       const pct=v/tot*100;
-      // 색 강도: 비중에 비례
       const alpha=Math.min(1,pct/35);
       const bg=v===0?'var(--surface2)':`color-mix(in srgb, var(--accent) ${Math.round(alpha*85)}%, transparent)`;
-      return `<td style="text-align:center;padding:0"><div title="${name} ${DOW[i]}요일: ${v}회 (${pct.toFixed(0)}%)" style="margin:2px;height:30px;border-radius:7px;background:${bg};border:1px solid ${i===peak&&v>0?'var(--accent)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-family:'DM Mono',monospace;font-weight:700;color:${pct>=22?'#fff':'var(--muted)'}">${v||''}</div></td>`;
+      return `<td style="text-align:center;padding:0"><div title="${name} ${DOW_KR[i]}요일: ${v}회 (${pct.toFixed(0)}%)" style="margin:2px;height:30px;border-radius:7px;background:${bg};border:1px solid ${i===peak&&v>0?'var(--accent)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-family:'DM Mono',monospace;font-weight:700;color:${pct>=22?'#fff':'var(--muted)'}">${v||''}</div></td>`;
     }).join('');
     return `<tr><td style="font-weight:700;font-size:12.5px;white-space:nowrap;padding-right:8px"><span class="av-sm" style="background:${avatarColor(name)}">${initial(name)}</span>${name}</td>${cells}</tr>`;
   }).join('');
   document.getElementById('weekdayCompare').innerHTML=`
     <table style="width:100%;border-collapse:collapse;min-width:520px">
-      <thead><tr><th style="width:80px"></th>${DOW.map((d,i)=>`<th style="text-align:center;font-size:11px;font-weight:600;color:${i===0?'var(--red)':i===6?'var(--blue)':'var(--muted)'};padding-bottom:6px">${d}</th>`).join('')}</tr></thead>
+      <thead><tr><th style="width:80px"></th>${DOW_KR.map((d,i)=>`<th style="text-align:center;font-size:11px;font-weight:600;color:${i===0?'var(--red)':i===6?'var(--blue)':'var(--muted)'};padding-bottom:6px">${d}</th>`).join('')}</tr></thead>
       <tbody>${rows}</tbody>
     </table>
     <div style="font-size:11px;color:var(--muted);margin-top:10px">색이 진할수록 그 요일 비중이 높음 · 테두리 강조 = 개인 최다 요일</div>`;
@@ -1547,18 +2028,17 @@ function buildCumulChart(m){
   const remain=MEMBERS.map((n,i)=>Math.max(0,(S.stats.target[n]||0)-cumul[i]));
   const rate=MEMBERS.map((n,i)=>{const t=S.stats.target[n]||1;return parseFloat((cumul[i]/t*100).toFixed(1));});
   const ds=[
-    {label:'누적 운동',data:cumul,backgroundColor:MEMBERS.map((_,i)=>MEM_COLORS[i]),borderWidth:0,borderRadius:3,yAxisID:'y',stack:'s',datalabels:{display:false}},
+    {label:'누적 운동',data:cumul,backgroundColor:MEMBERS.map((_,i)=>MEM_COLORS[i]),borderWidth:0,borderRadius:3,yAxisID:'y',stack:'s'},
     {label:'목표까지',data:remain,backgroundColor:MEMBERS.map((_,i)=>MEM_COLORS[i].replace('hsl(','hsla(').replace(')',',0.10)')),
-      borderColor:MEMBERS.map((_,i)=>MEM_COLORS[i].replace('hsl(','hsla(').replace(')',',0.45)')),borderWidth:1.5,borderSkipped:false,yAxisID:'y',stack:'s',datalabels:{display:false}},
-    {label:'달성률(%)',type:'line',data:rate,borderColor:f.amber,backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:f.amber,tension:.3,yAxisID:'y2',order:0,datalabels:{display:false}},
+      borderColor:MEMBERS.map((_,i)=>MEM_COLORS[i].replace('hsl(','hsla(').replace(')',',0.45)')),borderWidth:1.5,borderSkipped:false,yAxisID:'y',stack:'s'},
+    {label:'달성률(%)',type:'line',data:rate,borderColor:f.amber,backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:f.amber,tension:.3,yAxisID:'y2',order:0},
   ];
-  if(isCur)ds.push({label:`기준 ${yearPct}%`,type:'line',data:MEMBERS.map(()=>parseFloat(yearPct)),borderColor:f.red,borderWidth:1.5,borderDash:[5,4],pointRadius:0,yAxisID:'y2',order:0,datalabels:{display:false}});
+  if(isCur)ds.push({label:`기준 ${yearPct}%`,type:'line',data:MEMBERS.map(()=>parseFloat(yearPct)),borderColor:f.red,borderWidth:1.5,borderDash:[5,4],pointRadius:0,yAxisID:'y2',order:0});
   const yMax=Math.ceil(Math.max(...MEMBERS.map(n=>S.stats.target[n]||0),...cumul)*1.15/5)*5;
   CHARTS.cumul=new Chart(document.getElementById('cumulChart'),{type:'bar',data:{labels:MEMBERS,datasets:ds},
     options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:30}},
       plugins:{legend:{labels:{color:f.muted,font:{size:10},boxWidth:9,padding:5,filter:i=>['누적 운동','목표까지','달성률(%)',`기준 ${yearPct}%`].includes(i.text)}},
-        tooltip:{callbacks:{label:c=>{if(c.dataset.label==='목표까지'){const n=MEMBERS[c.dataIndex];return ` 잔여 ${c.raw}일 (목표 ${S.stats.target[n]}일)`;}if(c.dataset.yAxisID==='y2')return ` 달성률 ${Number(c.raw).toFixed(1)}%`;return ` 누적 ${c.raw}일`;}}},
-        datalabels:{display:false}},
+        tooltip:{callbacks:{label:c=>{if(c.dataset.label==='목표까지'){const n=MEMBERS[c.dataIndex];return ` 잔여 ${c.raw}일 (목표 ${S.stats.target[n]}일)`;}if(c.dataset.yAxisID==='y2')return ` 달성률 ${Number(c.raw).toFixed(1)}%`;return ` 누적 ${c.raw}일`;}}}},
       scales:{x:{stacked:true,ticks:{color:f.text,font:{size:11,weight:'600'}},grid:{display:false}},
         y:{stacked:true,max:yMax,ticks:{color:f.muted,font:{size:10}},grid:{color:f.grid},beginAtZero:true,title:{display:true,text:'운동 일수',color:f.muted,font:{size:10}}},
         y2:{position:'right',min:0,max:120,ticks:{color:f.amber,font:{size:10},callback:v=>v+'%'},grid:{display:false}}}}});
@@ -1570,11 +2050,11 @@ function buildWeekdayChart(){
   for(const e of S.raw){const d=new Date(e.date).getDay();counts[d]+=Object.keys(e.data).length;}
   const maxIdx=counts.indexOf(Math.max(...counts));
   CHARTS.weekday=new Chart(document.getElementById('weekdayChart'),{type:'bar',
-    data:{labels:['일','월','화','수','목','금','토'],datasets:[{data:counts,
+    data:{labels:DOW_KR,datasets:[{data:counts,
       backgroundColor:counts.map((_,i)=>i===maxIdx?f.accent:f.accent+'70'),borderRadius:7}]},
     options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:18}},
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw}회 운동`}},
-        datalabels:{anchor:'end',align:'end',color:f.text,font:{size:11,weight:'700'},formatter:v=>v||''}},
+        datalabels:{display:true,anchor:'end',align:'end',color:f.text,font:{size:11,weight:'700'},formatter:v=>v||''}},
       scales:{x:{ticks:{color:f.text,font:{size:13,weight:'700'}},grid:{display:false}},
         y:{ticks:{color:f.muted,font:{size:10}},grid:{color:f.grid},beginAtZero:true}}}});
 }
@@ -1587,7 +2067,7 @@ function buildTrendChart(){
     data:{labels:months.map(mo=>mo.slice(2)),datasets:[{data:totals,borderColor:f.accent,
       backgroundColor:'transparent',borderWidth:2.5,pointRadius:2,pointBackgroundColor:f.accent,tension:.35,fill:false}]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw}일`}},datalabels:{display:false}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw}일`}}},
       scales:{x:{ticks:{color:f.muted,font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:10},grid:{display:false}},
         y:{ticks:{color:f.muted,font:{size:10}},grid:{color:f.grid},beginAtZero:true}}}});
 }
@@ -1609,7 +2089,7 @@ function buildHeatAnnual(m){
   const monthLabels=Array(weeks).fill('');let lm=-1;
   for(let w=0;w<weeks;w++){const fc=cols[w].find(c=>c);if(fc){const mo=parseInt(fc.ds.slice(5,7));if(mo!==lm){monthLabels[w]=mo+'월';lm=mo;}}}
   let html=`<div style="display:flex;gap:0"><div style="display:flex;flex-direction:column;gap:${gap}px;margin-right:4px;margin-top:18px">`;
-  ['일','월','화','수','목','금','토'].forEach(d=>html+=`<div style="height:${cs}px;line-height:${cs}px;font-size:9px;color:var(--muted);text-align:right">${d}</div>`);
+  DOW_KR.forEach(d=>html+=`<div style="height:${cs}px;line-height:${cs}px;font-size:9px;color:var(--muted);text-align:right">${d}</div>`);
   html+=`</div><div><div style="display:flex;gap:${gap}px;margin-bottom:3px">`;
   for(let w=0;w<weeks;w++)html+=`<div style="width:${cs}px;font-size:9px;color:var(--muted);white-space:nowrap;overflow:visible">${monthLabels[w]}</div>`;
   html+=`</div>`;
@@ -1635,16 +2115,193 @@ function buildHeatCumul(){
   document.getElementById('heatCumul').innerHTML=`<div style="overflow-x:auto"><div style="margin-left:33px;display:flex;gap:2px;margin-bottom:4px">${labels}</div><div>${rows}</div></div>
     <div class="hm-legend">적음 <div class="hm-cell"></div><div class="hm-cell lv1"></div><div class="hm-cell lv2"></div><div class="hm-cell lv3"></div> 많음</div>`;
 }
+
 /* =================================================================
-   페이지 4: 개인 기록 (멤버 클릭 시)
+   페이지 4: VS 라이벌 비교 (신규)
+   두 멤버를 골라 6개 지표 H2H + 레이더 + 월별 듀얼 + 요일 패턴 비교
+   ================================================================= */
+function vsMetrics(name){
+  const md=S.monthly[S.selMonth]||{};
+  const year=S.selMonth.slice(0,4);
+  const cumulYear=Object.keys(S.monthly).filter(ym=>ym.startsWith(year)).reduce((s,ym)=>s+(S.monthly[ym]?.[name]||0),0);
+  const target=S.stats.target[name]||0;
+  const st=streakInfo(name);
+  const sports=new Set();
+  for(const e of S.raw)if(e.data[name])for(const s of e.data[name]){const k=normSport(s);if(k)sports.add(k);}
+  return {
+    month:md[name]||0,
+    year:cumulYear,
+    rate:target?cumulYear/target*100:0,
+    cur:st.current,
+    longest:st.longest,
+    sports:sports.size,
+  };
+}
+function setVs(side,name){
+  if(side==='A'){ if(name===S.vsB) S.vsB=S.vsA; S.vsA=name; }
+  else { if(name===S.vsA) S.vsA=S.vsB; S.vsB=name; }
+  ['vsRadar','vsDuel','vsWeekday'].forEach(k=>{if(CHARTS[k]){try{CHARTS[k].destroy();}catch(e){}delete CHARTS[k];}});
+  renderVS();
+}
+function renderVS(){
+  const a=S.vsA||MEMBERS[0], b=S.vsB||MEMBERS[1];
+  const A=vsMetrics(a), B=vsMetrics(b);
+  const rows=[
+    {k:'month',  l:`이달 운동 (${S.selMonth.slice(5)}월)`, u:'일'},
+    {k:'year',   l:'올해 누적', u:'일'},
+    {k:'rate',   l:'목표 달성률', u:'%', dec:1},
+    {k:'cur',    l:'현재 스트릭', u:'일'},
+    {k:'longest',l:'최장 스트릭', u:'일'},
+    {k:'sports', l:'종목 다양성', u:'종목'},
+  ];
+  let winA=0,winB=0;
+  rows.forEach(r=>{if(A[r.k]>B[r.k])winA++;else if(B[r.k]>A[r.k])winB++;});
+  const verdict = winA===winB ? `팽팽한 접전 — <b>${winA} : ${winB}</b> 무승부`
+    : winA>winB ? `이번 라운드는 <b>${a}</b> 우세 (${winA} : ${winB})`
+    : `이번 라운드는 <b>${b}</b> 우세 (${winB} : ${winA})`;
+
+  const picker=(side,cur,other)=>`
+    <select class="select" style="width:100%;max-width:170px;text-align:center" onchange="setVs('${side}',this.value)">
+      ${MEMBERS.map(n=>`<option value="${n}"${n===cur?' selected':''}>${n}</option>`).join('')}
+    </select>`;
+
+  const h2h=rows.map(r=>{
+    const va=A[r.k], vb=B[r.k];
+    const max=Math.max(va,vb,1);
+    const fa=va/max*100, fb=vb/max*100;
+    const aw=va>vb, bw=vb>va;
+    const fmt=v=>r.dec?v.toFixed(r.dec):v;
+    return `<div class="h2h-row">
+      <span class="h2h-val l ${aw?'win':''}">${fmt(va)}</span>
+      <div class="h2h-bar l"><div class="h2h-fill" style="width:${fa}%;background:${avatarColor(a)}"></div></div>
+      <span class="h2h-label">${r.l}</span>
+      <div class="h2h-bar"><div class="h2h-fill" style="width:${fb}%;background:${avatarColor(b)}"></div></div>
+      <span class="h2h-val r ${bw?'win':''}">${fmt(vb)}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('page-vs').innerHTML = `
+    <div class="sec-eyebrow">Head to Head</div>
+    <div class="sec-title">VS 비교</div>
+    <div class="sec-desc">두 멤버를 골라 이달·올해·스트릭·다양성을 정면 비교해보세요. 친선 경기니까, 진 쪽이 커피 사기? ☕</div>
+
+    <div class="card mb14">
+      <div class="vs-head">
+        <div class="vs-side ${winA>winB?'winner':''}">
+          <div class="big-av" style="background:${avatarColor(a)}">${initial(a)}</div>
+          <div class="nm">${winA>winB?'👑 ':''}${a}</div>
+          ${picker('A',a,b)}
+        </div>
+        <div class="vs-mark">VS</div>
+        <div class="vs-side ${winB>winA?'winner':''}">
+          <div class="big-av" style="background:${avatarColor(b)}">${initial(b)}</div>
+          <div class="nm">${winB>winA?'👑 ':''}${b}</div>
+          ${picker('B',b,a)}
+        </div>
+      </div>
+      <div class="vs-verdict">${verdict}</div>
+      <div class="h2h">${h2h}</div>
+    </div>
+
+    <div class="g2 mb14">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--purple)"></span>능력치 레이더</div><span class="card-sub">그룹 최고치=100 기준 정규화</span></div>
+        <div class="chart-box h300"><canvas id="vsRadar"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--cyan)"></span>월별 듀얼 레이스</div><span class="card-sub">${S.selMonth.slice(0,4)}년 월별 운동 일수</span></div>
+        <div class="chart-box h300"><canvas id="vsDuel"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--blue)"></span>요일 패턴 비교</div><span class="card-sub">25.01~ 요일별 운동 횟수</span></div>
+      <div class="chart-box h260"><canvas id="vsWeekday"></canvas></div>
+    </div>`;
+
+  buildVsRadar(a,b,A,B);
+  buildVsDuel(a,b);
+  buildVsWeekday(a,b);
+}
+
+function buildVsRadar(a,b,A,B){
+  const f=chartFont();
+  // 그룹 최대치 기준 정규화 (0~100)
+  const all=MEMBERS.map(vsMetrics);
+  const axes=[
+    {k:'month',l:'이달'},{k:'year',l:'올해 누적'},{k:'rate',l:'달성률'},
+    {k:'longest',l:'최장 스트릭'},{k:'sports',l:'종목 다양성'},
+  ];
+  const maxOf=k=>Math.max(...all.map(m=>m[k]),1);
+  const norm=M=>axes.map(ax=>Math.round(M[ax.k]/maxOf(ax.k)*100));
+  const toRGBA=(name,alpha)=>{
+    const idx=MEMBERS.indexOf(name); // hsl → hsla 문자열
+    return `hsla(${idx*30},62%,56%,${alpha})`;
+  };
+  CHARTS.vsRadar=new Chart(document.getElementById('vsRadar'),{type:'radar',
+    data:{labels:axes.map(ax=>ax.l),datasets:[
+      {label:a,data:norm(A),borderColor:avatarColor(a),backgroundColor:toRGBA(a,.18),borderWidth:2,pointRadius:3,pointBackgroundColor:avatarColor(a)},
+      {label:b,data:norm(B),borderColor:avatarColor(b),backgroundColor:toRGBA(b,.18),borderWidth:2,pointRadius:3,pointBackgroundColor:avatarColor(b)},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:f.text,font:{size:12,weight:'700'},boxWidth:12}},
+        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}점`}}},
+      scales:{r:{min:0,max:100,ticks:{display:false,stepSize:25},
+        grid:{color:f.grid},angleLines:{color:f.grid},
+        pointLabels:{color:f.text,font:{size:11,weight:'700'}}}}}});
+}
+
+function buildVsDuel(a,b){
+  const f=chartFont();
+  const year=S.selMonth.slice(0,4);
+  const isCur=year===String(NOW.getFullYear());
+  const maxMo=isCur?parseInt(nowYM.slice(5,7)):12;
+  const labels=[],da=[],db=[];
+  for(let mo=1;mo<=maxMo;mo++){
+    const ym=`${year}-${String(mo).padStart(2,'0')}`;
+    labels.push(mo+'월');
+    da.push(S.monthly[ym]?.[a]||0);
+    db.push(S.monthly[ym]?.[b]||0);
+  }
+  CHARTS.vsDuel=new Chart(document.getElementById('vsDuel'),{type:'line',
+    data:{labels,datasets:[
+      {label:a,data:da,borderColor:avatarColor(a),backgroundColor:'transparent',borderWidth:2.5,pointRadius:3,pointBackgroundColor:avatarColor(a),tension:.3},
+      {label:b,data:db,borderColor:avatarColor(b),backgroundColor:'transparent',borderWidth:2.5,pointRadius:3,pointBackgroundColor:avatarColor(b),tension:.3},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:f.text,font:{size:12,weight:'700'},boxWidth:12}},
+        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}일`}}},
+      scales:{x:{ticks:{color:f.text,font:{size:11}},grid:{display:false}},
+        y:{ticks:{color:f.muted,font:{size:10}},grid:{color:f.grid},beginAtZero:true}}}});
+}
+
+function buildVsWeekday(a,b){
+  const f=chartFont();
+  const cnt=name=>{
+    const arr=[0,0,0,0,0,0,0];
+    for(const e of S.raw)if(e.data[name])arr[new Date(e.date).getDay()]++;
+    return arr;
+  };
+  CHARTS.vsWeekday=new Chart(document.getElementById('vsWeekday'),{type:'bar',
+    data:{labels:DOW_KR,datasets:[
+      {label:a,data:cnt(a),backgroundColor:avatarColor(a),borderRadius:5},
+      {label:b,data:cnt(b),backgroundColor:avatarColor(b),borderRadius:5},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:f.text,font:{size:12,weight:'700'},boxWidth:12}},
+        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}회`}}},
+      scales:{x:{ticks:{color:f.text,font:{size:12,weight:'700'}},grid:{display:false}},
+        y:{ticks:{color:f.muted,font:{size:10}},grid:{color:f.grid},beginAtZero:true}}}});
+}
+/* =================================================================
+   페이지 5: 개인 기록 (멤버 클릭 시)
    ================================================================= */
 function renderMe(){
   const name=S.selMember||MEMBERS[0];
-  const year=S.selMonth.slice(0,4);
   document.getElementById('page-me').innerHTML = `
     <div class="sec-eyebrow">Profile</div>
     <div class="sec-title">개인 기록</div>
-    <div class="sec-desc">멤버를 선택하면 연속 스트릭, 종목 구성, 요일 패턴, 달성 배지를 볼 수 있어요.</div>
+    <div class="sec-desc">멤버를 선택하면 레벨·연속 스트릭·종목 구성·요일 패턴·달성 배지를 볼 수 있어요.</div>
     <div class="member-picker" id="memberPicker"></div>
     <div id="profileBody"></div>`;
   document.getElementById('memberPicker').innerHTML=MEMBERS.map(n=>
@@ -1652,17 +2309,18 @@ function renderMe(){
       <div class="av" style="background:${avatarColor(n)}">${initial(n)}</div>${n}</div>`).join('');
   buildProfile(name);
 }
-function selectMember(n){S.selMember=n;profCalYM=null;renderMe();}
+function selectMember(n){S.selMember=n;profCalYM=null;renderPage('me');}
 
 function buildProfile(name){
   const st=streakInfo(name);
   const year=S.selMonth.slice(0,4);
   const dates=[...activeDates(name)].sort();
-  const yearDates=dates.filter(d=>d.startsWith(year));
   const cumulYear=Object.keys(S.monthly).filter(ym=>ym.startsWith(year)).reduce((s,ym)=>s+(S.monthly[ym]?.[name]||0),0);
   const target=S.stats.target[name]||0;
   const rate=target?(cumulYear/target*100):0;
   const totalAll=dates.length;
+  const lv=levelInfo(totalAll);
+  const proj=(year===String(NOW.getFullYear()))?projectYearEnd(cumulYear):null;
 
   // 종목 구성
   const sportCount={};
@@ -1673,14 +2331,14 @@ function buildProfile(name){
   // 요일 패턴
   const wd=[0,0,0,0,0,0,0];
   for(const e of S.raw)if(e.data[name])wd[new Date(e.date).getDay()]++;
-  const wdMax=Math.max(...wd,1),bestWd=wd.indexOf(Math.max(...wd));
+  const bestWd=wd.indexOf(Math.max(...wd));
 
-  // 종목별 순위 1위 횟수(장인 배지) 계산
+  // 종목별 순위 1위 횟수(장인 배지)
   let masteryCount=0;
   const allSports=sportMapFor(S.raw);
   for(const[sp,{per}]of Object.entries(allSports)){const top=Object.entries(per).sort((a,b)=>b[1]-a[1])[0];if(top&&top[0]===name)masteryCount++;}
 
-  // 페이스(색 등급) 판정 + 다음 색까지 필요 일수
+  // 페이스 판정 + 다음 색까지 필요 일수
   const paceG=paceGrade(target?cumulYear/target:0);
   const nx=daysToNextGrade(cumulYear, target);
 
@@ -1697,17 +2355,17 @@ function buildProfile(name){
   ];
 
   // 스토리 카드 렌더링에 쓸 데이터 스냅샷 (다운로드 버튼이 참조)
-  // totalAll 은 이제 25.01~ 기준(S.raw가 그 이후만 담음). 24년치는 S.legacy에 별도.
   S.storyData={
     name, year, cumulYear, target, rate, totalAll,
     curStreak:st.current, longestStreak:st.longest,
     favSport, masteryCount,
-    sportTop:sportSorted.slice(0,5),            // [[종목,횟수],...]
-    bestWd:['일','월','화','수','목','금','토'][bestWd],
+    sportTop:sportSorted.slice(0,5),
+    bestWd:DOW_KR[bestWd],
     paceLevel:paceG.level, nx,
     badgesOn:achvs.filter(a=>a.on),
     monthsTogether:monthsTogether(),
-    legacyCount:(S.legacy.perMember[name]||0),  // 이 멤버의 24년 이전 기록 수
+    legacyCount:(S.legacy.perMember[name]||0),
+    lvTitle:`Lv.${lv.lv} ${lv.title}`, lvEmoji:lv.e,
   };
 
   document.getElementById('profileBody').innerHTML=`
@@ -1715,8 +2373,8 @@ function buildProfile(name){
       <div class="profile-hero">
         <div class="big-av" style="background:${avatarColor(name)}">${initial(name)}</div>
         <div class="info">
-          <h2>${name}</h2>
-          <div class="meta">${year}년 누적 <b>${cumulYear}일</b> · 목표 ${target}일 · 달성률 <b>${rate.toFixed(1)}%</b></div>
+          <h2>${name} <span class="lv-badge" onclick="openLevelGuide()" title="레벨 기준 보기">${lv.e} Lv.${lv.lv} ${lv.title} <span style="opacity:.65;font-size:10px">ⓘ</span></span></h2>
+          <div class="meta">${year}년 누적 <b>${cumulYear}일</b> · 목표 ${target}일 · 달성률 <b>${rate.toFixed(1)}%</b>${proj!==null?` · 🧭 연말 예상 ~${proj}일`:''}</div>
           <div class="meta" style="margin-top:2px">가장 좋아하는 운동: <b>${favSport}</b> · <b>25.01~</b> 누적 ${totalAll}회${(S.legacy.perMember[name]||0)?` <span style="color:var(--muted)">(이전 기록 ${S.legacy.perMember[name]}회 별도)</span>`:''}</div>
         </div>
         <button class="story-btn" onclick="downloadStoryCard()" title="인스타 스토리용 9:16 이미지로 저장">
@@ -1726,8 +2384,15 @@ function buildProfile(name){
       <div class="mini-stats">
         <div class="mini-stat"><div class="v" style="color:${st.current>0?'var(--red)':'var(--muted)'}">${st.current>0?'🔥':'❄️'}${st.current}</div><div class="l">현재 연속</div></div>
         <div class="mini-stat"><div class="v" style="color:var(--amber)">${st.longest}</div><div class="l">최장 연속</div></div>
-        <div class="mini-stat"><div class="v" style="color:var(--accent)">${cumulYear}</div><div class="l">${year} 누적</div></div>
+        <div class="mini-stat"><div class="v" style="color:var(--green)">${cumulYear}</div><div class="l">${year} 누적</div></div>
         <div class="mini-stat"><div class="v" style="color:var(--purple)">${masteryCount}</div><div class="l">종목 장인 🏅</div></div>
+      </div>
+      <div class="xp-wrap">
+        <div class="xp-head">
+          <span style="cursor:pointer" onclick="openLevelGuide()" title="레벨 기준 보기">${lv.e} <b>Lv.${lv.lv} ${lv.title}</b> <span style="opacity:.55;font-size:10px">ⓘ</span></span>
+          <span>${lv.next?`다음 레벨 ${lv.next.e} ${lv.next.title}까지 <b>${lv.need}회</b>`:'최고 레벨 달성 👑'}</span>
+        </div>
+        <div class="xp-bar"><div class="xp-fill" style="width:${Math.round(lv.progress*100)}%"></div></div>
       </div>
       ${buildPaceNudge(paceG, nx, target)}
       ${(S.legacy.perMember[name]||0) ? `<div style="margin-top:10px;font-size:12px;color:var(--muted);text-align:center">
@@ -1742,10 +2407,10 @@ function buildProfile(name){
       <div class="card">
         <div class="card-head"><div class="card-title"><span class="dot" style="background:var(--blue)"></span>요일별 패턴</div><span class="card-sub">25.01~ 전체</span></div>
         <div class="weekday-grid">
-          ${['일','월','화','수','목','금','토'].map((d,i)=>`<div class="wd-cell ${i===bestWd?'best':''}"><div class="d">${d}</div><div class="v">${wd[i]}</div></div>`).join('')}
+          ${DOW_KR.map((d,i)=>`<div class="wd-cell ${i===bestWd?'best':''}"><div class="d">${d}</div><div class="v">${wd[i]}</div></div>`).join('')}
         </div>
         <div style="font-size:12px;color:var(--text2);margin:12px 0 16px;text-align:center">
-          가장 부지런한 요일은 <b style="color:var(--accent)">${['일','월','화','수','목','금','토'][bestWd]}요일</b> 💪
+          가장 부지런한 요일은 <b style="color:var(--accent)">${DOW_KR[bestWd]}요일</b> 💪
         </div>
         <div style="border-top:1px solid var(--border);padding-top:14px">
           <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px">📈 월별 운동 추이</div>
@@ -1761,6 +2426,8 @@ function buildProfile(name){
         ${achvs.map(a=>`<div class="achv ${a.on?'on':'off'}"><span class="e">${a.e}</span><div class="t"><b>${a.t}</b><span>${a.s}</span></div></div>`).join('')}
       </div>
     </div>
+
+    <div class="card mb14" id="inbodyCard"></div>
 
     <div class="g2 mb14">
       <div class="card">
@@ -1790,10 +2457,10 @@ function buildProfile(name){
   buildProfileRecent(name);
   buildProfileCal(name);
   buildProfileHeat(name);
+  buildInbody(name);
 }
 
-// 개인 프로필 — 다음 색 등급까지 안내 카드 (초록불이면 "페이스 유지 중" 문구)
-// nx.need는 "오늘부터 하루도 안 빠지고 매일 운동한다고 가정"한 달력 일수(색 기준 상승 반영).
+// 개인 프로필 — 다음 색 등급까지 안내 카드
 function buildPaceNudge(paceG, nx, target){
   if(!target){
     return `<div class="pace-nudge keep"><span class="pn-emoji">🎯</span>
@@ -1806,11 +2473,10 @@ function buildPaceNudge(paceG, nx, target){
   const curColor = paceG.level==='amber' ? '노란불' : '빨간불';
   const curEmoji = paceG.level==='amber' ? '🟡' : '🔴';
   const nextColor = nx.toColor==='green' ? '초록불' : '노란불';
-  const nextVar   = nx.toColor==='green' ? 'var(--accent)' : 'var(--amber)';
+  const nextVar   = nx.toColor==='green' ? 'var(--green)' : 'var(--amber)';
   const nextEmoji = nx.toColor==='green' ? '🟢' : '🟡';
   const cls = nx.toColor==='green' ? 'to-green' : 'to-amber';
   if(nx.unreachable){
-    // 올해 남은 날짜 안엔 매일 해도 도달 불가
     return `<div class="pace-nudge to-amber"><span class="pn-emoji">${curEmoji}</span>
       <span class="pn-text">지금은 <b>${curColor}</b>이에요. 아쉽지만 올해 남은 <b>${nx.daysLeft}일</b> 동안 매일 운동해도
       ${nextColor} 도달은 어려워요. 그래도 오늘 한 번이 내년의 나를 만듭니다 💪</span></div>`;
@@ -1821,7 +2487,7 @@ function buildPaceNudge(paceG, nx, target){
     <span style="color:var(--muted);font-size:11px">(하루 1회 · 색 기준이 매일 조금씩 오르는 것까지 반영)</span></span></div>`;
 }
 
-// 개인 월별 운동 추이 (선택 멤버)
+// 개인 월별 운동 추이
 function buildProfileTrend(name){
   const f=chartFont();
   const months=Object.keys(S.monthly).sort().filter(mo=>mo<=nowYM);
@@ -1830,7 +2496,7 @@ function buildProfileTrend(name){
     data:{labels:months.map(mo=>mo.slice(2)),datasets:[{data,borderColor:avatarColor(name),
       backgroundColor:'transparent',borderWidth:2.5,pointRadius:0,tension:.35,fill:false}]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw}일`}},datalabels:{display:false}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw}일`}}},
       scales:{x:{ticks:{color:f.muted,font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8},grid:{display:false}},
         y:{ticks:{color:f.muted,font:{size:9}},grid:{color:f.grid},beginAtZero:true}}}});
 }
@@ -1838,7 +2504,6 @@ function buildProfileTrend(name){
 // 개인 운동 달력 (월별, 운동한 날에 이모지)
 let profCalYM = null;
 function buildProfileCal(name){
-  // 최초 진입 시 가장 최근 운동월로 초기화
   const dates=[...activeDates(name)].sort();
   if(!profCalYM){profCalYM = dates.length?dates[dates.length-1].slice(0,7):nowYM;}
   renderProfileCal(name);
@@ -1854,7 +2519,6 @@ function profCalMove(delta){
 function renderProfileCal(name){
   const ym=profCalYM, [y,mo]=ym.split('-').map(Number);
   document.getElementById('profCalLabel').textContent=`${y}년 ${mo}월`;
-  // 해당 월 멤버 운동 기록
   const dayMap={};
   for(const e of S.raw){if(!e.date.startsWith(ym)||!e.data[name])continue;
     dayMap[e.date]=e.data[name].map(normSport).filter(Boolean);}
@@ -1879,18 +2543,18 @@ function renderProfileCal(name){
   }
   const cnt=Object.keys(dayMap).length;
   document.getElementById('profileCal').innerHTML=`
-    <div class="cal-dow">${['일','월','화','수','목','금','토'].map((d,i)=>`<span style="color:${i===0?'var(--red)':i===6?'var(--blue)':'var(--muted)'}">${d}</span>`).join('')}</div>
+    <div class="cal-dow">${DOW_KR.map((d,i)=>`<span style="color:${i===0?'var(--red)':i===6?'var(--blue)':'var(--muted)'}">${d}</span>`).join('')}</div>
     <div class="cal-grid">${cells}</div>
     <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">이 달 <b style="color:var(--accent)">${cnt}일</b> 운동 💪</div>`;
 }
 
-// 개인 최근 운동 리스트 (날짜 + 종목 태그)
+// 개인 최근 운동 리스트
 function buildProfileRecent(name){
   const list=[...S.raw].reverse().filter(e=>e.data[name]).slice(0,30);
   if(!list.length){document.getElementById('profileRecent').innerHTML=`<div class="empty-hint"><span class="ic">🗓️</span>아직 운동 기록이 없어요</div>`;return;}
   document.getElementById('profileRecent').innerHTML=list.map(e=>{
     const dd=new Date(e.date);
-    const label=`${dd.getMonth()+1}/${dd.getDate()} (${['일','월','화','수','목','금','토'][dd.getDay()]})`;
+    const label=`${dd.getMonth()+1}/${dd.getDate()} (${DOW_KR[dd.getDay()]})`;
     const tags=e.data[name].map(normSport).filter(Boolean).map(s=>`<span class="tag">${sportEmoji(s)} ${s}</span>`).join('');
     return `<div class="feed-item">
       <div class="av" style="background:${avatarColor(name)}">${initial(name)}</div>
@@ -1911,7 +2575,7 @@ function buildProfileDonut(name, sportSorted){
     options:{responsive:true,maintainAspectRatio:false,cutout:'58%',
       plugins:{legend:{position:'right',labels:{color:f.text,font:{size:11},boxWidth:10,padding:7}},
         tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw}회`}},
-        datalabels:{color:'#fff',font:{size:10,weight:'700'},formatter:(v,c)=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);const p=v/t*100;return p>=8?Math.round(p)+'%':'';}}}}});
+        datalabels:{display:true,color:'#fff',font:{size:10,weight:'700'},formatter:(v,c)=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);const p=v/t*100;return p>=8?Math.round(p)+'%':'';}}}}});
 }
 
 function buildProfileHeat(name){
@@ -1930,7 +2594,7 @@ function buildProfileHeat(name){
   const monthLabels=Array(weeks).fill('');let lm=-1;
   for(let w=0;w<weeks;w++){const fc=cols[w].find(c=>c);if(fc){const mo=parseInt(fc.ds.slice(5,7));if(mo!==lm){monthLabels[w]=mo+'월';lm=mo;}}}
   let html=`<div style="display:flex;gap:0"><div style="display:flex;flex-direction:column;gap:${gap}px;margin-right:4px;margin-top:18px">`;
-  ['일','월','화','수','목','금','토'].forEach(d=>html+=`<div style="height:${cs}px;line-height:${cs}px;font-size:9px;color:var(--muted);text-align:right">${d}</div>`);
+  DOW_KR.forEach(d=>html+=`<div style="height:${cs}px;line-height:${cs}px;font-size:9px;color:var(--muted);text-align:right">${d}</div>`);
   html+=`</div><div><div style="display:flex;gap:${gap}px;margin-bottom:3px">`;
   for(let w=0;w<weeks;w++)html+=`<div style="width:${cs}px;font-size:9px;color:var(--muted);white-space:nowrap;overflow:visible">${monthLabels[w]}</div>`;
   html+=`</div>`;
@@ -1943,17 +2607,143 @@ function buildProfileHeat(name){
 }
 
 /* =================================================================
+   유틸: 카운트업 애니메이션 · 콘페티 · 커맨드 팔레트
+   ================================================================= */
+const REDUCED_MOTION = (typeof matchMedia==='function') && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// data-count 속성을 가진 요소를 0→목표값으로 애니메이션
+function runCountUps(root){
+  const els=(root||document).querySelectorAll('[data-count]');
+  els.forEach(el=>{
+    const target=parseFloat(el.dataset.count)||0;
+    const dec=parseInt(el.dataset.dec||'0');
+    if(REDUCED_MOTION){el.textContent=target.toFixed(dec);return;}
+    const dur=800;
+    const t0=performance.now();
+    function tick(t){
+      const p=Math.min(1,(t-t0)/dur);
+      const eased=1-Math.pow(1-p,3); // ease-out cubic
+      el.textContent=(target*eased).toFixed(dec);
+      if(p<1) requestAnimationFrame(tick);
+      else el.textContent=target.toFixed(dec);
+    }
+    requestAnimationFrame(tick);
+  });
+}
+
+// 전원 달성 콘페티 — 외부 라이브러리 없이 순수 canvas
+function fireConfetti(){
+  if(REDUCED_MOTION) return;
+  try{
+    const cv=document.createElement('canvas');
+    cv.id='confettiCanvas';
+    document.body.appendChild(cv);
+    const ctx=cv.getContext('2d');
+    if(!ctx){cv.remove();return;}
+    const W=cv.width=innerWidth, H=cv.height=innerHeight;
+    const colors=[...MEM_COLORS,'#ffd23f','#ff6b3d'];
+    const parts=Array.from({length:140},()=>({
+      x:Math.random()*W, y:-20-Math.random()*H*0.4,
+      w:6+Math.random()*6, h:8+Math.random()*8,
+      vy:2.2+Math.random()*3.2, vx:(Math.random()-0.5)*2.2,
+      rot:Math.random()*Math.PI, vr:(Math.random()-0.5)*0.25,
+      c:colors[Math.floor(Math.random()*colors.length)],
+    }));
+    const t0=performance.now();
+    (function frame(t){
+      const el=(t-t0)/1000;
+      ctx.clearRect(0,0,W,H);
+      for(const p of parts){
+        p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr;
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+        ctx.fillStyle=p.c; ctx.globalAlpha=Math.max(0,1-el/2.4);
+        ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+        ctx.restore();
+      }
+      if(el<2.6) requestAnimationFrame(frame);
+      else cv.remove();
+    })(t0);
+  }catch(e){ /* canvas 미지원 환경 무시 */ }
+}
+
+/* ---------- 커맨드 팔레트 (Ctrl/Cmd+K) ---------- */
+let cmdkItems=[], cmdkIdx=0;
+function cmdkActions(){
+  const acts=[];
+  acts.push({g:'이동',e:'🏠',label:'홈',run:()=>goPage('home')});
+  acts.push({g:'이동',e:'🏆',label:'랭킹 · 챌린지',run:()=>goPage('rank')});
+  acts.push({g:'이동',e:'📊',label:'데이터 · 분석',run:()=>goPage('data')});
+  acts.push({g:'이동',e:'⚔️',label:'VS 비교',run:()=>goPage('vs')});
+  acts.push({g:'이동',e:'👤',label:'개인 기록',run:()=>goPage('me')});
+  MEMBERS.forEach(n=>acts.push({g:'멤버',e:'👤',label:`${n} 개인 기록 보기`,kw:n,run:()=>openMember(n)}));
+  Object.keys(S.monthly||{}).sort().reverse().slice(0,12).forEach(mo=>
+    acts.push({g:'월 선택',e:'📅',label:`${mo} 로 이동`,kw:mo,run:()=>{setMonth(mo);goPage('rank');}}));
+  acts.push({g:'설정',e:'🏅',label:'레벨 가이드 · 레벨별 멤버 보기',run:()=>{goPage('me');openLevelGuide();}});
+  acts.push({g:'설정',e:'🌗',label:'다크/라이트 테마 전환',run:()=>toggleTheme()});
+  acts.push({g:'설정',e:'🔄',label:'데이터 새로고침',run:()=>init()});
+  return acts;
+}
+function openCmdk(){
+  const ov=document.getElementById('cmdkOverlay');
+  ov.classList.add('open');
+  const inp=document.getElementById('cmdkInput');
+  inp.value=''; cmdkFilter(); inp.focus();
+}
+function closeCmdk(){document.getElementById('cmdkOverlay').classList.remove('open');}
+function cmdkFilter(){
+  const q=document.getElementById('cmdkInput').value.trim().toLowerCase();
+  const all=cmdkActions();
+  cmdkItems = q ? all.filter(a=>(a.label+(a.kw||'')+(a.g||'')).toLowerCase().includes(q)) : all;
+  cmdkIdx=0;
+  renderCmdkList();
+}
+function renderCmdkList(){
+  const list=document.getElementById('cmdkList');
+  if(!cmdkItems.length){list.innerHTML=`<div class="cmdk-empty">검색 결과가 없어요</div>`;return;}
+  let html='',lastG=null;
+  cmdkItems.forEach((a,i)=>{
+    if(a.g!==lastG){html+=`<div class="cmdk-group">${a.g}</div>`;lastG=a.g;}
+    html+=`<div class="cmdk-item ${i===cmdkIdx?'active':''}" data-i="${i}"
+      onclick="cmdkRun(${i})" onmousemove="cmdkIdx=${i};renderCmdkList()">
+      <span class="e">${a.e}</span>${a.label}</div>`;
+  });
+  list.innerHTML=html;
+  const act=list.querySelector('.cmdk-item.active');
+  if(act&&typeof act.scrollIntoView==='function') act.scrollIntoView({block:'nearest'});
+}
+function cmdkRun(i){
+  const a=cmdkItems[i];
+  if(!a)return;
+  closeCmdk();
+  a.run();
+}
+function cmdkKey(ev){
+  if(ev.key==='ArrowDown'){ev.preventDefault();cmdkIdx=Math.min(cmdkItems.length-1,cmdkIdx+1);renderCmdkList();}
+  else if(ev.key==='ArrowUp'){ev.preventDefault();cmdkIdx=Math.max(0,cmdkIdx-1);renderCmdkList();}
+  else if(ev.key==='Enter'){ev.preventDefault();cmdkRun(cmdkIdx);}
+  else if(ev.key==='Escape'){closeCmdk();}
+}
+document.addEventListener('keydown',ev=>{
+  const isK=(ev.key==='k'||ev.key==='K')&&(ev.metaKey||ev.ctrlKey);
+  const isSlash=ev.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName||'');
+  if(isK||isSlash){ev.preventDefault();openCmdk();}
+  else if(ev.key==='Escape'){
+    if(document.getElementById('cmdkOverlay').classList.contains('open'))closeCmdk();
+    if(document.getElementById('lvlOverlay').classList.contains('open'))closeLevelGuide();
+    if(document.getElementById('ibOverlay').classList.contains('open'))closeIbModal();
+  }
+});
+
+/* =================================================================
    개인 탭 — 인스타 스토리용 9:16 카드 이미지 생성 & 다운로드
    외부 라이브러리 없이 순수 canvas로 1080×1920 렌더링.
    멤버 색(HSL) 기반 그라데이션 배경.
    ================================================================= */
-// 멤버의 HSL 색을 분해 (avatarColor는 'hsl(h,s%,l%)' 또는 CSS var)
 function memberHSL(name){
   const idx=MEMBERS.indexOf(name);
   const h=idx>=0?idx*30:210;
   return {h, s:62, l:56};
 }
-// 둥근 사각형 경로
 function roundRect(ctx,x,y,w,h,r){
   if(w<2*r)r=w/2; if(h<2*r)r=h/2;
   ctx.beginPath();
@@ -1999,7 +2789,6 @@ async function downloadStoryCard(){
     c.fillStyle=bottom; c.fillRect(0,0,W,H);
 
     const PAD=90;
-    const accent=`hsl(${h}, 75%, 62%)`;
     const accentSoft=`hsl(${h}, 70%, 72%)`;
     const white='#ffffff';
     const dim='rgba(255,255,255,0.62)';
@@ -2007,62 +2796,57 @@ async function downloadStoryCard(){
 
     // ---- 상단 브랜드 ----
     c.textAlign='left'; c.textBaseline='alphabetic';
-    c.font='800 40px Gabarito, "Noto Sans KR", sans-serif';
+    c.font='400 42px "Black Han Sans", "Noto Sans KR", sans-serif';
     c.fillStyle=white;
     c.fillText('오운완', PAD, 150);
     c.font='500 26px "Noto Sans KR", sans-serif';
     c.fillStyle=dim;
     c.fillText('우리들의 운동 기록', PAD+165, 150);
-    // 연도 배지 (오른쪽)
     c.textAlign='right';
-    c.font='700 30px "DM Mono", monospace';
+    c.font='700 30px "Archivo", "DM Mono", monospace';
     c.fillStyle=accentSoft;
     c.fillText(`${D.year}`, W-PAD, 150);
 
     // ---- 아바타 원형 + 이름 ----
     const avX=W/2, avY=360, avR=105;
-    // 링
     c.beginPath(); c.arc(avX,avY,avR+10,0,Math.PI*2);
     c.strokeStyle=`hsla(${h},80%,65%,0.55)`; c.lineWidth=6; c.stroke();
-    // 원
     const avg=c.createLinearGradient(avX-avR,avY-avR,avX+avR,avY+avR);
     avg.addColorStop(0,`hsl(${h},65%,58%)`);
     avg.addColorStop(1,`hsl(${(h+25)%360},60%,48%)`);
     c.beginPath(); c.arc(avX,avY,avR,0,Math.PI*2); c.fillStyle=avg; c.fill();
-    // 이니셜
     c.textAlign='center'; c.textBaseline='middle';
     c.font='900 96px "Noto Sans KR", sans-serif'; c.fillStyle=white;
     c.fillText(initial(D.name), avX, avY+4);
 
-    // 이름
+    // 이름 + 레벨 칭호
     c.textBaseline='alphabetic';
-    c.font='900 78px "Noto Sans KR", sans-serif'; c.fillStyle=white;
-    c.fillText(D.name, avX, avY+avR+110);
-    // 서브: 최애 종목
-    c.font='500 32px "Noto Sans KR", sans-serif'; c.fillStyle=dim;
-    c.fillText(`최애 운동 · ${D.favSport}   |   가장 부지런한 ${D.bestWd}요일`, avX, avY+avR+160);
+    c.font='400 82px "Black Han Sans", "Noto Sans KR", sans-serif'; c.fillStyle=white;
+    c.fillText(D.name, avX, avY+avR+112);
+    c.font='700 30px "Noto Sans KR", sans-serif'; c.fillStyle=accentSoft;
+    c.fillText(`${D.lvEmoji} ${D.lvTitle}`, avX, avY+avR+162);
+    c.font='500 27px "Noto Sans KR", sans-serif'; c.fillStyle=dim;
+    c.fillText(`최애 운동 · ${D.favSport}   |   가장 부지런한 ${D.bestWd}요일`, avX, avY+avR+206);
 
     // ---- 히어로 스탯: 올해 누적 (대형) ----
-    let y=740;
+    let y=780;
     c.textAlign='center';
     c.font='600 30px "Noto Sans KR", sans-serif'; c.fillStyle=dim;
     c.fillText(`${D.year}년 누적 운동`, avX, y);
-    c.font='900 168px "DM Mono", monospace'; c.fillStyle=white;
+    c.font='900 168px "Archivo", "DM Mono", monospace'; c.fillStyle=white;
     c.fillText(String(D.cumulYear), avX, y+150);
-    c.font='700 44px "DM Mono", monospace'; c.fillStyle=accentSoft;
-    c.fillText('일', avX + measureW(c,String(D.cumulYear),'900 168px "DM Mono", monospace')/2 + 44, y+150);
-    // 달성률 서브
+    c.font='700 44px "Noto Sans KR", sans-serif'; c.fillStyle=accentSoft;
+    c.fillText('일', avX + measureW(c,String(D.cumulYear),'900 168px "Archivo", "DM Mono", monospace')/2 + 44, y+150);
     c.font='600 34px "Noto Sans KR", sans-serif'; c.fillStyle=dim;
     if(D.target>0){
       c.fillText(`목표 ${D.target}일 중 ${D.rate.toFixed(0)}% 달성`, avX, y+215);
     }
-    // 함께한 개월 서사 (살짝)
     c.font='500 28px "Noto Sans KR", sans-serif'; c.fillStyle=accentSoft;
     c.fillText(`오운완과 함께한 지 ${D.monthsTogether}개월째`, avX, y+270);
 
     // ---- 2×2 스탯 그리드 ----
-    y=1060;
-    const gap=26, cardW=(W-PAD*2-gap)/2, cardH=170;
+    y=1100;
+    const gap=26, cardW=(W-PAD*2-gap)/2, cardH=160;
     const stats=[
       {label:'현재 연속', val:D.curStreak, unit:'일', tag:D.curStreak>0?'진행중 🔥':'휴식중'},
       {label:'최장 연속', val:D.longestStreak, unit:'일', tag:'기록'},
@@ -2079,16 +2863,15 @@ async function downloadStoryCard(){
       c.restore();
       c.textAlign='left';
       c.font='600 27px "Noto Sans KR", sans-serif'; c.fillStyle=dim;
-      c.fillText(s.label, x+34, yy+52);
-      c.font='900 78px "DM Mono", monospace'; c.fillStyle=white;
-      c.fillText(String(s.val), x+34, yy+128);
-      const numW=measureW(c,String(s.val),'900 78px "DM Mono", monospace');
+      c.fillText(s.label, x+34, yy+50);
+      c.font='900 74px "Archivo", "DM Mono", monospace'; c.fillStyle=white;
+      c.fillText(String(s.val), x+34, yy+122);
+      const numW=measureW(c,String(s.val),'900 74px "Archivo", "DM Mono", monospace');
       c.font='700 30px "Noto Sans KR", sans-serif'; c.fillStyle=accentSoft;
-      c.fillText(s.unit, x+34+numW+10, yy+128);
-      // 우측 태그
+      c.fillText(s.unit, x+34+numW+10, yy+122);
       c.textAlign='right';
       c.font='600 24px "Noto Sans KR", sans-serif'; c.fillStyle=dim2;
-      c.fillText(s.tag, x+cardW-30, yy+52);
+      c.fillText(s.tag, x+cardW-30, yy+50);
     });
 
     // ---- 종목 구성 도넛 (네이티브) + 범례 ----
@@ -2106,12 +2889,10 @@ async function downloadStoryCard(){
       c.fillStyle=donutColors[i]; c.fill();
       ang+=slice;
     });
-    // 도넛 구멍
     c.beginPath(); c.arc(donutCX,donutCY,donutInner,0,Math.PI*2);
     c.fillStyle=`hsl(${(h+18)%360}, 40%, 11%)`; c.fill();
-    // 구멍 안 텍스트
     c.textAlign='center'; c.textBaseline='middle';
-    c.font='800 30px "DM Mono", monospace'; c.fillStyle=white;
+    c.font='800 30px "Archivo", "DM Mono", monospace'; c.fillStyle=white;
     c.fillText(String(D.sportTop.length), donutCX, donutCY-8);
     c.font='500 18px "Noto Sans KR", sans-serif'; c.fillStyle=dim;
     c.fillText('종목', donutCX, donutCY+20);
@@ -2140,7 +2921,6 @@ async function downloadStoryCard(){
     };
     let paceTxt=(paceMap[D.paceLevel]||paceMap.green).txt;
     let paceCol=(paceMap[D.paceLevel]||paceMap.green).col;
-    // 다음 색까지 안내 (있으면)
     if(D.nx && !D.nx.unreachable){
       const to=D.nx.toColor==='green'?'초록불':'노란불';
       paceTxt += `  →  매일 하면 ${D.nx.need}일 뒤 ${to}`;
@@ -2151,7 +2931,6 @@ async function downloadStoryCard(){
     roundRect(c,PAD,y,W-PAD*2,90,24);
     c.fillStyle='rgba(255,255,255,0.08)'; c.fill();
     c.restore();
-    // 신호 점
     c.beginPath(); c.arc(PAD+46,y+45,16,0,Math.PI*2); c.fillStyle=paceCol; c.fill();
     c.textAlign='left'; c.textBaseline='middle';
     c.font='700 30px "Noto Sans KR", sans-serif'; c.fillStyle=white;
@@ -2166,6 +2945,7 @@ async function downloadStoryCard(){
 
     // ---- 다운로드 ----
     await new Promise(res=>{
+      if(typeof URL==='undefined'||typeof URL.createObjectURL!=='function'){res();return;}
       cv.toBlob(blob=>{
         const url=URL.createObjectURL(blob);
         const a=document.createElement('a');
@@ -2187,6 +2967,261 @@ function measureW(c, text, font){
   const prev=c.font; c.font=font;
   const w=c.measureText(text).width; c.font=prev;
   return w;
+}
+
+/* =================================================================
+   인바디 — 개인 기록 탭 섹션 + 입력 모달 (PIN 서버 검증)
+   ================================================================= */
+const IB_METRICS=[
+  {k:'weight',l:'몸무게',u:'kg',dec:1,goodDown:true},
+  {k:'smm',l:'골격근량',u:'kg',dec:1,goodDown:false},
+  {k:'bfm',l:'체지방량',u:'kg',dec:1,goodDown:true},
+  {k:'pbf',l:'체지방률',u:'%',dec:1,goodDown:true,derived:true},
+  {k:'bmi',l:'BMI',u:'',dec:1,goodDown:true,derived:true},
+  {k:'whr',l:'복부지방률',u:'',dec:2,goodDown:true},
+  {k:'vfl',l:'내장지방',u:'Lv',dec:0,goodDown:true},
+];
+function ibDerive(r,height){
+  const o={...r};
+  o.pbf=(r.weight&&r.bfm!=null)?r.bfm/r.weight*100:null;
+  o.bmi=(r.weight&&height)?r.weight/Math.pow(height/100,2):null;
+  return o;
+}
+function ibRecordsOf(name){
+  return S.inbody.records.filter(r=>r.name===name)
+    .sort((a,b)=>a.date.localeCompare(b.date)||a.ts-b.ts);
+}
+function ibChgChip(cur,prev,m){
+  if(cur==null||prev==null)return '<span class="chg eq">—</span>';
+  const d=cur-prev;
+  if(Math.abs(d)<Math.pow(10,-m.dec)/2)return '<span class="chg eq">변화없음</span>';
+  const good=m.goodDown?d<0:d>0;
+  const arrow=d>0?'▲':'▼';
+  return `<span class="chg ${good?'good':'bad'}">${arrow}${Math.abs(d).toFixed(m.dec)}</span>`;
+}
+
+function buildInbody(name){
+  const el=document.getElementById('inbodyCard');
+  if(!el)return;
+  const head=(sub)=>`<div class="card-head"><div class="card-title"><span class="dot" style="background:var(--pink)"></span>💉 인바디 기록</div><span class="card-sub">${sub}</span></div>`;
+
+  if(!S.inbody.loaded){
+    el.innerHTML=head('연결 대기')+`<div class="empty-hint" style="padding:18px"><span class="ic">🔌</span>
+      인바디 API가 아직 연결되지 않았어요.<br>
+      <span style="font-size:11px;color:var(--muted)">Apps Script에 인바디 코드를 추가하고 <b>새 버전으로 재배포</b>하면 이 자리에 나타납니다.</span></div>`;
+    return;
+  }
+
+  const height=S.inbody.members[name]?.height||null;
+  const recs=ibRecordsOf(name).map(r=>ibDerive(r,height));
+
+  if(!recs.length){
+    el.innerHTML=head('아직 기록 없음')+`
+      <div class="empty-hint" style="padding:20px"><span class="ic">💉</span>
+        첫 인바디를 기록하면 체중·골격근·체지방 추이를 볼 수 있어요</div>
+      <div style="text-align:center;margin-top:6px">
+        <button class="ib-btn" onclick="openIbForm('${name}')">＋ 첫 인바디 입력</button>
+      </div>`;
+    return;
+  }
+
+  const latest=recs[recs.length-1], prev=recs.length>1?recs[recs.length-2]:null;
+  const stats=IB_METRICS.map(m=>{
+    const v=latest[m.k];
+    if(v==null)return '';
+    return `<div class="ib-stat"><div class="l">${m.l}</div>
+      <div class="v">${v.toFixed(m.dec)}<small>${m.u}</small></div>
+      ${prev?ibChgChip(v,prev[m.k],m):'<span class="chg eq">첫 기록</span>'}</div>`;
+  }).join('');
+
+  const history=[...recs].reverse().slice(0,8).map(r=>`
+    <tr><td>${r.date.slice(2)}</td>
+      <td>${r.weight?.toFixed(1)??'—'}</td><td>${r.smm?.toFixed(1)??'—'}</td>
+      <td>${r.bfm?.toFixed(1)??'—'}</td><td>${r.pbf?r.pbf.toFixed(1)+'%':'—'}</td>
+      <td>${r.whr?r.whr.toFixed(2):'—'}</td><td>${r.vfl??'—'}</td>
+      <td><button class="ib-del" title="이 기록 삭제 (PIN 필요)" onclick="openIbDelete('${name}',${r.ts})">🗑</button></td></tr>`).join('');
+
+  el.innerHTML=head(`최근 측정 ${latest.date} · 총 ${recs.length}회${prev?' · 변화량은 직전 측정 대비':''}`)+`
+    <div class="ib-latest">${stats}</div>
+    ${recs.length>=2?`<div class="chart-box" style="height:230px;margin-bottom:14px"><canvas id="inbodyTrend"></canvas></div>`:
+      `<div style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:14px">한 번 더 기록하면 추이 그래프가 나타나요 📈</div>`}
+    <div style="overflow-x:auto"><table class="ib-table">
+      <thead><tr><th>측정일</th><th>몸무게</th><th>골격근</th><th>체지방</th><th>체지방률</th><th>WHR</th><th>내장</th><th></th></tr></thead>
+      <tbody>${history}</tbody></table></div>
+    <div style="text-align:center;margin-top:14px">
+      <button class="ib-btn" onclick="openIbForm('${name}')">＋ 인바디 입력</button>
+    </div>`;
+
+  if(recs.length>=2)buildInbodyChart(recs);
+}
+
+function buildInbodyChart(recs){
+  const f=chartFont();
+  const cv=document.getElementById('inbodyTrend');
+  if(!cv)return;
+  const labels=recs.map(r=>r.date.slice(2));
+  const line=(label,key,color,dash)=>({label,data:recs.map(r=>r[key]),borderColor:color,
+    backgroundColor:'transparent',borderWidth:2.5,pointRadius:3,pointBackgroundColor:color,
+    tension:.3,spanGaps:true,borderDash:dash||[]});
+  CHARTS.inbodyTrend=new Chart(cv,{type:'line',
+    data:{labels,datasets:[
+      line('몸무게','weight',f.text),
+      line('골격근량','smm',f.green),
+      line('체지방량','bfm',f.amber),
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:f.text,font:{size:11,weight:'700'},boxWidth:11,padding:8}},
+        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${Number(c.raw).toFixed(1)}kg`}}},
+      scales:{x:{ticks:{color:f.muted,font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:8},grid:{display:false}},
+        y:{ticks:{color:f.muted,font:{size:10},callback:v=>v+'kg'},grid:{color:f.grid}}}}});
+}
+
+/* ---------- 입력/삭제 모달 ---------- */
+let IB={mode:null,name:null,vals:null,ts:null};
+function closeIbModal(){document.getElementById('ibOverlay').classList.remove('open');IB={mode:null,name:null,vals:null,ts:null};}
+function ibShow(html){document.getElementById('ibModal').innerHTML=html;document.getElementById('ibOverlay').classList.add('open');}
+function ibMsg(txt,cls){const m=document.getElementById('ibFormMsg');if(m){m.textContent=txt;m.className='ib-msg '+(cls||'err');}}
+
+function openIbForm(name){
+  const isSetup=!S.inbody.members[name]?.hasPin;
+  const keepVals=(IB.name===name)?IB.vals:null;  // "← 수정"으로 돌아올 때 입력값 보존
+  IB={mode:isSetup?'setup':'add',name,vals:keepVals};
+  const setupFields=isSetup?`
+    <div style="background:color-mix(in srgb,var(--accent) 8%,var(--surface2));border:1px solid var(--accent);border-radius:11px;padding:11px 13px;margin-top:12px;font-size:12px;color:var(--text2);line-height:1.6">
+      🔑 <b>${name}</b>님의 첫 입력이에요. 본인 확인용 <b>PIN(숫자 4자리)</b>과 BMI 계산용 <b>키</b>를 함께 설정해주세요. 다음부터는 PIN만 입력하면 됩니다.</div>
+    <div class="ib-2col">
+      <div><label>키 (cm)</label><input id="ibHeight" type="number" step="0.1" placeholder="예: 175.5"></div>
+      <div><label>PIN 설정 (숫자 4자리)</label><input id="ibPin" type="password" inputmode="numeric" maxlength="4" placeholder="••••"></div>
+    </div>
+    <label>PIN 확인</label><input id="ibPin2" type="password" inputmode="numeric" maxlength="4" placeholder="한 번 더 입력">`
+  :`<label>PIN (숫자 4자리)</label><input id="ibPin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">`;
+
+  ibShow(`
+    <h3>💉 인바디 입력 <span style="font-size:12px;color:var(--muted);font-weight:500">— ${name}</span></h3>
+    <div class="sub">인바디 결과지의 수치를 그대로 입력하세요. 체지방률·BMI는 자동 계산됩니다.</div>
+    <div class="ib-form">
+      <label>인바디 측정일</label><input id="ibDate" type="date" value="${TODAY}" max="${TODAY}">
+      <div class="ib-2col">
+        <div><label>몸무게 (kg)</label><input id="ibWeight" type="number" step="0.1" placeholder="예: 72.5"></div>
+        <div><label>골격근량 (kg)</label><input id="ibSmm" type="number" step="0.1" placeholder="예: 32.1"></div>
+      </div>
+      <div class="ib-2col">
+        <div><label>체지방량 (kg)</label><input id="ibBfm" type="number" step="0.1" placeholder="예: 14.2"></div>
+        <div><label>복부지방률 WHR <span style="font-weight:500">(선택)</span></label><input id="ibWhr" type="number" step="0.01" placeholder="예: 0.85"></div>
+      </div>
+      <label>내장지방레벨 <span style="font-weight:500">(선택)</span></label><input id="ibVfl" type="number" step="1" placeholder="예: 6">
+      ${setupFields}
+      <div id="ibFormMsg" class="ib-msg"></div>
+      <div class="ib-actions">
+        <button class="lvl-close" onclick="closeIbModal()">취소</button>
+        <button class="ib-btn" onclick="ibToConfirm()">다음 → 확인</button>
+      </div>
+    </div>`);
+}
+
+// 1단계 → 확인 다이얼로그 (실수 입력 방지)
+function ibToConfirm(){
+  const g=id=>document.getElementById(id);
+  const num=(id,opt)=>{const v=g(id).value.trim();return v===''?(opt?null:NaN):Number(v);};
+  const vals={date:g('ibDate').value, weight:num('ibWeight'), smm:num('ibSmm'),
+    bfm:num('ibBfm'), whr:num('ibWhr',1), vfl:num('ibVfl',1)};
+  if(!vals.date)return ibMsg('측정일을 선택해주세요');
+  if(!(vals.weight>20&&vals.weight<250))return ibMsg('몸무게(kg)를 확인해주세요');
+  if(!(vals.smm>5&&vals.smm<100))return ibMsg('골격근량(kg)을 확인해주세요');
+  if(!(vals.bfm>=0&&vals.bfm<150))return ibMsg('체지방량(kg)을 확인해주세요');
+  if(vals.bfm>=vals.weight)return ibMsg('체지방량이 몸무게보다 클 수 없어요');
+  if(vals.whr!=null&&!(vals.whr>0.3&&vals.whr<2))return ibMsg('WHR을 확인해주세요 (예: 0.85)');
+  if(vals.vfl!=null&&!(vals.vfl>=1&&vals.vfl<=30))return ibMsg('내장지방레벨은 1~30 사이예요');
+
+  let pin=g('ibPin').value.trim(), height=null;
+  if(!/^\d{4}$/.test(pin))return ibMsg('PIN은 숫자 4자리로 입력해주세요');
+  if(IB.mode==='setup'){
+    if(g('ibPin2').value.trim()!==pin)return ibMsg('PIN 확인이 일치하지 않아요');
+    height=Number(g('ibHeight').value);
+    if(!(height>100&&height<230))return ibMsg('키(cm)를 확인해주세요');
+  }
+  IB.vals={...vals,pin,height};
+
+  const pbf=(vals.bfm/vals.weight*100).toFixed(1);
+  const rows=[
+    ['측정일',vals.date],['몸무게',vals.weight.toFixed(1)+' kg'],
+    ['골격근량',vals.smm.toFixed(1)+' kg'],['체지방량',vals.bfm.toFixed(1)+' kg'],
+    ['체지방률 (자동)',pbf+' %'],
+    ...(vals.whr!=null?[['복부지방률',vals.whr.toFixed(2)]]:[]),
+    ...(vals.vfl!=null?[['내장지방레벨','Lv.'+vals.vfl]]:[]),
+    ...(IB.mode==='setup'?[['키 (최초 등록)',height+' cm']]:[]),
+  ].map(([l,v])=>`<div class="row"><span>${l}</span><b>${v}</b></div>`).join('');
+
+  ibShow(`
+    <h3>✅ 입력 확인</h3>
+    <div class="ib-confirm">
+      <div class="who">⚠️ <b style="color:var(--accent)">${IB.name}</b>님의 인바디로 기록합니다. 본인이 맞나요?</div>
+      ${rows}
+    </div>
+    <div id="ibFormMsg" class="ib-msg"></div>
+    <div class="ib-actions">
+      <button class="lvl-close" onclick="openIbForm('${IB.name}');ibRestore()">← 수정</button>
+      <button class="ib-btn" id="ibSaveBtn" onclick="ibSubmit()">맞아요, 저장</button>
+    </div>`);
+}
+// 수정으로 돌아갈 때 입력값 복원
+function ibRestore(){
+  const v=IB.vals; if(!v)return;
+  const set=(id,val)=>{const el=document.getElementById(id);if(el&&val!=null)el.value=val;};
+  set('ibDate',v.date);set('ibWeight',v.weight);set('ibSmm',v.smm);set('ibBfm',v.bfm);
+  set('ibWhr',v.whr);set('ibVfl',v.vfl);set('ibHeight',v.height);
+}
+
+async function ibSubmit(){
+  const btn=document.getElementById('ibSaveBtn');
+  if(!btn||!IB.vals)return;  // 확인 단계가 아닌데 호출된 경우 방어
+  btn.disabled=true;btn.textContent='저장 중…';
+  const v=IB.vals;
+  const payload=IB.mode==='setup'
+    ?{action:'setup',name:IB.name,pin:v.pin,height:v.height,
+      record:{date:v.date,weight:v.weight,smm:v.smm,bfm:v.bfm,whr:v.whr??'',vfl:v.vfl??''}}
+    :{action:'add',name:IB.name,pin:v.pin,
+      record:{date:v.date,weight:v.weight,smm:v.smm,bfm:v.bfm,whr:v.whr??'',vfl:v.vfl??''}};
+  try{
+    const r=await ibPost(payload);
+    if(!r.ok){ibMsg(r.error||'저장 실패');btn.disabled=false;btn.textContent='맞아요, 저장';return;}
+    // 로컬 상태 즉시 반영
+    if(r.added)S.inbody.records.push(r.added);
+    if(IB.mode==='setup')S.inbody.members[IB.name]={height:v.height,hasPin:true};
+    ibShow(`<h3>🎉 저장 완료</h3>
+      <div class="sub"><b>${IB.name}</b>님의 인바디가 기록됐어요. 꾸준한 측정이 최고의 동기부여!</div>
+      <button class="lvl-close" onclick="closeIbModal();renderPage('me')">확인</button>`);
+  }catch(e){
+    ibMsg('네트워크 오류: '+e.message);btn.disabled=false;btn.textContent='맞아요, 저장';
+  }
+}
+
+function openIbDelete(name,ts){
+  IB={mode:'delete',name,ts};
+  const rec=S.inbody.records.find(r=>r.name===name&&r.ts===ts);
+  ibShow(`
+    <h3>🗑 기록 삭제</h3>
+    <div class="sub"><b>${name}</b>님의 <b>${rec?rec.date:''}</b> 기록을 삭제합니다. 본인 PIN을 입력해주세요.</div>
+    <div class="ib-form">
+      <label>PIN (숫자 4자리)</label><input id="ibPin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+      <div id="ibFormMsg" class="ib-msg"></div>
+      <div class="ib-actions">
+        <button class="lvl-close" onclick="closeIbModal()">취소</button>
+        <button class="ib-btn" id="ibSaveBtn" style="background:linear-gradient(135deg,var(--red),#ff8a7a)" onclick="ibDoDelete()">삭제</button>
+      </div>
+    </div>`);
+}
+async function ibDoDelete(){
+  const pin=document.getElementById('ibPin').value.trim();
+  if(!/^\d{4}$/.test(pin))return ibMsg('PIN은 숫자 4자리예요');
+  const btn=document.getElementById('ibSaveBtn');
+  btn.disabled=true;btn.textContent='삭제 중…';
+  try{
+    const r=await ibPost({action:'delete',name:IB.name,pin,ts:IB.ts});
+    if(!r.ok){ibMsg(r.error||'삭제 실패');btn.disabled=false;btn.textContent='삭제';return;}
+    S.inbody.records=S.inbody.records.filter(x=>!(x.name===IB.name&&x.ts===IB.ts));
+    closeIbModal();renderPage('me');
+  }catch(e){ibMsg('네트워크 오류: '+e.message);btn.disabled=false;btn.textContent='삭제';}
 }
 
 init();
