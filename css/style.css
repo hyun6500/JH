@@ -234,9 +234,10 @@ header{
   -webkit-mask-image:none;mask-image:none;}
 .ins-row.static::-webkit-scrollbar{height:5px;}
 .ins-row.static::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
-.ins-track{display:flex;animation:insFlow var(--ins-dur,42s) linear infinite;will-change:transform;}
+/* width:max-content — 트랙이 행 폭에 눌려 세트가 수축·겹치는 것 방지 */
+.ins-track{display:flex;width:max-content;animation:insFlow var(--ins-dur,42s) linear infinite;will-change:transform;}
 .ins-row:hover .ins-track,.ins-row:active .ins-track{animation-play-state:paused;}
-.ins-set{display:flex;gap:10px;padding-right:10px;}
+.ins-set{display:flex;gap:10px;padding-right:10px;flex-shrink:0;}
 @keyframes insFlow{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
 .ins-card{
   min-width:225px;max-width:280px;flex-shrink:0;scroll-snap-align:start;

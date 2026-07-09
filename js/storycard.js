@@ -56,6 +56,22 @@ async function downloadStoryCard(){
     bottom.addColorStop(1,'hsla(0,0%,0%,0.45)');
     c.fillStyle=bottom; c.fillRect(0,0,W,H);
 
+    // ---- 순위 동물 워터마크: 초대형 이모지를 반투명하게 배경에 깔기 ----
+    if(D.rankAnimal){
+      c.save();
+      c.textAlign='center'; c.textBaseline='middle';
+      // 뒤에 은은한 원형 광 (동물 실루엣을 배경에서 살짝 띄워줌)
+      const wg=c.createRadialGradient(W*0.72,H*0.30,60, W*0.72,H*0.30,560);
+      wg.addColorStop(0, `hsla(${h}, 70%, 60%, 0.10)`);
+      wg.addColorStop(1, 'hsla(0,0%,0%,0)');
+      c.fillStyle=wg; c.fillRect(0,0,W,H);
+      c.globalAlpha=0.13;
+      c.font='900 640px "Noto Sans KR", sans-serif';
+      c.fillText(D.rankAnimal.e, W*0.72, H*0.30);
+      c.restore();
+      c.textBaseline='alphabetic';
+    }
+
     const PAD=90;
     const accentSoft=`hsl(${h}, 70%, 72%)`;
     const white='#ffffff';
@@ -92,7 +108,7 @@ async function downloadStoryCard(){
     c.font='400 82px "Black Han Sans", "Noto Sans KR", sans-serif'; c.fillStyle=white;
     c.fillText(D.name, avX, avY+avR+112);
     c.font='700 30px "Noto Sans KR", sans-serif'; c.fillStyle=accentSoft;
-    c.fillText(`${D.lvEmoji} ${D.lvTitle}`, avX, avY+avR+162);
+    c.fillText(`${D.lvEmoji} ${D.lvTitle}${D.rankAnimal?`   |   ${D.rankAnimal.e} ${D.rankAnimal.short} · ${D.rankAnimal.rank}위`:''}`, avX, avY+avR+162);
     c.font='500 27px "Noto Sans KR", sans-serif'; c.fillStyle=dim;
     c.fillText(`최애 운동 · ${D.favSport}   |   가장 부지런한 ${D.bestWd}요일`, avX, avY+avR+206);
 

@@ -75,6 +75,7 @@ function buildProfile(name){
     monthsTogether:monthsTogether(),
     legacyCount:(S.legacy.perMember[name]||0),
     lvTitle:`Lv.${lv.lv} ${lv.title}`, lvEmoji:lv.e,
+    rankAnimal:(typeof raceRankOf==='function')?raceRankOf(name):null,
   };
 
   document.getElementById('profileBody').innerHTML=`
