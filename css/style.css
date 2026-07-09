@@ -647,8 +647,15 @@ button:focus-visible,.select:focus-visible,.cmdk-input:focus-visible{outline:2px
 .race-vline.goal100 .race-vline-label{color:var(--green)}
 .race-vline.today .race-vline-label{color:var(--amber)}
 .race-vline-label.row2{top:-38px}
-.race-runner{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:5px;
+/* 주자: 컨테이너 = 아바타 크기(부속 요소는 absolute) → translate(-50%)로
+   '아바타 정중앙'이 정확히 달성률 좌표에 정렬됨 (기준선 대비 위치 왜곡 방지) */
+.race-runner{position:absolute;top:50%;transform:translate(-50%,-50%);
   transition:left 3s cubic-bezier(.3,.75,.35,1.02);z-index:2;will-change:left}
+/* 부속(% 숫자 + 동물): 기본은 아바타 왼쪽 바깥, 왼쪽부터 [%][동물] 순 */
+.race-runner .rr-side{position:absolute;right:calc(100% + 5px);top:50%;transform:translateY(-50%);
+  display:flex;align-items:center;gap:4px;white-space:nowrap}
+/* 트랙 초반(왼쪽 끝) 주자는 부속을 오른쪽으로 — 이름 칸 침범 방지. 순서는 거울상 [동물][%] */
+.race-runner.flip .rr-side{right:auto;left:calc(100% + 5px);flex-direction:row-reverse}
 .race-runner .rr-av{width:23px;height:23px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:10.5px;font-weight:900;color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.28);position:relative;
   animation:runBob .55s ease-in-out infinite alternate;animation-delay:var(--d,0s)}
@@ -656,17 +663,18 @@ button:focus-visible,.select:focus-visible,.cmdk-input:focus-visible{outline:2px
 .race-runner .rr-crown{position:absolute;top:-13px;left:50%;transform:translateX(-50%);font-size:11px;
   filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));animation:runBob .55s ease-in-out infinite alternate;animation-delay:var(--d,0s)}
 .race-runner .rr-rank{font-size:13px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));
-  animation:runBob .55s ease-in-out infinite alternate;animation-delay:calc(var(--d,0s) + .12s)}
+  animation:runBobFlip .55s ease-in-out infinite alternate;animation-delay:calc(var(--d,0s) + .12s)}
+@keyframes runBobFlip{0%{transform:scaleX(-1) translateY(1.5px)}100%{transform:scaleX(-1) translateY(-2.5px)}}
 .race-runner .rr-val{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--muted);white-space:nowrap;
   background:color-mix(in srgb,var(--surface) 82%,transparent);padding:1px 5px;border-radius:6px;border:1px solid var(--border)}
-.race-runner.flip{flex-direction:row-reverse}
 @keyframes runBob{0%{transform:translateY(1.5px)}100%{transform:translateY(-2.5px)}}
 .race-legend{font-size:10.5px;color:var(--muted);margin-top:12px;line-height:1.6}
 .race-tracks{padding-top:26px}
 .race-tracks.two-row{padding-top:44px}
 @media (prefers-reduced-motion: reduce){
   .race-runner{transition:none}
-  .race-runner .rr-av,.race-runner .rr-crown,.race-runner .rr-rank{animation:none}
+  .race-runner .rr-av,.race-runner .rr-crown{animation:none}
+  .race-runner .rr-rank{animation:none;transform:scaleX(-1)}
 }
 
 /* ============ 순위 동물 칩 (VS·개인 탭) ============ */

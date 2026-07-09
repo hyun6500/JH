@@ -179,7 +179,7 @@ function buildRace(year){
   };
 
   const lanes=rows.map((r,i)=>{
-    const flip=r.pos>78;   // 트랙 끝 근처에선 라벨·먼지를 왼쪽으로
+    const flip=r.pos<25;   // 트랙 초반 주자는 부속([%·동물])을 오른쪽에 배치 (이름 칸 침범 방지)
     return `<div class="race-lane">
       <span class="race-nm"><span class="rk">${i+1}</span>${r.n}</span>
       <div class="race-track">
@@ -187,9 +187,11 @@ function buildRace(year){
         ${raceMode==='days'?'<div class="race-finish"></div>':''}
         <div class="race-runner ${r.done?'done':''} ${flip?'flip':''}" data-pos="${r.pos}"
              style="--d:${(i*0.07).toFixed(2)}s;left:0%">
+          <span class="rr-side">
+            <span class="rr-val">${r.done?'🎉 ':''}${r.val}</span>
+            <span class="rr-rank" title="${i+1}위 · ${RACE_RANK_EMOJI[i][1]}">${RACE_RANK_EMOJI[i][0]}</span>
+          </span>
           <span class="rr-av" style="background:${avatarColor(r.n)}">${i===0&&r.days>0?'<span class="rr-crown">👑</span>':''}${initial(r.n)}</span>
-          <span class="rr-rank" title="${i+1}위 · ${RACE_RANK_EMOJI[i][1]}">${RACE_RANK_EMOJI[i][0]}</span>
-          <span class="rr-val">${r.done?'🎉 ':''}${r.val}</span>
         </div>
       </div>
     </div>`;
