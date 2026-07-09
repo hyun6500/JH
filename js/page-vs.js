@@ -77,6 +77,7 @@ function renderVS(){
           <div class="av-wrap"><span class="crown">👑</span>
             <div class="big-av" style="background:${avatarColor(a)}">${initial(a)}</div></div>
           <div class="nm">${a}</div>
+          ${rankAnimalChip(a)}
           <span class="win-badge">🏆 WINNER</span>
           ${picker('A',a,b)}
         </div>
@@ -85,6 +86,7 @@ function renderVS(){
           <div class="av-wrap"><span class="crown">👑</span>
             <div class="big-av" style="background:${avatarColor(b)}">${initial(b)}</div></div>
           <div class="nm">${b}</div>
+          ${rankAnimalChip(b)}
           <span class="win-badge">🏆 WINNER</span>
           ${picker('B',b,a)}
         </div>

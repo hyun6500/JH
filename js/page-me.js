@@ -82,7 +82,7 @@ function buildProfile(name){
       <div class="profile-hero">
         <div class="big-av" style="background:${avatarColor(name)}">${initial(name)}</div>
         <div class="info">
-          <h2>${name} <span class="lv-badge" onclick="openLevelGuide()" title="레벨 기준 보기">${lv.e} Lv.${lv.lv} ${lv.title} <span style="opacity:.65;font-size:10px">ⓘ</span></span></h2>
+          <h2>${name} <span class="lv-badge" onclick="openLevelGuide()" title="레벨 기준 보기">${lv.e} Lv.${lv.lv} ${lv.title} <span style="opacity:.65;font-size:10px">ⓘ</span></span> ${rankAnimalChip(name)}</h2>
           <div class="meta">${year}년 누적 <b>${cumulYear}일</b> · 목표 ${target}일 · 달성률 <b>${rate.toFixed(1)}%</b>${proj!==null?` · 🧭 연말 예상 ~${proj}일`:''}</div>
           <div class="meta" style="margin-top:2px">가장 좋아하는 운동: <b>${favSport}</b> · <b>25.01~</b> 누적 ${totalAll}회${(S.legacy.perMember[name]||0)?` <span style="color:var(--muted)">(이전 기록 ${S.legacy.perMember[name]}회 별도)</span>`:''}</div>
         </div>

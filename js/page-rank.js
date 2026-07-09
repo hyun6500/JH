@@ -86,12 +86,61 @@ function renderRank(){
    운동일수 모드: 선두를 기준으로 상대 위치
    탭 진입 시 출발선에서 제 위치까지 달려가는 입장 애니메이션 */
 let raceMode='rate';
+/* 순위 → 동물 매핑 (이름이 아니라 '순위'에 붙음 — 순위가 바뀌면 동물도 강등/승급!)
+   하위권으로 갈수록 동물에서 멀어지는 것이 포인트 */
+const RACE_RANK_EMOJI=[
+  ['🐆','치타급 페이스'],   ['🐎','경주마'],           ['🐇','토끼'],
+  ['🦌','사슴'],           ['🐕','강아지'],           ['🐈','고양이 (기분파)'],
+  ['🐔','닭 (가끔 날음)'],  ['🐢','거북이 (꾸준함이 무기)'],['🐌','달팽이'],
+  ['🦥','나무늘보'],        ['🥔','감자 (움직임 미확인)'],  ['🪨','돌멩이 (무생물)'],
+];
 function setRaceMode(m){
   raceMode=m;
   const el=document.getElementById('raceCard');
-  if(el) buildRace(el.dataset.year, true);
+  if(el) buildRace(el.dataset.year);
 }
-function buildRace(year, skipEnter){
+/* 멤버의 현재 순위 동물 조회 — 연간 목표 달성률 기준 (레이스 기본 모드와 동일).
+   VS 탭·개인 기록 탭에서도 사용하는 공용 헬퍼 */
+function raceRankOf(name, year){
+  year = year || String(NOW.getFullYear());
+  const rows=MEMBERS.map(n=>{
+    const c=Object.keys(S.monthly).filter(ym=>ym.startsWith(year)).reduce((s,ym)=>s+(S.monthly[ym]?.[n]||0),0);
+    const t=S.stats.target[n]||0;
+    return {n,days:c,rate:t?c/t:0};
+  }).sort((a,b)=>b.rate-a.rate||b.days-a.days);
+  const i=Math.max(0,rows.findIndex(r=>r.n===name));
+  const [e,label]=RACE_RANK_EMOJI[Math.min(i,RACE_RANK_EMOJI.length-1)];
+  return {rank:i+1, e, label, short:label.split(' (')[0]};
+}
+// 순위 동물 칩 HTML (클릭 시 랭킹 탭 레이스로 이동)
+function rankAnimalChip(name){
+  const rk=raceRankOf(name);
+  return `<span class="rank-animal" title="연간 달성률 ${rk.rank}위 · ${rk.label} — 누르면 레이스 보기"
+    onclick="event.stopPropagation();goPage('rank')"><span class="ra-e">${rk.e}</span>${rk.short} · ${rk.rank}위</span>`;
+}
+
+/* 탭 재진입 시 입장 애니메이션 리플레이 (core.js goPage에서 호출) */
+function raceReplay(){
+  const el=document.getElementById('raceCard');
+  if(el && el.dataset.year) raceEnter(el);
+}
+/* 출발선(0%) 리셋 → 강제 리플로우로 상태 확정 → 제 위치로 발사.
+   레인별 transition-delay로 파도처럼 순차 출발 */
+function raceEnter(el){
+  const runners=el.querySelectorAll('.race-runner');
+  if(REDUCED_MOTION){
+    runners.forEach(r=>{r.style.transition='none';r.style.left=r.dataset.pos+'%';});
+    return;
+  }
+  runners.forEach(r=>{r.style.transition='none';r.style.left='0%';});
+  void el.offsetWidth;   // reflow — 출발선 상태를 브라우저가 실제로 반영하게 함
+  runners.forEach((r,i)=>{
+    r.style.transition='';                       // CSS 기본 transition 복원
+    r.style.transitionDelay=(i*0.06).toFixed(2)+'s';
+    r.style.left=r.dataset.pos+'%';
+  });
+}
+function buildRace(year){
   const el=document.getElementById('raceCard');
   if(!el) return;
   el.dataset.year=year;
@@ -99,11 +148,16 @@ function buildRace(year, skipEnter){
   const cumul={};
   MEMBERS.forEach(n=>{cumul[n]=Object.keys(S.monthly).filter(ym=>ym.startsWith(year)).reduce((s,ym)=>s+(S.monthly[ym]?.[n]||0),0);});
 
+  /* 달성률 모드: 트랙 스케일 130% — 100% 결승선을 넘어 달리는 초과 달성자 표현.
+     130%를 넘으면 트랙 끝에 캡. 운동일수 모드: 선두=트랙 끝 기준 상대 위치 */
+  const SCALE=130;
   let rows;
   if(raceMode==='rate'){
     rows=MEMBERS.map(n=>{
       const t=S.stats.target[n]||0, r=t?cumul[n]/t:0;
-      return {n,days:cumul[n],val:t?(r*100).toFixed(0)+'%':'목표없음',pos:Math.min(100,r*100),done:t>0&&r>=1,sort:r};
+      return {n,days:cumul[n],val:t?(r*100).toFixed(0)+'%':'목표없음',
+        pos:Math.min(100, r*100/SCALE*100),   // 트랙 내 % 위치
+        done:t>0&&r>=1,sort:r};
     });
   }else{
     const maxD=Math.max(...MEMBERS.map(n=>cumul[n]),1);
@@ -111,21 +165,30 @@ function buildRace(year, skipEnter){
   }
   rows.sort((a,b)=>b.sort-a.sort||b.days-a.days);
 
-  // 오늘 기준선 (달성률 모드 + 올해만)
-  const goal=(raceMode==='rate'&&isCur)
-    ?`<div class="race-goal" style="left:${yearPct}%"><span class="race-goal-label">📍 오늘 기준 ${yearPct}%</span></div>`:'';
+  /* 기준선 2종 (달성률 모드): 목표 100%(초록) + 오늘 기준선(노랑, 올해만).
+     각 레인에 넣어 12번 레인까지 관통 — z-index 0이라 주자·라벨·먼지 뒤로 깔림.
+     라벨은 1번 레인에만, 두 선이 가까우면 오늘 라벨을 윗줄로 올림 */
+  const goalLeft=100/SCALE*100;
+  const todayLeft=parseFloat(yearPct)/SCALE*100;
+  const labelsClose=isCur && Math.abs(goalLeft-todayLeft)<14;
+  const vlines=(withLabel)=>{
+    if(raceMode!=='rate') return '';
+    let h=`<div class="race-vline goal100" style="left:${goalLeft}%">${withLabel?`<span class="race-vline-label">🏁 목표 100%</span>`:''}</div>`;
+    if(isCur) h+=`<div class="race-vline today" style="left:${todayLeft}%">${withLabel?`<span class="race-vline-label ${labelsClose?'row2':''}">📍 오늘 ${yearPct}%</span>`:''}</div>`;
+    return h;
+  };
 
   const lanes=rows.map((r,i)=>{
-    const flip=r.pos>78;   // 결승선 근처에선 라벨·먼지를 왼쪽으로
+    const flip=r.pos>78;   // 트랙 끝 근처에선 라벨·먼지를 왼쪽으로
     return `<div class="race-lane">
       <span class="race-nm"><span class="rk">${i+1}</span>${r.n}</span>
       <div class="race-track">
-        ${i===0?goal:''}
-        <div class="race-finish"></div>
+        ${vlines(i===0)}
+        ${raceMode==='days'?'<div class="race-finish"></div>':''}
         <div class="race-runner ${r.done?'done':''} ${flip?'flip':''}" data-pos="${r.pos}"
-             style="--d:${(i*0.07).toFixed(2)}s;left:${skipEnter?r.pos:0}%">
-          <span class="rr-dust">💨</span>
-          <span class="rr-av" style="background:${avatarColor(r.n)}">${i===0&&r.days>0?'<span class="rr-crown">👑</span>':''}${initial(r.n)}${r.done?'':''}</span>
+             style="--d:${(i*0.07).toFixed(2)}s;left:0%">
+          <span class="rr-av" style="background:${avatarColor(r.n)}">${i===0&&r.days>0?'<span class="rr-crown">👑</span>':''}${initial(r.n)}</span>
+          <span class="rr-rank" title="${i+1}위 · ${RACE_RANK_EMOJI[i][1]}">${RACE_RANK_EMOJI[i][0]}</span>
           <span class="rr-val">${r.done?'🎉 ':''}${r.val}</span>
         </div>
       </div>
@@ -140,19 +203,14 @@ function buildRace(year, skipEnter){
         <button class="${raceMode==='days'?'active':''}" onclick="setRaceMode('days')">💪 운동일수</button>
       </div>
     </div>
-    <div class="race-tracks">${lanes}</div>
+    <div class="race-tracks ${labelsClose&&raceMode==='rate'?'two-row':''}">${lanes}</div>
     <div class="race-legend">${raceMode==='rate'
-      ?`🏁 결승선 = 연간 목표 100% · <b style="color:var(--amber)">노란 점선</b> = 오늘까지 왔어야 할 위치(연 경과율${isCur?` ${yearPct}%`:''}) — 점선보다 앞이면 페이스 초과 중!`
-      :`🏁 선두 기준 상대 위치 · 선두와의 거리가 곧 따라잡을 일수예요`}</div>`;
+      ?`<b style="color:var(--green)">초록 점선 🏁</b> = 연간 목표 100% (트랙은 130%까지 — 넘어서도 계속 달립니다!)${isCur?` · <b style="color:var(--amber)">노란 점선 📍</b> = 오늘까지 왔어야 할 위치(연 경과율 ${yearPct}%) — 노란 선보다 앞이면 페이스 초과 중`:''}`
+      :`🏁 선두 기준 상대 위치 · 선두와의 거리가 곧 따라잡을 일수예요`}
+      <br>동물은 이름이 아니라 <b>순위</b>에 붙어요: 1위 🐆 치타 ~ 10위 🦥 나무늘보, 11위 🥔 감자, 12위 🪨 돌멩이 — 순위가 바뀌면 동물도 바뀝니다</div>`;
 
-  // 입장 애니메이션: 출발선(0%) → 제 위치로 달려가기
-  if(!skipEnter && !REDUCED_MOTION){
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      el.querySelectorAll('.race-runner').forEach(r=>{r.style.left=r.dataset.pos+'%';});
-    }));
-  }else if(skipEnter||REDUCED_MOTION){
-    el.querySelectorAll('.race-runner').forEach(r=>{r.style.left=r.dataset.pos+'%';});
-  }
+  // 입장 애니메이션: 출발선 → 제 위치 (재진입·토글 시에도 매번 리플레이)
+  raceEnter(el);
 }
 
 // 직전 달 'YYYY-MM' 반환

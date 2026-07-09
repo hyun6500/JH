@@ -212,6 +212,8 @@ function goPage(p){
     if(PAGE_DIRTY[p]) renderPage(p);
     else requestAnimationFrame(()=>{ // 이미 렌더된 페이지: 혹시 모를 0크기 차트 보정
       Object.values(CHARTS).forEach(c=>{try{c.resize();}catch(e){}});
+      // 랭킹 탭 재진입 시 레이스 입장 애니메이션 리플레이
+      if(p==='rank' && typeof raceReplay==='function') raceReplay();
     });
   }
   window.scrollTo({top:0,behavior:'smooth'});
