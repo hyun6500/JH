@@ -59,6 +59,10 @@
   <div class="lvl-modal" id="ibModal"></div>
 </div>
 
+<div class="lvl-overlay" id="storyOverlay" onclick="if(event.target===this)closeStoryPreview()">
+  <div class="lvl-modal story-modal" id="storyModal"></div>
+</div>
+
 
 <!-- ===== 앱 스크립트 (로드 순서 중요: core → 페이지들 → 위젯 → 진입점) ===== -->
 <script src="js/core.js"></script>

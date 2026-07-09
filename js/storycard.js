@@ -23,15 +23,41 @@ function roundRect(ctx,x,y,w,h,r){
   ctx.closePath();
 }
 
-async function downloadStoryCard(){
-  if(!S.storyData){ return; }
+/* 흐름: 📸 버튼 → openStoryPreview(캔버스 생성 + 팝업 미리보기)
+        → 팝업 안 ⬇️ 다운로드 버튼 → downloadStoryCard(파일 저장) */
+let STORY_CV=null;   // 미리보기에서 생성한 캔버스 보관 (다운로드 시 재사용, 이중 렌더링 방지)
+
+async function openStoryPreview(){
+  if(!S.storyData) return;
   const btn=document.querySelector('.story-btn');
+  if(btn){ btn.disabled=true; btn.innerHTML='<span style="font-size:15px">⏳</span> 이미지 만드는 중…'; }
+  try{
+    STORY_CV=renderStoryCanvas();
+    const url=STORY_CV.toDataURL('image/png');
+    document.getElementById('storyModal').innerHTML=`
+      <h3>📸 스토리 이미지 미리보기</h3>
+      <div class="sub"><b>${S.storyData.name}</b>님의 ${S.storyData.year}년 기록 카드예요. 마음에 들면 다운로드!</div>
+      <div class="story-preview"><img src="${url}" alt="스토리 카드 미리보기"></div>
+      <div class="ib-actions">
+        <button class="lvl-close" onclick="closeStoryPreview()">닫기</button>
+        <button class="ib-btn" onclick="downloadStoryCard()">⬇️ 이미지 다운로드</button>
+      </div>`;
+    document.getElementById('storyOverlay').classList.add('open');
+  }catch(e){
+    alert('이미지 생성 중 문제가 발생했어요: '+e.message);
+  }finally{
+    if(btn){ btn.disabled=false; btn.innerHTML='<span style="font-size:15px">📸</span> 스토리 이미지 저장'; }
+  }
+}
+function closeStoryPreview(){
+  document.getElementById('storyOverlay').classList.remove('open');
+  STORY_CV=null;
+}
+
+/* 1080×1920 캔버스 렌더링 (순수 그리기 — 다운로드와 분리) */
+function renderStoryCanvas(){
   const D=S.storyData;
   const {h}=memberHSL(D.name);
-
-  if(btn){ btn.disabled=true; btn.innerHTML='<span style="font-size:15px">⏳</span> 이미지 만드는 중…'; }
-
-  try{
     const W=1080, H=1920;
     const cv=document.createElement('canvas');
     cv.width=W; cv.height=H;
@@ -56,18 +82,19 @@ async function downloadStoryCard(){
     bottom.addColorStop(1,'hsla(0,0%,0%,0.45)');
     c.fillStyle=bottom; c.fillRect(0,0,W,H);
 
-    // ---- 순위 동물 워터마크: 초대형 이모지를 반투명하게 배경에 깔기 ----
+    // ---- 순위 동물 워터마크: 상단을 꽉 채우는 초대형 이모지, 가로 중앙 배치 ----
     if(D.rankAnimal){
       c.save();
       c.textAlign='center'; c.textBaseline='middle';
       // 뒤에 은은한 원형 광 (동물 실루엣을 배경에서 살짝 띄워줌)
-      const wg=c.createRadialGradient(W*0.72,H*0.30,60, W*0.72,H*0.30,560);
+      const wg=c.createRadialGradient(W/2,H*0.25,80, W/2,H*0.25,760);
       wg.addColorStop(0, `hsla(${h}, 70%, 60%, 0.10)`);
       wg.addColorStop(1, 'hsla(0,0%,0%,0)');
       c.fillStyle=wg; c.fillRect(0,0,W,H);
       c.globalAlpha=0.13;
-      c.font='900 640px "Noto Sans KR", sans-serif';
-      c.fillText(D.rankAnimal.e, W*0.72, H*0.30);
+      // 캔버스 폭(1080px)에 거의 꽉 차는 크기 — 얼굴 잘림 없이 온전히 노출
+      c.font='900 960px "Noto Sans KR", sans-serif';
+      c.fillText(D.rankAnimal.e, W/2, H*0.25);
       c.restore();
       c.textBaseline='alphabetic';
     }
@@ -227,24 +254,26 @@ async function downloadStoryCard(){
     const dateStr=`${NOW.getFullYear()}.${String(NOW.getMonth()+1).padStart(2,'0')}.${String(NOW.getDate()).padStart(2,'0')} 기준`;
     c.fillText(`#오운완  ·  ${dateStr}`, W/2, 1880);
 
-    // ---- 다운로드 ----
-    await new Promise(res=>{
-      if(typeof URL==='undefined'||typeof URL.createObjectURL!=='function'){res();return;}
-      cv.toBlob(blob=>{
-        const url=URL.createObjectURL(blob);
-        const a=document.createElement('a');
-        a.href=url;
-        a.download=`오운완_${D.name}_${D.year}.png`;
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(()=>URL.revokeObjectURL(url), 1000);
-        res();
-      }, 'image/png');
-    });
-  }catch(e){
-    alert('이미지 생성 중 문제가 발생했어요: '+e.message);
-  }finally{
-    if(btn){ btn.disabled=false; btn.innerHTML='<span style="font-size:15px">📸</span> 스토리 이미지 저장'; }
-  }
+    return cv;
+}
+
+/* 미리보기 팝업의 ⬇️ 버튼: 보관된 캔버스를 파일로 저장 */
+async function downloadStoryCard(){
+  const cv=STORY_CV;
+  if(!cv||!S.storyData) return;
+  const D=S.storyData;
+  await new Promise(res=>{
+    if(typeof URL==='undefined'||typeof URL.createObjectURL!=='function'){res();return;}
+    cv.toBlob(blob=>{
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=`오운완_${D.name}_${D.year}.png`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 1000);
+      res();
+    }, 'image/png');
+  });
 }
 // 폰트 지정 후 텍스트 폭 측정 헬퍼 (원래 폰트 복원)
 function measureW(c, text, font){

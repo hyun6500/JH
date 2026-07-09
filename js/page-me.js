@@ -87,7 +87,7 @@ function buildProfile(name){
           <div class="meta">${year}년 누적 <b>${cumulYear}일</b> · 목표 ${target}일 · 달성률 <b>${rate.toFixed(1)}%</b>${proj!==null?` · 🧭 연말 예상 ~${proj}일`:''}</div>
           <div class="meta" style="margin-top:2px">가장 좋아하는 운동: <b>${favSport}</b> · <b>25.01~</b> 누적 ${totalAll}회${(S.legacy.perMember[name]||0)?` <span style="color:var(--muted)">(이전 기록 ${S.legacy.perMember[name]}회 별도)</span>`:''}</div>
         </div>
-        <button class="story-btn" onclick="downloadStoryCard()" title="인스타 스토리용 9:16 이미지로 저장">
+        <button class="story-btn" onclick="openStoryPreview()" title="인스타 스토리용 9:16 이미지 미리보기 후 저장">
           <span style="font-size:15px">📸</span> 스토리 이미지 저장
         </button>
       </div>

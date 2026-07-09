@@ -685,3 +685,9 @@ button:focus-visible,.select:focus-visible,.cmdk-input:focus-visible{outline:2px
 .rank-animal:hover{border-color:var(--accent);color:var(--text)}
 .rank-animal .ra-e{font-size:14px;line-height:1;animation:runBob .55s ease-in-out infinite alternate}
 @media (prefers-reduced-motion: reduce){.rank-animal .ra-e{animation:none}}
+
+/* ============ 스토리 카드 미리보기 팝업 ============ */
+.story-modal{max-width:400px}
+.story-preview{text-align:center;margin:12px 0 4px}
+.story-preview img{max-width:100%;max-height:56vh;border-radius:14px;border:1px solid var(--border);
+  box-shadow:0 12px 36px rgba(0,0,0,.45)}

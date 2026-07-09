@@ -177,6 +177,7 @@ document.addEventListener('keydown',ev=>{
     if(document.getElementById('cmdkOverlay').classList.contains('open'))closeCmdk();
     if(document.getElementById('lvlOverlay').classList.contains('open'))closeLevelGuide();
     if(document.getElementById('ibOverlay').classList.contains('open'))closeIbModal();
+    if(document.getElementById('storyOverlay').classList.contains('open'))closeStoryPreview();
   }
 });
 
